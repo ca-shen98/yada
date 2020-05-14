@@ -1,7 +1,7 @@
 import React from "react";
 import RichMarkdownEditor from 'rich-markdown-editor';
-import { connect } from 'react-redux';
-import { debounce } from 'lodash';
+import {connect} from 'react-redux';
+import {debounce} from 'lodash';
 
 class Editor extends React.Component {
   LOCAL_STORAGE_KEY = 'saved';
