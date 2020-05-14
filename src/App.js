@@ -4,8 +4,11 @@ import Header from './containers/Header';
 import Editor from './containers/Editor.js';
 
 export default () => (
-  <div className="App">
-    <Header/>
-    <Editor/>
+  <div>
+    <div className="App">
+      <Header/>
+      <Editor/>
+    </div>
+    <footer>&copy; 2020 Carl Shen (ca-shen98)</footer>
   </div>
 );
