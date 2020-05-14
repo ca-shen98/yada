@@ -1,7 +1,10 @@
 import {configureStore} from '@reduxjs/toolkit';
 import {combineReducers} from 'redux';
-import toggleEditorReadOnlyReducer from './reducers/ToggleEditorReadOnly';
+import {ToggleEditorDarkModeReducer, ToggleEditorReadOnlyReducer} from './reducers/ToggleEditorProps';
 
 export default configureStore({
-  reducer: combineReducers({editorReadOnly: toggleEditorReadOnlyReducer}),
+  reducer: combineReducers({
+    editorDarkMode: ToggleEditorDarkModeReducer,
+    editorReadOnly: ToggleEditorReadOnlyReducer,
+  }),
 });

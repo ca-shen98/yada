@@ -2,8 +2,8 @@ import React from 'react';
 import {connect} from 'react-redux';
 import nearley from 'nearley'
 import TagFiltersTextGrammar from './TagFiltersTextGrammar'
-import {TOGGLE_EDITOR_READ_ONLY} from '../actions';
-import {MODE_LOCAL_STORAGE_KEY} from '../reducers/ToggleEditorReadOnly';
+import Actions from '../actions';
+import {PROPS_LOCAL_STORAGE_KEYS} from '../reducers/ToggleEditorProps';
 
 class Header extends React.Component {
   FILTERS_LOCAL_STORAGE_KEY = 'filters';
@@ -57,13 +57,24 @@ class Header extends React.Component {
   handleToggleEditorReadOnly = () => {
     this.props.toggleEditorReadOnly();
     // dispatch is async? so state/prop change only happens once function exits? so the prop is the previous value.
-    localStorage.setItem(MODE_LOCAL_STORAGE_KEY, this.props.editorReadOnly ? 'Editable' : 'ReadOnly');
+    localStorage.setItem(PROPS_LOCAL_STORAGE_KEYS.EDITOR_READ_ONLY,
+      this.props.editorReadOnly ? 'Editable' : 'ReadOnly');
     document.getElementById(this.TAG_FILTERS_INPUT_ID).value =
       this.props.editorReadOnly ? '' : this.state.tagFiltersText;
   };
 
+  handleToggleEditorDarkMode = () => {
+    this.props.toggleEditorDarkMode();
+    // dispatch is async? so state/prop change only happens once function exits? so the prop is the previous value.
+    localStorage.setItem(PROPS_LOCAL_STORAGE_KEYS.EDITOR_DARK_MODE,
+      this.props.editorDarkMode ? 'Light' : 'Dark');
+  };
+
   render = () => (
     <div className="Header">
+      <button type="button" onClick={this.handleToggleEditorDarkMode}>
+        {this.props.editorDarkMode ? 'Light' : 'Dark'} Theme
+      </button>
       <button type="button" onClick={this.handleToggleEditorReadOnly}>
         Make {this.props.editorReadOnly ? 'Editable' : 'ReadOnly'}
       </button>
@@ -92,8 +103,9 @@ class Header extends React.Component {
 }
 
 export default connect(
-  state => ({editorReadOnly: state.editorReadOnly}),
+  state => ({editorDarkMode: state.editorDarkMode, editorReadOnly: state.editorReadOnly}),
   dispatch => ({
-    toggleEditorReadOnly: () => dispatch(TOGGLE_EDITOR_READ_ONLY),
+    toggleEditorDarkMode: () => dispatch(Actions.TOGGLE_EDITOR_DARK_MODE),
+    toggleEditorReadOnly: () => dispatch(Actions.TOGGLE_EDITOR_READ_ONLY),
   }),
 )(Header);
