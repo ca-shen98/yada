@@ -1,6 +1,25 @@
 .App {
   min-height: 100vh;
-  width: 80vw;
+  width: 85vw;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 30px 0 35px;
+}
+
+.Header {
+  margin: 15px 0 20px 0;
+  width: 100%;
+}
+
+.Header button, .Header input {
+  margin: 5px 0 0 5px;
+  padding: 3px;
+}
+
+.Header button {
+  width: 100px;
+}
+
+.Header input {
+  min-width: 205px;
+  width: calc(100% - 240px);
 }
