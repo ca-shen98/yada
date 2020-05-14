@@ -3,6 +3,7 @@ import {connect} from 'react-redux';
 import nearley from 'nearley'
 import TagFiltersTextGrammar from './TagFiltersTextGrammar'
 import {TOGGLE_EDITOR_READ_ONLY} from '../actions';
+import {MODE_LOCAL_STORAGE_KEY} from '../reducers/ToggleEditorReadOnly';
 
 class Header extends React.Component {
   FILTERS_LOCAL_STORAGE_KEY = 'filters';
@@ -19,8 +20,17 @@ class Header extends React.Component {
     if (this.props.editorReadOnly) { // sanity check
       if (this.state.tagFiltersDirty) {
         const parser = new nearley.Parser(nearley.Grammar.fromCompiled(TagFiltersTextGrammar));
-        parser.feed(this.state.tagFiltersText.trim());
-        console.log(parser.results);
+        try {
+          parser.feed(this.state.tagFiltersText.trim());
+        } catch(ex) {
+          // invalid
+          return;
+        }
+        const parsed = parser.results;
+        if (parsed.length === 0) {
+          // incomplete
+          return;
+        }
         localStorage.setItem(this.FILTERS_LOCAL_STORAGE_KEY, this.state.tagFiltersText);
         this.setState({tagFiltersDirty: false, tagFiltersExpr: parser.results});
       }
@@ -46,7 +56,8 @@ class Header extends React.Component {
 
   handleToggleEditorReadOnly = () => {
     this.props.toggleEditorReadOnly();
-    // dispatch is async? so state/prop change only happens once function exits? so this is the previous value.
+    // dispatch is async? so state/prop change only happens once function exits? so the prop is the previous value.
+    localStorage.setItem(MODE_LOCAL_STORAGE_KEY, this.props.editorReadOnly ? 'Editable' : 'ReadOnly');
     document.getElementById(this.TAG_FILTERS_INPUT_ID).value =
       this.props.editorReadOnly ? '' : this.state.tagFiltersText;
   };
