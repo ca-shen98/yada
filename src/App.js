@@ -5,7 +5,7 @@ import Editor from './containers/Editor.js';
 
 export default () => (
   <div className="App">
-    <Header />
-    <Editor />
+    <Header/>
+    <Editor/>
   </div>
 );
