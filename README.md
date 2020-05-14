@@ -1,4 +1,4 @@
-## Yada - Yet another docs app
+## [Yada - Yet another docs app](https://ca-shen98.github.io/yada)
 
 **\[TLDR\] the idea:** a novel/unique paradigm for information management by curating distinct view files of (outliner
 notes) docs that act as consolidated single sources-of-truth for content/knowledge bases via annotations/tags on pieces
