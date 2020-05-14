@@ -1,0 +1,3 @@
+export const TOGGLE_EDITOR_READ_ONLY = {
+  type: 'TOGGLE_EDITOR_READ_ONLY',
+};
