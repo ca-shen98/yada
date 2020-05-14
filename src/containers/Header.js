@@ -11,8 +11,6 @@ class Header extends React.Component {
   };
 
   TAG_FILTERS_ID = 'tag_filters_input';
-  TAG_FILTERS_DISABLED = 'TagFilters are only enabled in ReadOnly mode';
-  TAG_FILTERS_PLACEHOLDER = 'TagFilters expr - e.g. "(#tag1 | #tag2) & #tag3"';
 
   handleApplyTagFilters = () => {
     if (this.props.editorReadOnly) { // sanity check
@@ -34,8 +32,7 @@ class Header extends React.Component {
   handleToggleEditorReadOnly = () => {
     this.props.toggleEditorReadOnly();
     // dispatch is async? so state/prop change only happens once function exits?
-    document.getElementById(this.TAG_FILTERS_ID).value =
-      this.props.editorReadOnly ? this.TAG_FILTERS_DISABLED : this.state.tagFiltersText;
+    document.getElementById(this.TAG_FILTERS_ID).value = this.props.editorReadOnly ? '' : this.state.tagFiltersText;
   };
 
   render = () => (
@@ -54,7 +51,10 @@ class Header extends React.Component {
         type="text"
         id={this.TAG_FILTERS_ID}
         disabled={!this.props.editorReadOnly}
-        placeholder={this.props.editorReadOnly ? this.TAG_FILTERS_PLACEHOLDER : this.TAG_FILTERS_DISABLED}
+        placeholder={
+          this.props.editorReadOnly ?
+            'TagFilters expr - e.g. "(#tag1 | #tag2) & #tag3"' : 'TagFilters are only enabled in ReadOnly mode'
+        }
         onChange={this.handleTagFiltersChange}
       />
     </div>
