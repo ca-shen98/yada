@@ -12,13 +12,18 @@ class Editor extends React.Component {
     }
   }, 250);
 
-  render = () => (
-    <RichMarkdownEditor
-      readOnly={this.props.editorReadOnly}
-      defaultValue={localStorage.getItem(this.LOCAL_STORAGE_KEY) || ''}
-      onChange={this.handleEditorChange}
-    />
-  );
+  render() {
+    const {body} = document;
+    if (body) body.style.backgroundColor = this.props.editorDarkMode ? "#181A1B" : "#FFF";
+    return (
+      <RichMarkdownEditor
+        readOnly={this.props.editorReadOnly}
+        dark={this.props.editorDarkMode}
+        defaultValue={localStorage.getItem(this.LOCAL_STORAGE_KEY) || ''}
+        onChange={this.handleEditorChange}
+      />
+    );
+  };
 }
 
-export default connect(state => ({editorReadOnly: state.editorReadOnly}))(Editor);
+export default connect(state => ({editorDarkMode: state.editorDarkMode, editorReadOnly: state.editorReadOnly}))(Editor);

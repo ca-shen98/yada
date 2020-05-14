@@ -11,6 +11,8 @@ footer {
   padding: 5px 0 10px 0;
   margin: 0 auto;
   text-align: center;
+  color: #808080;
+  font-size: .8em;
 }
 
 .Header {
@@ -30,6 +32,6 @@ footer {
 }
 
 .Header input {
-  min-width: 205px;
-  width: calc(100% - 240px);
+  min-width: 315px;
+  width: calc(100% - 350px);
 }
