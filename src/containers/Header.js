@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { TOGGLE_EDITOR_READ_ONLY } from "../actions";
 
-
 class Header extends React.Component {
   state = {
     tagFiltersDirty: false,
