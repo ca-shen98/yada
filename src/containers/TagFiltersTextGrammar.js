@@ -1,5 +1,19 @@
 // Generated automatically by nearley, version undefined
 // http://github.com/Hardmath123/nearley
+/* The grammar used was
+Main -> Expr | null
+Expr -> Or | And_
+Or -> Expr __ "|" __ And_
+And_ -> And | Term_
+And -> And_ __ "&" __ Term_
+Term_ -> Not | Expr_ | Term
+Not -> "!" Expr_
+Expr_ -> "(" _ Expr _ ")"
+Term -> "#{" n "}"
+n -> [^{}]:+
+__ -> " ":+
+_ -> " ":*
+ */
 export default {
   Lexer: undefined,
   ParserRules: [
