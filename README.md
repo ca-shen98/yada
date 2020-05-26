@@ -6,3 +6,4 @@ notes) docs that act as consolidated single sources-of-truth for content/knowled
 of information (blocks/lines) within the files.
 
 **Details: [https://github.com/fydp-saac/yada/wiki](https://github.com/ca-shen98/yada/wiki)**
+Dev page: [https://github.com/fydp-saac/yada/wiki/dev-notes](https://github.com/FYDP-SAAC/yada/wiki/dev-notes)
