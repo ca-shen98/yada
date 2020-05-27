@@ -12,7 +12,7 @@
     "react-dom": "^16.13.1",
     "react-redux": "^7.1.3",
     "redux": "^4.0.5",
-    "rich-markdown-editor": "https://github.com/aravind-segu/rich-markdown-editor.git"
+    "rich-markdown-editor": "https://github.com/FYDP-SAAC/rich-markdown-editor.git"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^4.2.4",
@@ -28,7 +28,7 @@
     "eject": "react-scripts eject",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
-    "postinstall": "cd ./node_modules/rich-markdown-editor && npm install && npm run build"
+    "dev_install": "./dev_install.sh"
   },
   "eslintConfig": {
     "extends": "react-app"
