@@ -24,17 +24,22 @@ class Header extends React.Component {
           parser.feed(this.state.tagFiltersText.trim());
         } catch(ex) {
           // invalid
+          console.log(ex);
+          console.log("ERROR Applying tags")
           return;
         }
         const parsed = parser.results;
         if (parsed.length === 0) {
           // incomplete
+          console.log("No tags to show")
           return;
+        } else {
+          console.log("FOUND SOMETHING~~~~" + parsed.length + " " + parsed);
         }
         localStorage.setItem(this.FILTERS_LOCAL_STORAGE_KEY, this.state.tagFiltersText);
         this.setState({tagFiltersDirty: false, tagFiltersExpr: parser.results});
       }
-      // TODO pass tagFiltersExpr value to editor somehow (via redux?)
+      // TODO: pass tagFiltersExpr value to editor somehow (via redux?)
     }
   };
 
@@ -45,10 +50,12 @@ class Header extends React.Component {
         tagFiltersDirty: true,
         tagFiltersText: document.getElementById(this.TAG_FILTERS_INPUT_ID).value,
       });
+      console.log("Changed Tag Filters state")
     }
   };
 
   handleTagFiltersEnter = event => {
+    console.log("TAG FILTER EVENT: " + event);
     if (event.key === 'Enter') {
       this.handleApplyTagFilters();
     }

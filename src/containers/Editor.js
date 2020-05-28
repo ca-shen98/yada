@@ -4,15 +4,20 @@ import {connect} from 'react-redux';
 import {debounce} from 'lodash';
 
 class Editor extends React.Component {
-  LOCAL_STORAGE_KEY = 'saved';
+  CONTENT_LOCAL_STORAGE_KEY = 'saved';
+  FILTERS_LOCAL_STORAGE_KEY = 'filters';
 
   handleEditorChange = debounce(value => {
     if (!this.props.editorReadOnly) {
-      localStorage.setItem(this.LOCAL_STORAGE_KEY, value());
+      localStorage.setItem(this.CONTENT_LOCAL_STORAGE_KEY, value());
     }
   }, 250);
 
   traverse(rootNode, levelIndent){
+    let filter = localStorage.getItem(this.FILTERS_LOCAL_STORAGE_KEY)
+    console.log("filter = " + filter)
+    console.log("n = " + rootNode);
+    console.log(rootNode);
     if(rootNode.isText){
       console.log(levelIndent + rootNode.text);
     }
@@ -25,6 +30,7 @@ class Editor extends React.Component {
 
   handleModelChange = (node) => {
     console.log("got here");
+    // TODO: pull out tags here?
     this.traverse(node, "");
     return node;
   }
@@ -36,7 +42,7 @@ class Editor extends React.Component {
       <RichMarkdownEditor
         readOnly={this.props.editorReadOnly}
         dark={this.props.editorDarkMode}
-        defaultValue={localStorage.getItem(this.LOCAL_STORAGE_KEY) || ''}
+        defaultValue={localStorage.getItem(this.CONTENT_LOCAL_STORAGE_KEY) || ''}
         onChange={this.handleEditorChange}
         onModelChange={this.handleModelChange}
       />
