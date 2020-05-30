@@ -1,12 +1,12 @@
 import Actions from '../actions';
 
-export const PROPS_LOCAL_STORAGE_KEYS = {
-  EDITOR_READ_ONLY: "editorReadOnly",
-  EDITOR_DARK_MODE: "editorDarkMode",
+export const EDITOR_PROPS_LOCAL_STORAGE_KEYS = {
+  EDITOR_READ_ONLY: 'editorReadOnly',
+  EDITOR_DARK_MODE: 'editorDarkMode',
 };
 
 export const ToggleEditorReadOnlyReducer = (
-  state = localStorage.getItem(PROPS_LOCAL_STORAGE_KEYS.EDITOR_READ_ONLY) === 'ReadOnly',
+  state = localStorage.getItem(EDITOR_PROPS_LOCAL_STORAGE_KEYS.EDITOR_READ_ONLY) === 'ReadOnly',
   action,
 ) => {
   if (action.type === Actions.TOGGLE_EDITOR_READ_ONLY.type) return !state;
@@ -14,7 +14,7 @@ export const ToggleEditorReadOnlyReducer = (
 };
 
 export const ToggleEditorDarkModeReducer = (
-  state = localStorage.getItem(PROPS_LOCAL_STORAGE_KEYS.EDITOR_DARK_MODE) === 'Dark',
+  state = localStorage.getItem(EDITOR_PROPS_LOCAL_STORAGE_KEYS.EDITOR_DARK_MODE) === 'Dark',
   action,
 ) => {
   if (action.type === Actions.TOGGLE_EDITOR_DARK_MODE.type) return !state;

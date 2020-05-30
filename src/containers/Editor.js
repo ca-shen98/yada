@@ -1,14 +1,13 @@
-import React from "react";
+import React from 'react';
 import RichMarkdownEditor from 'rich-markdown-editor';
 import {connect} from 'react-redux';
 import {debounce} from 'lodash';
 
 class Editor extends React.Component {
-  LOCAL_STORAGE_KEY = 'saved';
 
   handleEditorChange = debounce(value => {
     if (!this.props.editorReadOnly) {
-      localStorage.setItem(this.LOCAL_STORAGE_KEY, value());
+      localStorage.setItem(this.props.fileNameKey, value());
     }
   }, 250);
 
@@ -29,14 +28,15 @@ class Editor extends React.Component {
     return node;
   }
 
-  render() {
+  render = () => {
     const {body} = document;
-    if (body) body.style.backgroundColor = this.props.editorDarkMode ? "#181A1B" : "#FFF";
+    if (body) body.style.backgroundColor = this.props.editorDarkMode ? '#181A1B' : '#ffffff';
     return (
       <RichMarkdownEditor
         readOnly={this.props.editorReadOnly}
         dark={this.props.editorDarkMode}
-        defaultValue={localStorage.getItem(this.LOCAL_STORAGE_KEY) || ''}
+        key={this.props.fileNameKey}
+        defaultValue={localStorage.getItem(this.props.fileNameKey) || ''}
         onChange={this.handleEditorChange}
         onModelChange={this.handleModelChange}
       />
@@ -44,4 +44,10 @@ class Editor extends React.Component {
   };
 }
 
-export default connect(state => ({editorDarkMode: state.editorDarkMode, editorReadOnly: state.editorReadOnly}))(Editor);
+export default connect(
+  state => ({
+    editorDarkMode: state.editorDarkMode,
+    editorReadOnly: state.editorReadOnly,
+    fileNameKey: state.fileNameKey,
+  }),
+)(Editor);

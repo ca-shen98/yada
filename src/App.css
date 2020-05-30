@@ -16,22 +16,26 @@ footer {
 }
 
 .Header {
-  padding: 10px 0 5px 0;
+  padding: 4px 0 6px 0;
   margin: 5px 0 10px 0;
   border-bottom: 1px solid darkgray;
   width: 100%;
 }
 
-.Header button, .Header input {
+.SubHeader {
+  padding: 6px 0 0 0;
+}
+
+.SubHeader button, .SubHeader input {
   margin: 5px 0 0 5px;
   padding: 3px;
 }
 
-.Header button {
-  width: 100px;
+.SubHeader button {
+  width: 115px;
 }
 
-.Header input {
+.SubHeader input {
   min-width: 315px;
-  width: calc(100% - 350px);
+  width: calc(100% - 150px);
 }
