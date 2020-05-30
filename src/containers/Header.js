@@ -1,50 +1,28 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import nearley from 'nearley'
-import TagFiltersTextGrammar from './TagFiltersTextGrammar'
 import Actions from '../actions';
 import {EDITOR_PROPS_LOCAL_STORAGE_KEYS} from '../reducers/ToggleEditorProps';
 import {INITIAL_FILE_NAME_LOCAL_STORAGE_KEY} from '../reducers/ChangeFileNameKey';
+import {INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY, initialTagFiltersText, parse as parseTagFilters} from "./TagFilters";
 
 class Header extends React.Component {
-  FILTERS_LOCAL_STORAGE_KEY = 'filters';
   TAG_FILTERS_INPUT_ID = 'tag_filters_input';
   FILE_EXPLORER_INPUT_ID = 'file_explorer_input';
 
   state = {
-    tagFiltersDirty: true,
-    tagFiltersText: localStorage.getItem(this.FILTERS_LOCAL_STORAGE_KEY) || '',
-    tagFiltersExpr: undefined,
+    tagFiltersText: initialTagFiltersText,
   };
 
   handleApplyTagFilters = () => {
-    if (this.props.editorReadOnly) { // sanity check
-      if (this.state.tagFiltersDirty) {
-        const parser = new nearley.Parser(nearley.Grammar.fromCompiled(TagFiltersTextGrammar));
-        try {
-          parser.feed(this.state.tagFiltersText.trim());
-        } catch(ex) {
-          // invalid
-          return;
-        }
-        const parsed = parser.results;
-        if (parsed.length === 0) {
-          // incomplete
-          return;
-        }
-        localStorage.setItem(this.FILTERS_LOCAL_STORAGE_KEY, this.state.tagFiltersText);
-        this.setState({tagFiltersDirty: false, tagFiltersExpr: parser.results});
-      }
-      // TODO pass tagFiltersExpr value to editor somehow (via redux?)
-    }
+    localStorage.setItem(INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY, this.state.tagFiltersText);
+    this.props.setTagFilters(parseTagFilters(this.state.tagFiltersText));
   };
 
   // is there a race condition that would cause a disabled text value to be saved?
   handleTagFiltersChange = () => {
     if (this.props.editorReadOnly) {
       this.setState({
-        tagFiltersDirty: true,
-        tagFiltersText: document.getElementById(this.TAG_FILTERS_INPUT_ID).value,
+        tagFiltersText: document.getElementById(this.TAG_FILTERS_INPUT_ID).value.trim(),
       });
     }
   };
@@ -143,5 +121,6 @@ export default connect(
     toggleEditorDarkMode: () => dispatch(Actions.TOGGLE_EDITOR_DARK_MODE),
     toggleEditorReadOnly: () => dispatch(Actions.TOGGLE_EDITOR_READ_ONLY),
     changeFileNameKey: fileNameKey => dispatch(Actions.changeFileNameKey(fileNameKey)),
+    setTagFilters: tagFilters => dispatch(Actions.setTagFilters(tagFilters)),
   }),
 )(Header);
