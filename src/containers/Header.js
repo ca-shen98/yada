@@ -1,9 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import Actions from '../actions';
-import {EDITOR_PROPS_LOCAL_STORAGE_KEYS} from '../reducers/ToggleEditorProps';
-import {INITIAL_FILE_NAME_LOCAL_STORAGE_KEY} from '../reducers/ChangeFileNameKey';
-import {INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY, initialTagFiltersText, parse as parseTagFilters} from "./TagFilters";
+import {initialTagFiltersText, parse as parseTagFilters} from "./TagFilters";
 
 class Header extends React.Component {
   TAG_FILTERS_INPUT_ID = 'tag_filters_input';
@@ -14,7 +12,6 @@ class Header extends React.Component {
   };
 
   handleApplyTagFilters = () => {
-    localStorage.setItem(INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY, this.state.tagFiltersText);
     this.props.setTagFilters(parseTagFilters(this.state.tagFiltersText));
   };
 
@@ -36,17 +33,12 @@ class Header extends React.Component {
   handleToggleEditorReadOnly = () => {
     this.props.toggleEditorReadOnly();
     // dispatch is async? so state/prop change only happens once function exits? so the prop is the previous value.
-    localStorage.setItem(EDITOR_PROPS_LOCAL_STORAGE_KEYS.EDITOR_READ_ONLY,
-      this.props.editorReadOnly ? 'Editable' : 'ReadOnly');
     document.getElementById(this.TAG_FILTERS_INPUT_ID).value =
       this.props.editorReadOnly ? '' : this.state.tagFiltersText;
   };
 
   handleToggleEditorDarkMode = () => {
     this.props.toggleEditorDarkMode();
-    // dispatch is async? so state/prop change only happens once function exits? so the prop is the previous value.
-    localStorage.setItem(EDITOR_PROPS_LOCAL_STORAGE_KEYS.EDITOR_DARK_MODE,
-      this.props.editorDarkMode ? 'Light' : 'Dark');
   };
 
   handleFileExplorerEnter = event => {
@@ -58,7 +50,6 @@ class Header extends React.Component {
   handleLoadFile = () => {
     const fileNameKey = document.getElementById(this.FILE_EXPLORER_INPUT_ID).value;
     this.props.changeFileNameKey(fileNameKey);
-    localStorage.setItem(INITIAL_FILE_NAME_LOCAL_STORAGE_KEY, fileNameKey);
   };
 
   render = () => (

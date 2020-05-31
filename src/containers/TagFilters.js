@@ -62,7 +62,3 @@ export const parse = (inputText, throwErrors = true) => {
 export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = 'initialTagFilters';
 export const initialTagFiltersText = localStorage.getItem(INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY) || '';
 export const initialTagFiltersExpr = parse(initialTagFiltersText);
-
-export default {
-  parse: parse,
-};
