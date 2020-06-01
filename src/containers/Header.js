@@ -6,22 +6,28 @@ import {initialTagFiltersText, parse as parseTagFilters} from "./TagFilters";
 class Header extends React.Component {
   TAG_FILTERS_INPUT_ID = 'tag_filters_input';
   FILE_EXPLORER_INPUT_ID = 'file_explorer_input';
+  FILE_NAME_KEY_CHAR_REGEX = /\w/;
 
   state = {
-    tagFiltersText: initialTagFiltersText,
+    dirtyTagFiltersText: initialTagFiltersText,
+    validTagFiltersText: initialTagFiltersText.trim(),
   };
 
   handleApplyTagFilters = () => {
-    this.props.setTagFilters(parseTagFilters(this.state.tagFiltersText));
+    const maybeValidTagFiltersText = this.state.dirtyTagFiltersText.trim();
+    const tagFiltersExpr = parseTagFilters(maybeValidTagFiltersText);
+    if (tagFiltersExpr) {
+      this.setState({ validTagFiltersText: maybeValidTagFiltersText });
+      this.props.setTagFilters(tagFiltersExpr);
+    } else {
+      document.getElementById(this.TAG_FILTERS_INPUT_ID).value = this.state.validTagFiltersText;
+    }
   };
 
-  // is there a race condition that would cause a disabled text value to be saved?
   handleTagFiltersChange = () => {
-    if (this.props.editorReadOnly) {
-      this.setState({
-        tagFiltersText: document.getElementById(this.TAG_FILTERS_INPUT_ID).value.trim(),
-      });
-    }
+    this.setState({
+      dirtyTagFiltersText: document.getElementById(this.TAG_FILTERS_INPUT_ID).value,
+    });
   };
 
   handleTagFiltersEnter = event => {
@@ -34,22 +40,29 @@ class Header extends React.Component {
     this.props.toggleEditorReadOnly();
     // dispatch is async? so state/prop change only happens once function exits? so the prop is the previous value.
     document.getElementById(this.TAG_FILTERS_INPUT_ID).value =
-      this.props.editorReadOnly ? '' : this.state.tagFiltersText;
+      this.props.editorReadOnly ? '' : this.state.dirtyTagFiltersText;
   };
 
   handleToggleEditorDarkMode = () => {
     this.props.toggleEditorDarkMode();
   };
 
-  handleFileExplorerEnter = event => {
+  handleFileExplorerKeyPress = event => {
     if (event.key === 'Enter') {
       this.handleLoadFile();
+    }
+    if (event.key.length !== 1 || !this.FILE_NAME_KEY_CHAR_REGEX.test(event.key)) {
+      event.preventDefault();
     }
   };
 
   handleLoadFile = () => {
-    const fileNameKey = document.getElementById(this.FILE_EXPLORER_INPUT_ID).value;
-    this.props.changeFileNameKey(fileNameKey);
+    const fileNameKey = document.getElementById(this.FILE_EXPLORER_INPUT_ID).value.trim();
+    if (fileNameKey) {
+      this.props.changeFileNameKey(fileNameKey);
+    } else {
+      document.getElementById(this.FILE_EXPLORER_INPUT_ID).value = this.props.fileNameKey;
+    }
   };
 
   render = () => (
@@ -63,7 +76,7 @@ class Header extends React.Component {
             this.props.editorReadOnly ?
               'TagFilters expr - e.g. "#{tag1} | !(#{t2} & !(#{_3}))"' : 'TagFilters are only enabled in ReadOnly mode'
           }
-          defaultValue={this.props.editorReadOnly ? this.state.tagFiltersText : ''}
+          defaultValue={this.props.editorReadOnly ? this.state.validTagFiltersText : ''}
           onKeyPress={this.handleTagFiltersEnter}
           onChange={this.handleTagFiltersChange}
         />
@@ -81,7 +94,7 @@ class Header extends React.Component {
           id={this.FILE_EXPLORER_INPUT_ID}
           placeholder="file name/key"
           defaultValue={this.props.fileNameKey}
-          onKeyPress={this.handleFileExplorerEnter}
+          onKeyPress={this.handleFileExplorerKeyPress}
         />
         <button
           type="button"
