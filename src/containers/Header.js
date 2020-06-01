@@ -1,7 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import Actions from '../actions';
-import {initialTagFiltersText, parse as parseTagFilters} from "./TagFilters";
+import {initialTagFiltersText} from '../reducers/SetTagFilters';
+import {parse as parseTagFilters} from '../lib/TagFilters';
 
 class Header extends React.Component {
   TAG_FILTERS_INPUT_ID = 'tag_filters_input';
