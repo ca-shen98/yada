@@ -1,9 +1,9 @@
 import Actions from '../actions';
 import {parse as parseTagFilters} from '../lib/TagFilters';
 
-export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = "initialTagFilters";
+export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = 'initialTagFilters';
 export const initialTagFiltersText =
-  localStorage.getItem(INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY) || "";
+  localStorage.getItem(INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY) || '';
 export const initialTagFiltersExpr = parseTagFilters(initialTagFiltersText);
 
 export const SetTagFiltersReducer = (state = initialTagFiltersExpr, action) => {

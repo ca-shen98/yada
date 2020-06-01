@@ -3,53 +3,52 @@ import {connect} from 'react-redux';
 import Actions from '../actions';
 import {initialTagFiltersText} from '../reducers/SetTagFilters';
 import {parse as parseTagFilters} from '../lib/TagFilters';
-import {FILE_NAME_PREFIX_LOCAL_STORAGE_KEY} from '../reducers/ChangeFileNameKey';
+import {FILE_NAME_PREFIX_LOCAL_STORAGE_KEY, FILES_LIST_LOCAL_STORAGE_KEY} from '../reducers/ChangeFileNameKey';
 
 class Header extends React.Component {
   TAG_FILTERS_INPUT_ID = 'tag_filters_input';
   FILE_EXPLORER_INPUT_ID = 'file_explorer_input';
   FILE_EXPLORER_LIST_ID = 'file_explorer_list';
-  FILES_LIST_LOCAL_STORAGE_KEY = 'filesList';
   FILE_NAME_KEY_CHAR_REGEX = /\w/;
 
   state = {
-    dirtyTagFiltersText: initialTagFiltersText,
-    validTagFiltersText: initialTagFiltersText.trim(),
+    tagFiltersText: initialTagFiltersText,
   };
 
-  handleApplyTagFilters = () => {
-    const maybeValidTagFiltersText = this.state.dirtyTagFiltersText.trim();
-    const tagFiltersExpr = parseTagFilters(maybeValidTagFiltersText);
-    if (tagFiltersExpr) {
-      this.setState({ validTagFiltersText: maybeValidTagFiltersText });
-      this.props.setTagFilters(tagFiltersExpr);
-    } else { // if invalid expr, reset the input value to the current valid tag filters text state
-      document.getElementById(this.TAG_FILTERS_INPUT_ID).value = this.state.validTagFiltersText;
+  handleApplyTagFilters = (modifyState = true, checkState = true) => {
+    const tagFiltersInput = document.getElementById(this.TAG_FILTERS_INPUT_ID).value.trim();
+    if (checkState && tagFiltersInput === this.state.tagFiltersText) {
+      return; // don't need to re-apply since already applied
+    }
+    let tagFiltersExpr = null;
+    if (tagFiltersInput) {
+      tagFiltersExpr = parseTagFilters(tagFiltersInput);
+      if (!tagFiltersExpr) { // if invalid expr, reset the input value to the current valid tag filters text state
+        document.getElementById(this.TAG_FILTERS_INPUT_ID).value = this.state.tagFiltersText;
+        return;
+      }
+    }
+    this.props.setTagFilters(tagFiltersExpr);
+    if (modifyState) {
+      this.setState({ tagFiltersText: tagFiltersInput });
     }
   };
 
-  handleTagFiltersChange = () => {
-    this.setState({
-      dirtyTagFiltersText: document.getElementById(this.TAG_FILTERS_INPUT_ID).value,
-    });
-  };
-
-  handleTagFiltersEnter = event => {
+  handleTagFiltersKeyPress = event => {
     if (event.key === 'Enter') {
       this.handleApplyTagFilters();
     }
   };
 
   handleToggleEditorReadOnly = () => {
-    this.props.toggleEditorReadOnly();
-    // dispatch is async? so state/prop change only happens once function exits? so the prop is the previous value.
+    // currently the prop is the previous value, before toggling
     document.getElementById(this.TAG_FILTERS_INPUT_ID).value =
-      this.props.editorReadOnly ? '' : this.state.dirtyTagFiltersText;
+      this.props.editorReadOnly ? '' : this.state.tagFiltersText;
+    this.handleApplyTagFilters(false, false);
+    this.props.toggleEditorReadOnly();
   };
 
-  handleToggleEditorDarkMode = () => {
-    this.props.toggleEditorDarkMode();
-  };
+  handleToggleEditorDarkMode = () => this.props.toggleEditorDarkMode();
 
   handleFileExplorerKeyPress = event => {
     if (event.key === 'Enter') {
@@ -63,9 +62,9 @@ class Header extends React.Component {
   handleLoadFile = () => {
     const fileNameKey = document.getElementById(this.FILE_EXPLORER_INPUT_ID).value.trim();
     if (fileNameKey) {
-      const filesListStr = localStorage.getItem(this.FILES_LIST_LOCAL_STORAGE_KEY);
+      const filesListStr = localStorage.getItem(FILES_LIST_LOCAL_STORAGE_KEY);
       localStorage.setItem(
-        this.FILES_LIST_LOCAL_STORAGE_KEY,
+        FILES_LIST_LOCAL_STORAGE_KEY,
         JSON.stringify(Array.from(new Set(filesListStr ? JSON.parse(filesListStr) : []).add(fileNameKey))),
       );
       this.props.changeFileNameKey(fileNameKey);
@@ -79,19 +78,16 @@ class Header extends React.Component {
     if (fileNameKey === this.props.fileNameKey) {
       return; // don't remove the currently open file
     }
-    const filesListStr = localStorage.getItem(this.FILES_LIST_LOCAL_STORAGE_KEY);
+    const filesListStr = localStorage.getItem(FILES_LIST_LOCAL_STORAGE_KEY);
     const filesList = new Set(filesListStr ? JSON.parse(filesListStr) : []);
     if (filesList.delete(fileNameKey)) {
       localStorage.removeItem(FILE_NAME_PREFIX_LOCAL_STORAGE_KEY + fileNameKey);
     }
-    localStorage.setItem(
-      this.FILES_LIST_LOCAL_STORAGE_KEY,
-      JSON.stringify(Array.from(filesList)),
-    );
+    localStorage.setItem(FILES_LIST_LOCAL_STORAGE_KEY, JSON.stringify(Array.from(filesList)));
   }
 
   render = () => {
-    const filesListStr = localStorage.getItem(this.FILES_LIST_LOCAL_STORAGE_KEY);
+    const filesListStr = localStorage.getItem(FILES_LIST_LOCAL_STORAGE_KEY);
     const filesList = (filesListStr ? JSON.parse(filesListStr) : [])
       .map(fileNameKey => <option key={fileNameKey}>{fileNameKey}</option>);
     return (
@@ -102,12 +98,12 @@ class Header extends React.Component {
             id={this.TAG_FILTERS_INPUT_ID}
             disabled={!this.props.editorReadOnly}
             placeholder={
-              this.props.editorReadOnly ?
-                'TagFilters expr - e.g. "#{tag1} | !(#{t2} & !(#{_3}))"' : 'TagFilters are only enabled in ReadOnly mode'
+              this.props.editorReadOnly
+                ? 'TagFilters expr - e.g. "#{tag1} | !(#{t 2} & !(#{_3}))"'
+                : 'TagFilters are only enabled in ReadOnly mode'
             }
-            defaultValue={this.props.editorReadOnly ? this.state.validTagFiltersText : ''}
-            onKeyPress={this.handleTagFiltersEnter}
-            onChange={this.handleTagFiltersChange}
+            defaultValue={this.props.editorReadOnly ? this.state.tagFiltersText : ''}
+            onKeyPress={this.handleTagFiltersKeyPress}
           />
           <button
             type="button"
