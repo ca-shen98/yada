@@ -1,4 +1,4 @@
-import nearley from "nearley";
+import nearley from 'nearley';
 // Generated automatically by nearley, version undefined
 // http://github.com/Hardmath123/nearley
 /*

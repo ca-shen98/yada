@@ -2,7 +2,7 @@ import {configureStore} from '@reduxjs/toolkit';
 import {combineReducers} from 'redux';
 import {EDITOR_PROPS_LOCAL_STORAGE_KEYS, ToggleEditorDarkModeReducer, ToggleEditorReadOnlyReducer} from './reducers/ToggleEditorProps';
 import {INITIAL_FILE_NAME_LOCAL_STORAGE_KEY, ChangeFileNameKeyReducer} from './reducers/ChangeFileNameKey';
-import {INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY, SetTagFiltersReducer} from "./reducers/SetTagFilters";
+import {INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY, SetTagFiltersReducer} from './reducers/SetTagFilters';
 
 const store = configureStore({
   reducer: combineReducers({
