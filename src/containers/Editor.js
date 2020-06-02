@@ -1,47 +1,38 @@
-import React from "react";
+import React from 'react';
 import RichMarkdownEditor from 'rich-markdown-editor';
 import {connect} from 'react-redux';
 import {debounce} from 'lodash';
+import {FILE_NAME_PREFIX_LOCAL_STORAGE_KEY} from '../reducers/ChangeFileNameKey';
 
 class Editor extends React.Component {
-  LOCAL_STORAGE_KEY = 'saved';
 
   handleEditorChange = debounce(value => {
     if (!this.props.editorReadOnly) {
-      localStorage.setItem(this.LOCAL_STORAGE_KEY, value());
+      localStorage.setItem(FILE_NAME_PREFIX_LOCAL_STORAGE_KEY + this.props.fileNameKey, value());
     }
   }, 250);
 
-  traverse(rootNode, levelIndent){
-    if(rootNode.isText){
-      console.log(levelIndent + rootNode.text);
-    }
-    if(!rootNode.isLeaf){
-      for(let i = 0 ; i < rootNode.childCount; i++){
-        this.traverse(rootNode.child(i), levelIndent + "\t");
-      }
-    }
-  }
-
-  handleModelChange = (node) => {
-    console.log("got here");
-    this.traverse(node, "");
-    return node;
-  }
-
-  render() {
+  render = () => {
     const {body} = document;
-    if (body) body.style.backgroundColor = this.props.editorDarkMode ? "#181A1B" : "#FFF";
+    if (body) body.style.backgroundColor = this.props.editorDarkMode ? '#181A1B' : '#FFF';
     return (
       <RichMarkdownEditor
         readOnly={this.props.editorReadOnly}
         dark={this.props.editorDarkMode}
-        defaultValue={localStorage.getItem(this.LOCAL_STORAGE_KEY) || ''}
+        key={this.props.fileNameKey}
+        defaultValue={localStorage.getItem(FILE_NAME_PREFIX_LOCAL_STORAGE_KEY + this.props.fileNameKey) || ''}
+        tagFilters={this.props.tagFilters}
         onChange={this.handleEditorChange}
-        onModelChange={this.handleModelChange}
       />
     );
   };
 }
 
-export default connect(state => ({editorDarkMode: state.editorDarkMode, editorReadOnly: state.editorReadOnly}))(Editor);
+export default connect(
+  state => ({
+    editorDarkMode: state.editorDarkMode,
+    editorReadOnly: state.editorReadOnly,
+    fileNameKey: state.fileNameKey,
+    tagFilters: state.tagFilters,
+  }),
+)(Editor);

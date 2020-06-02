@@ -9,6 +9,6 @@ export default () => (
       <Header/>
       <Editor/>
     </div>
-    <footer>&copy; 2020 Carl Shen (ca-shen98)</footer>
+    <footer>&copy; 2020 FYDP-SAAC</footer>
   </div>
 );
