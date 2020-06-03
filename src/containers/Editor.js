@@ -21,7 +21,7 @@ class Editor extends React.Component {
         dark={this.props.editorDarkMode}
         key={this.props.fileNameKey}
         defaultValue={localStorage.getItem(FILE_NAME_PREFIX_LOCAL_STORAGE_KEY + this.props.fileNameKey) || ''}
-        tagFilters={this.props.tagFilters}
+        tagFilters={this.props.tagFiltersExpr}
         onChange={this.handleEditorChange}
       />
     );
@@ -33,6 +33,6 @@ export default connect(
     editorDarkMode: state.editorDarkMode,
     editorReadOnly: state.editorReadOnly,
     fileNameKey: state.fileNameKey,
-    tagFilters: state.tagFilters,
+    tagFiltersExpr: state.tagFilters.expr,
   }),
 )(Editor);

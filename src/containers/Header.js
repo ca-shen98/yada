@@ -1,7 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import Actions from '../actions';
-import {initialTagFiltersText} from '../reducers/SetTagFilters';
 import {parse as parseTagFilters} from '../lib/TagFilters';
 import {FILE_NAME_PREFIX_LOCAL_STORAGE_KEY, FILES_LIST_LOCAL_STORAGE_KEY} from '../reducers/ChangeFileNameKey';
 
@@ -11,27 +10,20 @@ class Header extends React.Component {
   FILE_EXPLORER_LIST_ID = 'file_explorer_list';
   FILE_NAME_KEY_CHAR_REGEX = /\w/;
 
-  state = {
-    tagFiltersText: initialTagFiltersText,
-  };
-
   handleApplyTagFilters = (modifyState = true, checkState = true) => {
     const tagFiltersInput = document.getElementById(this.TAG_FILTERS_INPUT_ID).value.trim();
-    if (checkState && tagFiltersInput === this.state.tagFiltersText) {
+    if (checkState && tagFiltersInput === this.props.tagFiltersText) {
       return; // don't need to re-apply since already applied
     }
     let tagFiltersExpr = null;
     if (tagFiltersInput) {
       tagFiltersExpr = parseTagFilters(tagFiltersInput);
       if (!tagFiltersExpr) { // if invalid expr, reset the input value to the current valid tag filters text state
-        document.getElementById(this.TAG_FILTERS_INPUT_ID).value = this.state.tagFiltersText;
+        document.getElementById(this.TAG_FILTERS_INPUT_ID).value = this.props.tagFiltersText;
         return;
       }
     }
-    this.props.setTagFilters(tagFiltersExpr);
-    if (modifyState) {
-      this.setState({ tagFiltersText: tagFiltersInput });
-    }
+    this.props.setTagFilters({ text: tagFiltersInput, expr: tagFiltersExpr });
   };
 
   handleTagFiltersKeyPress = event => {
@@ -43,7 +35,7 @@ class Header extends React.Component {
   handleToggleEditorReadOnly = () => {
     // currently the prop is the previous value, before toggling
     document.getElementById(this.TAG_FILTERS_INPUT_ID).value =
-      this.props.editorReadOnly ? '' : this.state.tagFiltersText;
+      this.props.editorReadOnly ? '' : this.props.tagFiltersText;
     this.handleApplyTagFilters(false, false);
     this.props.toggleEditorReadOnly();
   };
@@ -102,7 +94,7 @@ class Header extends React.Component {
                 ? 'TagFilters expr - e.g. "#{tag1} | !(#{t 2} & !(#{_3}))"'
                 : 'TagFilters are only enabled in ReadOnly mode'
             }
-            defaultValue={this.props.editorReadOnly ? this.state.tagFiltersText : ''}
+            defaultValue={this.props.editorReadOnly ? this.props.tagFiltersText : ''}
             onKeyPress={this.handleTagFiltersKeyPress}
           />
           <button
@@ -154,6 +146,7 @@ export default connect(
     editorDarkMode: state.editorDarkMode,
     editorReadOnly: state.editorReadOnly,
     fileNameKey: state.fileNameKey,
+    tagFiltersText: state.tagFilters.text,
   }),
   dispatch => ({
     toggleEditorDarkMode: () => dispatch(Actions.TOGGLE_EDITOR_DARK_MODE),

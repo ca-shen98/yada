@@ -25,7 +25,7 @@ store.subscribe(() => {
   localStorage.setItem(INITIAL_FILE_NAME_LOCAL_STORAGE_KEY, store.getState().fileNameKey);
   localStorage.setItem(
     INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY,
-    store.getState().tagFilters || '',
+    store.getState().tagFilters.text || '',
   );
 });
 
