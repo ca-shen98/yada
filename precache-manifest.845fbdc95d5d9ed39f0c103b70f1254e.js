@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "8c977f1ad0fc4b0da3ae43dc42d4a719",
+    "revision": "5b257b3f6583a49c8781ef71fa23d1a4",
     "url": "/yada/index.html"
   },
   {
-    "revision": "094a89c4c399c9f8ede6",
+    "revision": "9b0555cdab52f50d813f",
     "url": "/yada/static/css/main.6ee8e2a3.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/yada/static/js/2.1978797a.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "094a89c4c399c9f8ede6",
-    "url": "/yada/static/js/main.de6640fb.chunk.js"
+    "revision": "9b0555cdab52f50d813f",
+    "url": "/yada/static/js/main.bf1ae5f9.chunk.js"
   },
   {
     "revision": "89ff51e356b8c68013db",
