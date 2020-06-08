@@ -17,7 +17,7 @@ const Home = () => {
             backgroundImage="https://source.unsplash.com/npxXWgQ33ZQ/1600x900"
         >
             <Section heading='YADA' subhead='Yet Another Docs App' width={1}>
-                <CallToAction href='/#/edit'>Get Started</CallToAction>
+                <CallToAction href='#/edit'>Get Started</CallToAction>
             </Section>
         </Hero>
     </div>);
@@ -31,12 +31,12 @@ const Edit = () => {
 }
 
 export default () => (
-    <HashRouter  basename="/">
+    <HashRouter  basename="/yada">
         <div>
             {/*LANDING PAGE*/}
             <Route exact path="/" component={Home} />
             {/*CREATE / UPDATE / VIEW */}
-            <Route path="/edit" component={Edit} />
+            <Route exact path="/edit" component={Edit} />
         </div>
         <footer>&copy; 2020 FYDP-SAAC</footer>
     </HashRouter>
