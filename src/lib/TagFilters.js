@@ -10,7 +10,7 @@ Factor_ -> Term _ "&" _ Factor {% function(d) { return [d[0], d[2], d[4]] } %}
 Term -> Not {% id %} | Nested {% id %} | Tag {% id %}
 Not -> "!" (Nested {% id %} | Tag {% id %})
 Nested -> "(" _ Expression _ ")" {% function(d) { return d[2] } %}
-Tag -> "#{" [^{}]:+ "}" {% function(d) { return [d[0], d[1].join(""), d[2]].join("") } %}
+Tag -> "#{" [^#{}]:+ "}" {% function(d) { return [d[0], d[1].join(""), d[2]].join("") } %}
 _ -> " ":* {% function(d) { return null } %}
 */
 function id(x) {
@@ -67,10 +67,10 @@ export const Grammar = {
         return d.join("");
       },
     },
-    { name: "Tag$ebnf$1", symbols: [/[^{}]/] },
+    { name: "Tag$ebnf$1", symbols: [/[^#{}]/] },
     {
       name: "Tag$ebnf$1",
-      symbols: [/[^{}]/, "Tag$ebnf$1"],
+      symbols: [/[^#{}]/, "Tag$ebnf$1"],
       postprocess: function arrconcat(d) {
         return [d[0]].concat(d[1]);
       },
