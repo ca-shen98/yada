@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/yada/static/css/main.6ee8e2a3.chunk.css",
-    "main.js": "/yada/static/js/main.c13fb03b.chunk.js",
-    "main.js.map": "/yada/static/js/main.c13fb03b.chunk.js.map",
-    "runtime-main.js": "/yada/static/js/runtime-main.15c626b3.js",
-    "runtime-main.js.map": "/yada/static/js/runtime-main.15c626b3.js.map",
-    "static/js/2.1978797a.chunk.js": "/yada/static/js/2.1978797a.chunk.js",
-    "static/js/2.1978797a.chunk.js.map": "/yada/static/js/2.1978797a.chunk.js.map",
+    "main.js": "/yada/static/js/main.51fe55fd.chunk.js",
+    "main.js.map": "/yada/static/js/main.51fe55fd.chunk.js.map",
+    "runtime-main.js": "/yada/static/js/runtime-main.32044ecf.js",
+    "runtime-main.js.map": "/yada/static/js/runtime-main.32044ecf.js.map",
+    "static/js/2.a74e0d68.chunk.js": "/yada/static/js/2.a74e0d68.chunk.js",
+    "static/js/2.a74e0d68.chunk.js.map": "/yada/static/js/2.a74e0d68.chunk.js.map",
     "index.html": "/yada/index.html",
-    "precache-manifest.53768a4129397f391a4eee2c5d3c88bc.js": "/yada/precache-manifest.53768a4129397f391a4eee2c5d3c88bc.js",
+    "precache-manifest.950973f90f8255c533110602eaec2f2b.js": "/yada/precache-manifest.950973f90f8255c533110602eaec2f2b.js",
     "service-worker.js": "/yada/service-worker.js",
     "static/css/main.6ee8e2a3.chunk.css.map": "/yada/static/css/main.6ee8e2a3.chunk.css.map",
-    "static/js/2.1978797a.chunk.js.LICENSE.txt": "/yada/static/js/2.1978797a.chunk.js.LICENSE.txt"
+    "static/js/2.a74e0d68.chunk.js.LICENSE.txt": "/yada/static/js/2.a74e0d68.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.15c626b3.js",
-    "static/js/2.1978797a.chunk.js",
+    "static/js/runtime-main.32044ecf.js",
+    "static/js/2.a74e0d68.chunk.js",
     "static/css/main.6ee8e2a3.chunk.css",
-    "static/js/main.c13fb03b.chunk.js"
+    "static/js/main.51fe55fd.chunk.js"
   ]
 }
