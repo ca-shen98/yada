@@ -12,14 +12,7 @@ const Edit = () => {
     </div>);
 }
 
-export default () => (
-    <HashRouter  basename="/yada">
-        <div>
-            {/*LANDING PAGE*/}
-            <Route exact path="/" component={Home} />
-            {/*CREATE / UPDATE / VIEW */}
-            <Route exact path="/edit" component={Edit} />
-        </div>
-        <footer>&copy; 2020 FYDP-SAAC</footer>
-    </HashRouter>
-);
+export default () => (<HashRouter basename="/yada">
+  <Route exact path="/" component={Home} />
+  <Route exact path="/edit" component={Edit} />
+</HashRouter>);

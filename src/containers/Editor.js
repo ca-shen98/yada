@@ -12,7 +12,7 @@ class Editor extends React.Component {
   }
 
   handleEditorChange = debounce(value => {
-    if (!this.props.editorReadOnly) {
+    if (!this.props.readOnly) {
       localStorage.setItem(FILE_NAME_PREFIX_LOCAL_STORAGE_KEY + this.props.fileNameKey, value());
     }
   }, 250);
@@ -36,7 +36,6 @@ class Editor extends React.Component {
         return (
           <RichMarkdownEditor
             readOnly={this.props.editorReadOnly}
-            dark={this.props.editorDarkMode}
             key={this.props.fileNameKey}
             defaultJSON = {this.state.defaultJSON}
             tagFilters={this.props.tagFiltersExpr}
@@ -47,7 +46,6 @@ class Editor extends React.Component {
         return (
           <RichMarkdownEditor
             readOnly={this.props.editorReadOnly}
-            dark={this.props.editorDarkMode}
             key={this.props.fileNameKey}
             defaultValue={localStorage.getItem(FILE_NAME_PREFIX_LOCAL_STORAGE_KEY + this.props.fileNameKey) || ''}
             tagFilters={this.props.tagFiltersExpr}
@@ -60,10 +58,5 @@ class Editor extends React.Component {
 }
 
 export default connect(
-  state => ({
-    editorDarkMode: state.editorDarkMode,
-    editorReadOnly: state.editorReadOnly,
-    fileNameKey: state.fileNameKey,
-    tagFiltersExpr: state.tagFilters.expr,
-  }),
+  state => ({ readOnly: state.readOnly, fileNameKey: state.fileNameKey, tagFiltersExpr: state.tagFilters.expr }),
 )(Editor);

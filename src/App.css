@@ -41,10 +41,5 @@ footer {
 
 .SubHeader input {
   min-width: 315px;
-  width: calc(100% - 150px);
-}
-
-#file_explorer_input {
-  min-width: 195px;
   width: calc(100% - 270px);
 }
