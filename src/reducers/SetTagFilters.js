@@ -10,6 +10,6 @@ export const SetTagFiltersReducer = (
   state = { text: initialTagFiltersText, expr: initialTagFiltersExpr },
   action,
 ) => {
-  if (action.type !== Actions.SET_TAG_FILTERS_TYPE) return state;
+  if (action.type !== Actions.SET_TAG_FILTERS_TYPE) { return state; }
   return action.tagFilters;
 };

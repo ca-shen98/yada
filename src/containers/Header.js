@@ -30,29 +30,18 @@ class Header extends React.Component {
     this.props.setTagFilters({ text: tagFiltersInput, expr: tagFiltersExpr });
   };
 
-  handleTagFiltersKeyPress = event => {
-    if (event.key === 'Enter') {
-      this.handleApplyTagFilters();
-    }
-  };
+  handleTagFiltersKeyPress = event => { if (event.key === 'Enter') { this.handleApplyTagFilters(); } };
 
-  handleToggleEditorReadOnly = () => {
+  handleToggleReadOnly = () => {
     // currently the prop is the previous value, before toggling
-    document.getElementById(this.TAG_FILTERS_INPUT_ID).value =
-      this.props.editorReadOnly ? '' : this.state.tagFiltersText;
+    document.getElementById(this.TAG_FILTERS_INPUT_ID).value = this.props.readOnly ? '' : this.state.tagFiltersText;
     this.handleApplyTagFilters(false, false);
-    this.props.toggleEditorReadOnly();
+    this.props.toggleReadOnly();
   };
-
-  handleToggleEditorDarkMode = () => this.props.toggleEditorDarkMode();
 
   handleFileExplorerKeyPress = event => {
-    if (event.key === 'Enter') {
-      this.handleLoadFile();
-    }
-    if (event.key.length !== 1 || !this.FILE_NAME_KEY_CHAR_REGEX.test(event.key)) {
-      event.preventDefault();
-    }
+    if (event.key === 'Enter') { this.handleLoadFile(); }
+    if (event.key.length !== 1 || !this.FILE_NAME_KEY_CHAR_REGEX.test(event.key)) { event.preventDefault(); }
   };
 
   handleLoadFile = () => {
@@ -73,9 +62,7 @@ class Header extends React.Component {
 
   handleRemoveFile = () => {
     const fileNameKey = document.getElementById(this.FILE_EXPLORER_INPUT_ID).value.trim();
-    if (fileNameKey === this.props.fileNameKey) {
-      return; // don't remove the currently open file
-    }
+    if (fileNameKey === this.props.fileNameKey) { return; } // don't remove the currently open file
     const filesListStr = localStorage.getItem(FILES_LIST_LOCAL_STORAGE_KEY);
     const filesList = new Set(filesListStr ? JSON.parse(filesListStr) : []);
     if (filesList.delete(fileNameKey)) {
@@ -93,27 +80,6 @@ class Header extends React.Component {
         <div className="SubHeader">
           <input
             type="text"
-            id={this.TAG_FILTERS_INPUT_ID}
-            disabled={!this.props.editorReadOnly}
-            placeholder={
-              this.props.editorReadOnly
-                ? 'TagFilters expr - e.g. "#{tag1} | !(#{t 2} & !(#{_3}))"'
-                : 'TagFilters are only enabled in ReadOnly mode'
-            }
-            defaultValue={this.props.editorReadOnly ? this.state.tagFiltersText : ''}
-            onKeyPress={this.handleTagFiltersKeyPress}
-          />
-          <button
-            type="button"
-            disabled={!this.props.editorReadOnly}
-            onClick={this.handleApplyTagFilters}
-          >
-            Apply TagFilters
-          </button>
-        </div>
-        <div className="SubHeader">
-          <input
-            type="text"
             id={this.FILE_EXPLORER_INPUT_ID}
             list={this.FILE_EXPLORER_LIST_ID}
             placeholder="file name/key"
@@ -121,25 +87,27 @@ class Header extends React.Component {
             onKeyPress={this.handleFileExplorerKeyPress}
           />
           <datalist id={this.FILE_EXPLORER_LIST_ID}>{filesList}</datalist>
-          <button
-            type="button"
-            onClick={this.handleLoadFile}
-          >
-            Load File
-          </button>
-          <button
-            type="button"
-            onClick={this.handleRemoveFile}
-          >
-            Remove File
-          </button>
+          <button type="button" onClick={this.handleLoadFile}>Load File</button>
+          <button type="button" onClick={this.handleRemoveFile}>Remove File</button>
         </div>
         <div className="SubHeader">
-          <button type="button" onClick={this.handleToggleEditorDarkMode}>
-            {this.props.editorDarkMode ? 'Light' : 'Dark'} Theme
+          <input
+            type="text"
+            id={this.TAG_FILTERS_INPUT_ID}
+            disabled={!this.props.readOnly}
+            placeholder={
+              this.props.readOnly
+                ? 'TagFilters expr - e.g. "#{tag1} | !(#{t 2} & !(#{_3}))"'
+                : 'TagFilters are only enabled in ReadOnly mode'
+            }
+            defaultValue={this.props.readOnly ? this.state.tagFiltersText : ''}
+            onKeyPress={this.handleTagFiltersKeyPress}
+          />
+          <button type="button" disabled={!this.props.readOnly} onClick={this.handleApplyTagFilters}>
+            Apply TagFilters
           </button>
-          <button type="button" onClick={this.handleToggleEditorReadOnly}>
-            Make {this.props.editorReadOnly ? 'Editable' : 'ReadOnly'}
+          <button type="button" onClick={this.handleToggleReadOnly}>
+            Make {this.props.readOnly ? 'Editable' : 'ReadOnly'}
           </button>
         </div>
       </div>
@@ -148,14 +116,9 @@ class Header extends React.Component {
 }
 
 export default connect(
-  state => ({
-    editorDarkMode: state.editorDarkMode,
-    editorReadOnly: state.editorReadOnly,
-    fileNameKey: state.fileNameKey,
-  }),
+  state => ({ readOnly: state.readOnly, fileNameKey: state.fileNameKey }),
   dispatch => ({
-    toggleEditorDarkMode: () => dispatch(Actions.TOGGLE_EDITOR_DARK_MODE),
-    toggleEditorReadOnly: () => dispatch(Actions.TOGGLE_EDITOR_READ_ONLY),
+    toggleReadOnly: () => dispatch(Actions.TOGGLE_READ_ONLY),
     changeFileNameKey: fileNameKey => dispatch(Actions.changeFileNameKey(fileNameKey)),
     setTagFilters: tagFilters => dispatch(Actions.setTagFilters(tagFilters)),
   }),
