@@ -64,6 +64,8 @@ class Header extends React.Component {
         JSON.stringify(Array.from(new Set(filesListStr ? JSON.parse(filesListStr) : []).add(fileNameKey))),
       );
       this.props.changeFileNameKey(fileNameKey);
+      document.getElementById(this.TAG_FILTERS_INPUT_ID).value = '';
+      this.handleApplyTagFilters(true, false);
     } else { // if doesn't exist, reset the input value to the currently open file
       document.getElementById(this.FILE_EXPLORER_INPUT_ID).value = this.props.fileNameKey;
     }
