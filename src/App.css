@@ -5,6 +5,10 @@
   padding: 0 30px 0 35px;
 }
 
+#edit {
+  margin-bottom: 32px;
+}
+
 footer {
   border-top: 1px solid darkgray;
   width: 95vw;
