@@ -1,6 +1,6 @@
-var SERVER_URL = "https://yaas.azurewebsites.net/";
+let SERVER_URL = "https://yaas.azurewebsites.net/";
 
-if (process.env.NODE_ENV == "development"){
+if (process.env.NODE_ENV === "development"){
     SERVER_URL = "http://localhost:5000/";
 }
 
@@ -8,7 +8,7 @@ const fetchWithTimeout = (uri, options = {}, time = 8000) => {
     const controller = new AbortController()
     const config = { ...options, signal: controller.signal }
 
-    const timeout = setTimeout(() => {
+    setTimeout(() => {
       controller.abort()
     }, time)
 
@@ -28,7 +28,6 @@ const fetchWithTimeout = (uri, options = {}, time = 8000) => {
   }
 
 export async function getDocument(docID) {
-
     const response = await fetchWithTimeout(SERVER_URL + "query?docID="+docID);
     const json = await response.json();
     return JSON.stringify(json);
@@ -42,5 +41,7 @@ export async function putDocument(documentJSON, docID) {
             'Content-Type': 'application/json'
           })
     });
-    alert("Document Saved Successfully")
+    if (response.ok) {
+        alert("Document Saved Successfully");
+    }
 }
