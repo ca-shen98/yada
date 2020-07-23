@@ -1,45 +1,57 @@
 .App {
-  min-height: calc(100vh - 40px);
-  width: 85vw;
-  margin: 0 auto;
-  padding: 0 30px 0 35px;
+  height: 100vh;
+  width: 100vw;
 }
 
-#edit {
-  margin-bottom: 32px;
+.SidePane {
+  width: 196px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-right: 1px solid black;
 }
 
-footer {
-  border-top: 1px solid darkgray;
-  width: 95vw;
-  padding: 5px 0 10px 0;
-  margin: 0 auto;
-  text-align: center;
-  color: #808080;
-  font-size: .8em;
-}
-
-.Header {
-  padding: 4px 0 6px 0;
-  margin: 5px 0 10px 0;
+.SearchBar, .FilterBar {
+  width: calc(196px - 36px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 6px 12px;
+  padding: 6px;
   border-bottom: 1px solid darkgray;
-  width: 100%;
 }
 
-.SubHeader {
-  padding: 6px 0 0 0;
+.FilterBar {
+  width: calc(100% - 196px - 36px);
+  left: 196px;
 }
 
-.SubHeader button, .SubHeader input {
-  margin: 5px 0 0 5px;
-  padding: 3px;
+.SearchBar button, .SearchBar input, .FilterBar button, .FilterBar input {
+  margin: 4px 0 0 4px;
+  padding: 2px;
 }
 
-.SubHeader button {
-  width: 115px;
+.SearchBar input, .FilterBar input {
+  width: calc(100% - 18px);
 }
 
-.SubHeader input {
-  min-width: 315px;
-  width: calc(100% - 270px);
+.Navigator, .Editor {
+  width: 160px;
+  position: fixed;
+  top: 72px;
+  bottom: 0;
+  left: 0;
+  overflow: scroll;
+}
+
+.Navigator {
+  white-space: nowrap;
+}
+
+.Editor {
+  width: calc(100% - 196px - 90px);
+  left: 196px;
+  margin: 1em 20px 1em 10px;
+  padding: 0 30px;
 }

@@ -1,16 +1,16 @@
 import React from 'react';
+import { HashRouter, Route } from "react-router-dom";
 import './App.css';
-import Header from './containers/Header';
 import Home from './containers/Home';
+import Navigator from "./containers/Navigator";
 import Editor from './containers/Editor';
-import { HashRouter, Route, Link } from "react-router-dom";
 
-const Edit = () => {
-    return (<div className="App">
-        <Header/>
-        <Editor/>
-    </div>);
-}
+const Edit = () => (
+  <div className="App">
+    <Navigator />
+    <Editor />
+  </div>
+);
 
 export default () => (<HashRouter basename="/yada">
   <Route exact path="/" component={Home} />

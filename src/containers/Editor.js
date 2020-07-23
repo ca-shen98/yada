@@ -1,9 +1,11 @@
 import React from 'react';
 import RichMarkdownEditor from 'rich-markdown-editor';
+import FilterBar from "../components/FilterBar";
 import {connect} from 'react-redux';
 import {debounce} from 'lodash';
-import {FILE_NAME_PREFIX_LOCAL_STORAGE_KEY} from '../reducers/ChangeFileNameKey';
+import {FILE_NAME_KEY_PREFIX_LOCAL_STORAGE_KEY} from '../reducers/ChangeFileNameKey';
 import {getDocument, putDocument} from '../backend/yaas'
+
 class Editor extends React.Component {
 
   state = {
@@ -13,7 +15,7 @@ class Editor extends React.Component {
 
   handleEditorChange = debounce(value => {
     if (!this.props.readOnly) {
-      localStorage.setItem(FILE_NAME_PREFIX_LOCAL_STORAGE_KEY + this.props.fileNameKey, value());
+      localStorage.setItem(FILE_NAME_KEY_PREFIX_LOCAL_STORAGE_KEY + this.props.fileNameKey, value());
     }
   }, 250);
 
@@ -34,23 +36,33 @@ class Editor extends React.Component {
       if (body) body.style.backgroundColor = this.props.editorDarkMode ? '#181A1B' : '#FFF';
       if(this.state.serverRunning){
         return (
-          <RichMarkdownEditor
-            readOnly={this.props.editorReadOnly}
-            key={this.props.fileNameKey}
-            defaultJSON = {this.state.defaultJSON}
-            tagFilters={this.props.tagFiltersExpr}
-            onSave={options => putDocument(options['doc'].toJSON(), 1)}
-          />
+          <div className="MainPane">
+            <FilterBar />
+            <div className="Editor">
+              <RichMarkdownEditor
+                readOnly={this.props.readOnly}
+                key={this.props.fileNameKey}
+                defaultJSON = {this.state.defaultJSON}
+                tagFilters={this.props.tagFiltersExpr}
+                onSave={options => putDocument(options['doc'].toJSON(), 1)}
+              />
+            </div>
+          </div>
         );
       }else{
         return (
-          <RichMarkdownEditor
-            readOnly={this.props.editorReadOnly}
-            key={this.props.fileNameKey}
-            defaultValue={localStorage.getItem(FILE_NAME_PREFIX_LOCAL_STORAGE_KEY + this.props.fileNameKey) || ''}
-            tagFilters={this.props.tagFiltersExpr}
-            onChange={this.handleEditorChange}
-          />
+          <div className="MainPane">
+            <FilterBar />
+            <div className="Editor">
+              <RichMarkdownEditor
+                readOnly={this.props.readOnly}
+                key={this.props.fileNameKey}
+                defaultValue={localStorage.getItem(FILE_NAME_KEY_PREFIX_LOCAL_STORAGE_KEY + this.props.fileNameKey) || ''}
+                tagFilters={this.props.tagFiltersExpr}
+                onChange={this.handleEditorChange}
+              />
+            </div>
+          </div>
         );
       }
     }
