@@ -33,7 +33,7 @@ class Card extends React.Component {
 					className="Card"
 					readOnly={true}
 					dark={this.props.editorDarkMode}
-					key={`card${key}_${this.props.fileNameKey}`}
+					key={`card${key}`}
 					defaultJSON={JSON.stringify(json)}
 					tagFilters={this.props.tagFiltersExpr}
 				/>
@@ -42,7 +42,6 @@ class Card extends React.Component {
 	}
 	
 	render = () => {
-		console.log(this.props);
 		const bgMode = this.props.editorDarkMode ? 'dark' : 'light';
 		const textColour = this.props.editorDarkMode ? 'white' : 'dark';
 		const content = this.props.content;
@@ -61,8 +60,5 @@ class Card extends React.Component {
 }
 
 export default connect(
-	state => ({
-		fileNameKey: state.fileNameKey,
-		tagFiltersExpr: state.tagFilters.expr,
-	}),
+	state => ({}),
 )(Card);

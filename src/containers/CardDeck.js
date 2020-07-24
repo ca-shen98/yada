@@ -296,13 +296,9 @@ class CardDeck extends React.Component {
 	
 	render = () => {
 		if (this.state.content == null){
-			return (
-				<Container>
-					<Card/>
-				</Container>
-			);
+			console.log("Not content to display")
+			return null;
 		}else{
-			console.log("Actual Card Deck")
 			const cards = [];
 			for (let i = 0; i < this.state.content.length; i+=2) {
 				cards.push(
@@ -330,8 +326,6 @@ class CardDeck extends React.Component {
 
 export default connect(
 	state => ({
-		editorReadOnly: state.editorReadOnly,
 		fileNameKey: state.fileNameKey,
-		tagFiltersExpr: state.tagFilters.expr,
 	}),
 )(CardDeck);
