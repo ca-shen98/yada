@@ -10,9 +10,9 @@ class FilterBar extends React.Component {
     tagFiltersText: this.props.tagFiltersText,
   }
 
-  handleApplyTagFilters = (modifyState = true, checkState = true) => {
+  handleApplyTagFilters = () => {
     const tagFiltersInput = document.getElementById(this.TAG_FILTERS_INPUT_ID).value.trim();
-    if (checkState && tagFiltersInput === this.state.tagFiltersText) { return; } // don't need to re-apply
+    if (tagFiltersInput === this.state.tagFiltersText) { return; } // don't need to re-apply
     let tagFiltersExpr = null;
     if (tagFiltersInput) {
       tagFiltersExpr = parseTagFilters(tagFiltersInput);
@@ -21,8 +21,8 @@ class FilterBar extends React.Component {
         return;
       }
     }
-    if (modifyState) { this.setState({ tagFiltersText: tagFiltersInput }); }
     this.props.setTagFilters({ text: tagFiltersInput, expr: tagFiltersExpr });
+    // state set in componentDidUpdate
   };
 
   handleTagFiltersKeyPress = event => { if (event.key === 'Enter') { this.handleApplyTagFilters(); } };
@@ -30,14 +30,14 @@ class FilterBar extends React.Component {
   handleToggleReadOnly = () => {
     // currently the prop is the previous value, before toggling
     document.getElementById(this.TAG_FILTERS_INPUT_ID).value = this.props.readOnly ? '' : this.state.tagFiltersText;
-    this.handleApplyTagFilters(false, false);
+    this.handleApplyTagFilters();
     this.props.toggleReadOnly();
   };
 
   componentDidUpdate = prevProps => {
     if (this.props.tagFiltersText !== prevProps.tagFiltersText) {
       document.getElementById(this.TAG_FILTERS_INPUT_ID).value = this.props.readOnly ? this.props.tagFiltersText : '';
-      this.handleApplyTagFilters(true, false);
+      this.setState({ tagFiltersText: this.props.tagFiltersText });
     }
   };
 
