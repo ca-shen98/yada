@@ -55,3 +55,18 @@
   margin: 1em 20px 1em 10px;
   padding: 0 30px;
 }
+
+.BootstrapCard {
+  max-width: 36em;
+  min-height: 18em;
+  margin: 10px auto;
+}
+
+.Card {
+  padding: 25px;
+}
+
+/*make rich markdown editor background transparent*/
+.Card div {
+  background: transparent;
+}

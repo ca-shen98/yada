@@ -13,8 +13,6 @@ class Home extends React.Component {
 	}
 	
 	render = () => {
-		const {body} = document;
-		if (body) body.style.backgroundColor = this.props.editorDarkMode ? '#181A1B' : '#FFF';
 		return (
 			<div>
 				<Hero

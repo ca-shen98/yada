@@ -30,11 +30,11 @@ class GoogleBtn extends Component {
 	}
 	
 	handleLoginFailure = (response) => {
-		alert('Failed to log in')
+		console.log(response);
 	}
 	
 	handleLogoutFailure = (response) => {
-		alert('Failed to log out')
+		console.log(response)
 	}
 	
 	render() {
