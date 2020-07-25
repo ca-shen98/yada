@@ -67,8 +67,8 @@ class Navigator extends React.Component {
         <datalist id={this.FILE_NAME_KEY_LIST_ID}>
           {this.state.fileNameKeys.map(fileNameKey => <option key={fileNameKey}>{fileNameKey}</option>)}
         </datalist>
-        <button type="button" onClick={this.handleLoadFile}>Load File</button>
-        <button type="button" onClick={this.handleRemoveFile}>Remove File</button>
+        <button type="button" onClick={() => this.handleLoadFile()}>Load File</button>
+        <button type="button" onClick={() => this.handleRemoveFile()}>Remove File</button>
       </div>
       <ul className="Navigator">
         {this.state.fileNameKeys.map(fileNameKey =>
