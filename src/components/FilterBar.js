@@ -2,13 +2,12 @@ import React from 'react';
 import {connect} from 'react-redux';
 import Actions from '../actions';
 import {parse as parseTagFilters} from '../lib/TagFilters';
+import {SOURCE_FILE_NAME} from '../reducers/SetFile';
 
 class FilterBar extends React.Component {
   TAG_FILTERS_INPUT_ID = 'tag_filters_input';
 
-  state = {
-    tagFiltersText: this.props.tagFiltersText,
-  }
+  state = { tagFiltersText: this.props.tagFiltersText }
 
   handleApplyTagFilters = () => {
     const tagFiltersInput = document.getElementById(this.TAG_FILTERS_INPUT_ID).value.trim();
@@ -31,7 +30,7 @@ class FilterBar extends React.Component {
     // currently the prop is the previous value, before toggling
     document.getElementById(this.TAG_FILTERS_INPUT_ID).value = this.props.readOnly ? '' : this.state.tagFiltersText;
     this.handleApplyTagFilters();
-    this.props.toggleReadOnly();
+    this.props.setReadOnly(!this.props.readOnly);
   };
 
   componentDidUpdate = prevProps => {
@@ -41,34 +40,43 @@ class FilterBar extends React.Component {
     }
   };
 
-  render = () => (
-    <div className="FilterBar">
-      <input
-        type="text"
-        id={this.TAG_FILTERS_INPUT_ID}
-        disabled={!this.props.readOnly}
-        placeholder={
-          this.props.readOnly
-            ? 'TagFilters expr - e.g. "#{tag1} | !(#{t 2} & !(#{_3}))"'
-            : 'TagFilters are only enabled in ReadOnly mode'
-        }
-        defaultValue={this.props.readOnly ? this.state.tagFiltersText : ''}
-        onKeyPress={this.handleTagFiltersKeyPress}
-      />
-      <button type="button" disabled={!this.props.readOnly} onClick={this.handleApplyTagFilters}>
-        Apply TagFilters
-      </button>
-      <button type="button" onClick={this.handleToggleReadOnly}>
-        Make {this.props.readOnly ? 'Editable' : 'ReadOnly'}
-      </button>
-    </div>
-  );
+  render = () => {
+    return (
+      <div className="FilterBar">
+        <input
+          type="text"
+          id={this.TAG_FILTERS_INPUT_ID}
+          disabled={this.props.fileNameKey !== SOURCE_FILE_NAME || !this.props.readOnly}
+          placeholder={
+            this.props.readOnly
+              ? 'TagFilters expr - e.g. "#{tag1} | !(#{t 2} & !(#{_3}))"'
+              : 'TagFilters are only enabled in ReadOnly mode'
+          }
+          defaultValue={this.props.readOnly ? this.state.tagFiltersText : ''}
+          onKeyPress={this.handleTagFiltersKeyPress}
+        />
+        <button
+          type="button"
+          disabled={this.props.fileNameKey !== SOURCE_FILE_NAME || !this.props.readOnly}
+          onClick={this.handleApplyTagFilters}>
+          Apply TagFilters
+        </button>
+        <button type="button" disabled={this.props.fileNameKey !== SOURCE_FILE_NAME} onClick={this.handleToggleReadOnly}>
+          Make {this.props.readOnly ? 'Editable' : 'ReadOnly'}
+        </button>
+      </div>
+    );
+  };
 }
 
 export default connect(
-  state => ({ readOnly: state.readOnly, tagFiltersText: state.tagFilters.text }),
+  state => ({
+    readOnly: state.readOnly,
+    fileNameKey: state.file.fileNameKey,
+    tagFiltersText: state.tagFilters.text,
+  }),
   dispatch => ({
-    toggleReadOnly: () => dispatch(Actions.TOGGLE_READ_ONLY),
+    setReadOnly: readOnly => dispatch(Actions.setReadOnly(readOnly)),
     setTagFilters: tagFilters => dispatch(Actions.setTagFilters(tagFilters)),
   }),
 )(FilterBar);

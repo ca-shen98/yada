@@ -79,7 +79,7 @@ export const Grammar = {
       name: "Tag",
       symbols: ["Tag$string$1", "Tag$ebnf$1", { literal: "}", pos: 131 }],
       postprocess: function(d) {
-        return [d[0], d[1].join(""), d[2]].join("");
+        return d[1].join("");
       },
     },
     { name: "_$ebnf$1", symbols: [] },
