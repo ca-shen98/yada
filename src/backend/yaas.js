@@ -36,7 +36,7 @@ export async function getDocument(docID) {
 export async function putDocument(documentJSON, docID) {
     const response = await fetchWithTimeout(SERVER_URL + "document?docID="+docID, {
         method: 'PUT',
-        body: JSON.stringify(documentJSON),
+        body: documentJSON,
         headers: new Headers({
             'Content-Type': 'application/json'
           })

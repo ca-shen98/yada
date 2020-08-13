@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from './containers/Home';
-import Navigator from "./containers/Navigator";
+import Navigator from './containers/Navigator';
 import Editor from './containers/Editor';
 import { HashRouter, Route } from "react-router-dom";
 import CardDeck from "./containers/CardDeck";

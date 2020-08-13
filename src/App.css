@@ -27,25 +27,29 @@
   left: 196px;
 }
 
+.FilterBar input {
+  width: calc(100% - 18px);
+}
+
 .SearchBar button, .SearchBar input, .FilterBar button, .FilterBar input {
   margin: 4px 0 0 4px;
   padding: 2px;
 }
 
-.SearchBar input, .FilterBar input {
-  width: calc(100% - 18px);
+.SearchBar input {
+  width: calc(100% - 36px);
 }
 
 .Navigator, .Editor {
-  width: 160px;
   position: fixed;
   top: 72px;
   bottom: 0;
-  left: 0;
   overflow: scroll;
 }
 
 .Navigator {
+  width: 148px;
+  left: 0;
   white-space: nowrap;
 }
 
