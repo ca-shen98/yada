@@ -4,6 +4,7 @@ import Card from '../components/Card';
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import TagEditor from "../components/TagEditor";
 
 class CardDeck extends React.Component {
 	
@@ -317,6 +318,7 @@ class CardDeck extends React.Component {
 			
 			return (
 				<Container>
+					<TagEditor/>
 					{cards}
 				</Container>
 			);
