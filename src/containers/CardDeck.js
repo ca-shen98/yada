@@ -132,7 +132,7 @@ class CardDeck extends React.Component {
 		
 			for (let i = 0; i < this.props.tagsInView.length; i+=4) {
 				cards.push(
-					<Row className="justify-content-md-center">
+					<Row key={`row_${i%4}`} className="justify-content-md-center">
 						<Col lg="12" xl="6">
 							{this.constructCard(i)}
 						</Col>

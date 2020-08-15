@@ -119,7 +119,7 @@ class TagEditor extends React.Component {
 							const column = this.state.columns[columnId];
 							const tags = column.tagIds.map(tagId => this.state.tags[tagId])
 							return (
-								<Col md="12" lg="6">
+								<Col key={column.id} md="12" lg="6">
 									<DragDropColumn key={column.id} column={column} tags={tags}/>
 								</Col>
 							);
