@@ -46,8 +46,7 @@ class Navigator extends React.Component {
     if (!fileNameKey) { fileNameKey = document.getElementById(this.FILE_NAME_KEY_INPUT_ID).value.trim(); }
     if (
       !docNameKey || !fileNameKey ||
-      (!this.state.docFileNameKeys.has(docNameKey) && fileNameKey !== SOURCE_FILE_NAME) ||
-      (fileNameKey !== SOURCE_FILE_NAME && !this.state.docFileNameKeys.get(docNameKey).has(fileNameKey))
+      (!this.state.docFileNameKeys.has(docNameKey) && fileNameKey !== SOURCE_FILE_NAME)
     ) {
       document.getElementById(this.DOC_NAME_KEY_INPUT_ID).value = this.props.docNameKey;
       document.getElementById(this.FILE_NAME_KEY_INPUT_ID).value = this.props.fileNameKey;
@@ -59,6 +58,14 @@ class Navigator extends React.Component {
       const newDocFileNameKeys = SortedMap.from(this.state.docFileNameKeys);
       newDocFileNameKeys.add(new SortedSet(), docNameKey);
       localStorage.setItem(DOC_NAME_KEYS_LIST_LOCAL_STORAGE_KEY, JSON.stringify(Array.from(newDocFileNameKeys.keys())));
+      this.setState({ docFileNameKeys: newDocFileNameKeys });
+    } else if (fileNameKey !== SOURCE_FILE_NAME && !this.state.docFileNameKeys.get(docNameKey).has(fileNameKey)) {
+      const newDocFileNameKeys = SortedMap.from(this.state.docFileNameKeys);
+      newDocFileNameKeys.get(docNameKey).push(fileNameKey);
+      const docViewsStr = localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey);
+      const docViews = docViewsStr ? JSON.parse(docViewsStr) : {};
+      docViews[fileNameKey] = [];
+      localStorage.setItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey, JSON.stringify(docViews));
       this.setState({ docFileNameKeys: newDocFileNameKeys });
     }
     batch(() => {
