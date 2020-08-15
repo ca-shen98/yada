@@ -8,308 +8,137 @@ import TagEditor from "../components/TagEditor";
 
 class CardDeck extends React.Component {
 	
-	state = {
-		content: null,
-		serverRunning: true
+	constructor(props) {
+		super(props);
+		this.state = {
+			content: null,
+			tags: null,
+			all_tags: []
+		};
+	}
+	
+	constructDoc = (tagId) => {
+		const node = this.state.tags[tagId]["content"]
+		return {
+			"doc": {
+				"type": "doc",
+				"content": [node]
+			},
+			"selection": {
+				"type": "text",
+				"anchor": 0,
+				"head": 0
+			}
+		};
+	}
+	
+	constructCard = (index) => {
+		const cardContent = {"index": index}
+		cardContent["front"] = this.constructDoc(this.props.tagsInView[index]);
+		if (index+1 < this.props.tagsInView.length) {
+			cardContent["back"] = this.constructDoc(this.props.tagsInView[index+1]);
+		}
+		return <Card content={cardContent}/>;
 	}
 	
 	componentDidMount(){
-		const frontJSON = [
-			{
-				"doc": {
-					"type": "doc",
-					"content": [
-						{
-							"type": "heading",
-							"attrs": {
-								"hidden": false,
-								"level": 1
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Top Secret Presentation"
-								}
-							]
-						},
-						{
-							"type": "paragraph",
-							"attrs": {
-								"hidden": false
-							},
-							"content": [
-								{
-									"type": "text",
-									"marks": [
-										{
-											"type": "code_inline"
-										}
-									],
-									"text": "print(\"Welcome to the Yada Card View\")"
-								}
-							]
-						}
-					]
-				},
-				"selection": {
-					"type": "text",
-					"anchor": 0,
-					"head": 0
-				}
+		const front_1 = {
+			"type": "heading",
+			"attrs": {
+				"hidden": false,
+				"level": 1
 			},
-			{
-				"doc": {
-					"type": "doc",
-					"content": [
-						{
-							"type": "heading",
-							"attrs": {
-								"hidden": false,
-								"level": 1
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Card 1"
-								}
-							]
-						},
-						{
-							"type": "paragraph",
-							"attrs": {
-								"hidden": false
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Much "
-								},
-								{
-									"type": "text",
-									"marks": [
-										{
-											"type": "strong"
-										}
-									],
-									"text": "Hype! "
-								}
-							]
-						}
-					]
-				},
-				"selection": {
+			"content": [
+				{
 					"type": "text",
-					"anchor": 0,
-					"head": 0
+					"text": "How many bones are in a shark's body"
 				}
+			]
+		};
+		const back_1 = {
+			"type": "paragraph",
+			"attrs": {
+				"hidden": false
 			},
-			{
-				"doc": {
-					"type": "doc",
-					"content": [
-						{
-							"type": "heading",
-							"attrs": {
-								"hidden": false,
-								"level": 1
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Card 2"
-								}
-							]
-						},
-						{
-							"type": "paragraph",
-							"attrs": {
-								"hidden": false
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Much "
-								},
-								{
-									"type": "text",
-									"marks": [
-										{
-											"type": "strong"
-										}
-									],
-									"text": "Hype! "
-								}
-							]
-						}
-					]
-				},
-				"selection": {
+			"content": [
+				{
 					"type": "text",
-					"anchor": 0,
-					"head": 0
+					"text": "0 bones - "
+				},
+				{
+					"type": "text",
+					"marks": [
+						{
+							"type": "strong"
+						}
+					],
+					"text": "shark skeleton is all cartilage"
 				}
+			]
+		};
+		const front_2 = {
+			"type": "heading",
+			"attrs": {
+				"hidden": false,
+				"level": 1
 			},
-			{
-				"doc": {
-					"type": "doc",
-					"content": [
-						{
-							"type": "heading",
-							"attrs": {
-								"hidden": false,
-								"level": 1
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Thank You"
-								}
-							]
-						},
-						{
-							"type": "paragraph",
-							"attrs": {
-								"hidden": false
-							},
-							"content": [
-								{
-									"type": "text",
-									"marks": [
-										{
-											"type": "code_inline"
-										}
-									],
-									"text": "print(\"Hope you liked this top secret presentation\")"
-								}
-							]
-						},
-						{
-							"type": "paragraph",
-							"attrs": {
-								"hidden": false
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Hope you liked this "
-								},
-								{
-									"type": "text",
-									"marks": [
-										{
-											"type": "strong"
-										}
-									],
-									"text": "top secret presentation"
-								}
-							]
-						}
-					]
-				},
-				"selection": {
+			"content": [
+				{
 					"type": "text",
-					"anchor": 0,
-					"head": 0
+					"text": "How do you print \"Hello World\" in Python3?"
 				}
-			}
-		]
-		const backJSON = [
-			{
-				"doc": {
-					"type": "doc",
-					"content": [
-						{
-							"type": "heading",
-							"attrs": {
-								"hidden": false,
-								"level": 1
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Back of Card 1"
-								}
-							]
-						}
-					]
-				},
-				"selection": {
-					"type": "text",
-					"anchor": 0,
-					"head": 0
-				}
+			]
+		};
+		const back_2 = {
+			"type": "paragraph",
+			"attrs": {
+				"hidden": false
 			},
-			{
-				"doc": {
-					"type": "doc",
-					"content": [
-						{
-							"type": "heading",
-							"attrs": {
-								"hidden": false,
-								"level": 1
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Back of Card 2"
-								}
-							]
-						},
-						{
-							"type": "paragraph",
-							"attrs": {
-								"hidden": false
-							},
-							"content": [
-								{
-									"type": "text",
-									"text": "Flippity flip "
-								},
-								{
-									"type": "text",
-									"marks": [
-										{
-											"type": "strong"
-										}
-									],
-									"text": "flip! "
-								}
-							]
-						}
-					]
-				},
-				"selection": {
+			"content": [
+				{
 					"type": "text",
-					"anchor": 0,
-					"head": 0
+					"marks": [
+						{
+							"type": "code_inline"
+						}
+					],
+					"text": "print(\"Hello World\")"
 				}
-			}
-		];
-		const content = [
-			{"index": 0, "front": frontJSON[0]},
-			{"index": 1, "front": frontJSON[1], "back": backJSON[0]},
-			{"index": 2, "front": frontJSON[2], "back": backJSON[1]},
-			{"index": 3, "front": frontJSON[3]}
-		]
-		this.setState({content: content})
+			]
+		};
+		
+		
+		let allTags = ['uuid1', 'uuid2', 'uuid3', 'uuid4']
+		
+		const newState = {
+			tags: {
+				'uuid1': {"id": "uuid1", "name": "question", "content": front_1},
+				'uuid2': {"id": "uuid2", "name": "answer",   "content": back_1},
+				'uuid3': {"id": "uuid3", "name": "question", "content": front_2},
+				'uuid4': {"id": "uuid4", "name": "answer",   "content": back_2},
+			},
+			allTags: allTags
+		}
+		this.setState(newState)
 	}
 	
 	render = () => {
-		if (this.state.content == null){
-			console.log("Not content to display")
+		if (this.state.tags === null){
+			console.log("No content to display")
 			return null;
 		}else{
+			console.log(this.props.tagsInView);
 			const cards = [];
-			for (let i = 0; i < this.state.content.length; i+=2) {
+		
+			for (let i = 0; i < this.props.tagsInView.length; i+=4) {
 				cards.push(
 					<Row className="justify-content-md-center">
 						<Col lg="12" xl="6">
-							<Card content={this.state.content[i]}/>
+							{this.constructCard(i)}
 						</Col>
 						<Col lg="12" xl="6">
 							{
-								(i < this.state.content.length-1) && <Card content={this.state.content[i+1]}/>
+								(i+2 < this.props.tagsInView.length) && this.constructCard(i+2)
 							}
 						</Col>
 					</Row>
@@ -318,7 +147,7 @@ class CardDeck extends React.Component {
 			
 			return (
 				<Container>
-					<TagEditor/>
+					<TagEditor tags={this.state.tags} tagsInView={this.props.tagsInView} allTags={this.state.allTags}/>
 					{cards}
 				</Container>
 			);
@@ -328,6 +157,6 @@ class CardDeck extends React.Component {
 
 export default connect(
 	state => ({
-		fileNameKey: state.fileNameKey,
+		tagsInView: state.tagsInView
 	}),
 )(CardDeck);

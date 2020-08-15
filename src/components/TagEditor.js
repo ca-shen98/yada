@@ -5,27 +5,50 @@ import DragDropColumn from "./DragDropColumn";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import {DragDropContext} from "react-beautiful-dnd";
+import Actions from "../actions";
 
 class TagEditor extends React.Component {
 	constructor(props) {
 		super(props);
+		const tagsInView = new Set(this.props.tagsInView);
+		const availableTags = this.props.allTags.filter(t => !tagsInView.has(t));
+		
+		// parse nodes to obtain preview
+		function getPreview(node) {
+			for (let i = 0; i < node.content.length; ++i) {
+				const contentNode = node.content[i];
+				if (contentNode.type === "text") {
+					return contentNode.text;
+				} else if (contentNode) {
+					const recurseResponse = getPreview(contentNode);
+					if (recurseResponse !== "") return recurseResponse;
+				}
+			}
+			return "";
+		}
+		
+		const tags = this.props.tags;
+		Object.keys(tags).forEach(tagId => {
+			const preview = getPreview(tags[tagId].content);
+			const maxPreviewLength = 50;
+			tags[tagId]["preview"] = preview.substring(0, maxPreviewLength);
+			if (preview.length > maxPreviewLength) {
+				tags[tagId]["preview"] += " . . .";
+			}
+		});
+		
 		this.state = {
-			tags: {
-				'intro_1':   {"id": "intro_1",   "content": "Welcome to the Presentation"},
-				'content_1': {"id": "content_1", "content": "Today we will be talking about Yada"},
-				'intro_2':   {"id": "intro_2",   "content": "Another Title"},
-				'content_2': {"id": "content_2", "content": "More content"},
-			},
+			tags: tags,
 			columns: {
-				'tags_in_view': {
+				tags_in_view: {
 					id: 'tags_in_view',
 					title: "Tags in View",
-					tagIds: []
+					tagIds: this.props.tagsInView
 				},
-				'tags_available': {
+				tags_available: {
 					id: 'tags_available',
 					title: "Available Tags",
-					tagIds: ['intro_1', 'content_1', 'intro_2', 'content_2']
+					tagIds: availableTags
 				},
 			},
 			columnOrder: ['tags_in_view', 'tags_available']
@@ -37,6 +60,7 @@ class TagEditor extends React.Component {
 		if (!destination) return;
 		if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 		
+		let newState = {}
 		if (destination.droppableId === source.droppableId) {
 			const column = this.state.columns[source.droppableId]
 			const newTagIds = Array.from(column.tagIds);
@@ -48,15 +72,13 @@ class TagEditor extends React.Component {
 				tagIds: newTagIds
 			}
 			
-			const newState = {
+			newState = {
 				...this.state,
 				columns: {
 					...this.state.columns,
 					[newColumn.id]: newColumn
 				}
 			};
-			
-			this.setState(newState);
 		} else {
 			const start = this.state.columns[source.droppableId];
 			const finish = this.state.columns[destination.droppableId];
@@ -74,7 +96,7 @@ class TagEditor extends React.Component {
 				tagIds: finishTagIds
 			};
 			
-			const newState = {
+			newState = {
 				...this.state,
 				columns: {
 					...this.state.columns,
@@ -82,9 +104,9 @@ class TagEditor extends React.Component {
 					[newFinish.id]: newFinish
 				}
 			};
-			
-			this.setState(newState);
 		}
+		this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
+		this.setState(newState);
 	}
 	
 	
@@ -110,5 +132,8 @@ class TagEditor extends React.Component {
 }
 
 export default connect(
-	state => ({}),
+	state => ({ tagInView: state.tagsInView }),
+	dispatch => ({
+		setTagsInView: tagsInView => dispatch(Actions.setTagsInView(tagsInView)),
+	}),
 )(TagEditor);
