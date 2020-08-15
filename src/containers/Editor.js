@@ -67,10 +67,12 @@ class Editor extends React.Component {
         const docViews =
           JSON.parse(localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey));
         const viewTags = docViews[this.props.fileNameKey];
-        value = JSON.stringify({
-          type: 'doc',
-          content: viewTags.map(tag => docTags[tag.tag][tag.id]),
-        });
+        if (viewTags.length > 0) {
+          value = JSON.stringify({
+            type: 'doc',
+            content: viewTags.map(tag => docTags[tag.tag][tag.id]),
+          });
+        }
       } else {
         value = localStorage.getItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey) || '';
       }
