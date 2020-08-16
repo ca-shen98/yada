@@ -24,7 +24,25 @@ class Editor extends React.Component {
       if (this.state.serverRunning) {
         this.currentJSON = value(true);
       } else {
-        localStorage.setItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey, value(true));
+        const docBlocksStr = value(true);
+        localStorage.setItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey, docBlocksStr);
+        const docBlocks = JSON.parse(docBlocksStr);
+        const docTagsStr = localStorage.getItem(DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
+        const docTags = docTagsStr ? JSON.parse(docTagsStr) : {};
+        const nodes = [];
+        for (const node of docBlocks.content) { nodes.push(node); }
+        while (nodes.length > 0) {
+          const node = nodes.shift();
+          if (node.hasOwnProperty('attrs') && node.attrs.hasOwnProperty('tags')) {
+            for (const tag of Object.keys(node.attrs.tags)) {
+              docTags[tag][node.attrs.tags[tag]] = node;
+            }
+          }
+          if (node.type !== 'paragraph' && node.type !== 'heading' && node.hasOwnProperty('content')) {
+            for (const child of node.content) { nodes.push(child); }
+          }
+        }
+        localStorage.setItem(DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX +  this.props.docNameKey, JSON.stringify(docTags));
       }
     }
   }, 250);
