@@ -24,8 +24,8 @@ class Tag extends React.Component {
 						{...provided.dragHandleProps}
 						isDragging={snapshot.isDragging}
 					>
-						<TagId>{this.props.tagInfo.id}</TagId>
-						<Content>{this.props.tagInfo.content}</Content>
+						<TagId>{this.props.tagInfo.name}</TagId>
+						<Content>{this.props.tagInfo.preview}</Content>
 					</Container>
 				)}
 			</Draggable>

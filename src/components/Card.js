@@ -8,8 +8,10 @@ class Card extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			serverRunning: true,
-			isFlipped: false
+			isFlipped: false,
+			key: this.props.content["index"],
+			front: this.props.content["front"],
+			back: this.props.content["back"]
 		};
 		this.handleClick = this.handleClick.bind(this);
 		this.createBootstrapCard = this.createBootstrapCard.bind(this);
@@ -34,8 +36,7 @@ class Card extends React.Component {
 					readOnly={true}
 					dark={this.props.editorDarkMode}
 					key={`card${key}`}
-					defaultJSON={JSON.stringify(json)}
-					tagFilters={this.props.tagFiltersExpr}
+					setJSON={JSON.stringify(json)}
 				/>
 			</BootstrapCard>
 		);
