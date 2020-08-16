@@ -70,7 +70,6 @@ class Navigator extends React.Component {
     }
     batch(() => {
       this.props.setFile({ docNameKey: docNameKey, fileNameKey: fileNameKey });
-      this.props.setReadOnly(fileNameKey !== SOURCE_FILE_NAME);
       this.props.setTagFilters({ text: '', expr: null });
     });
   };
@@ -183,7 +182,6 @@ export default connect(
   state => ({ docNameKey: state.file.docNameKey, fileNameKey: state.file.fileNameKey }),
   dispatch => ({
     setFile: file => dispatch(Actions.setFile(file)),
-    setReadOnly: readOnly => dispatch(Actions.setReadOnly(readOnly)),
     setTagFilters: tagFilters => dispatch(Actions.setTagFilters(tagFilters)),
-  })
+  }),
 )(Navigator);

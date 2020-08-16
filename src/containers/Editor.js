@@ -12,27 +12,62 @@ import {
 
 class Editor extends React.Component {
 
+  static updateDocBlocks = (parent, childIdx, node, updatedDocTags) => {
+    if (node.hasOwnProperty('attrs') && node.attrs.hasOwnProperty('tags')) {
+      for (const tag of Object.keys(node.attrs.tags)) {
+        const tagId = node.attrs.tags[tag];
+        if (updatedDocTags.hasOwnProperty(tag) && updatedDocTags[tag].hasOwnProperty(tagId)) {
+          parent.content[childIdx] = updatedDocTags[tag][tagId];
+          return;
+        }
+      }
+    }
+    if (node.type !== 'paragraph' && node.type !== 'heading' && node.hasOwnProperty('content')) {
+      for (let i = 0; i < node.content.length; ++i) {
+        Editor.updateDocBlocks(node, i, node.content[i], updatedDocTags);
+      }
+    }
+  }
+
   handleEditorChange = debounce(value => {
     if (!this.props.readOnly) {
-      const docBlocksStr = value(true);
-      localStorage.setItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey, docBlocksStr);
-      const docBlocks = JSON.parse(docBlocksStr);
+      const docNodeStr = value(true);
+      const docNode = JSON.parse(docNodeStr);
       const docTagsStr = localStorage.getItem(DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
       const docTags = docTagsStr ? JSON.parse(docTagsStr) : {};
+      const updatedDocTags = {};
       const nodes = [];
-      for (const node of docBlocks.content) { nodes.push(node); }
+      for (const node of docNode.content) { nodes.push(node); }
       while (nodes.length > 0) {
         const node = nodes.shift();
+        let save = true;
         if (node.hasOwnProperty('attrs') && node.attrs.hasOwnProperty('tags')) {
           for (const tag of Object.keys(node.attrs.tags)) {
-            docTags[tag][node.attrs.tags[tag]] = node;
+            const tagId = node.attrs.tags[tag];
+            if (!docTags.hasOwnProperty(tag) || !docTags[tag].hasOwnProperty(tagId)) {
+              save = false;
+              break;
+            }
+            docTags[tag][tagId] = node;
+            if (!updatedDocTags.hasOwnProperty(tag)) { updatedDocTags[tag] = {}; }
+            updatedDocTags[tag][tagId] = node;
           }
         }
-        if (node.type !== 'paragraph' && node.type !== 'heading' && node.hasOwnProperty('content')) {
+        if (save && node.type !== 'paragraph' && node.type !== 'heading' && node.hasOwnProperty('content')) {
           for (const child of node.content) { nodes.push(child); }
         }
       }
-      localStorage.setItem(DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX +  this.props.docNameKey, JSON.stringify(docTags));
+      localStorage.setItem(DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey, JSON.stringify(docTags));
+      let docSourceStr = docNodeStr;
+      if (this.props.fileNameKey !== SOURCE_FILE_NAME) {
+        const docSource =
+          JSON.parse(localStorage.getItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey));
+        for (let i = 0; i < docSource.content.length; ++i) {
+          Editor.updateDocBlocks(docSource, i, docSource.content[i], updatedDocTags);
+        }
+        docSourceStr = JSON.stringify(docSource);
+      }
+      localStorage.setItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey, docSourceStr);
     }
   }, 250);
 

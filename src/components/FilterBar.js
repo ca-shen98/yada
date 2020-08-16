@@ -2,7 +2,6 @@ import React from 'react';
 import {connect} from 'react-redux';
 import Actions from '../actions';
 import {parse as parseTagFilters} from '../lib/TagFilters';
-import {SOURCE_FILE_NAME} from '../reducers/SetFile';
 
 class FilterBar extends React.Component {
   TAG_FILTERS_INPUT_ID = 'tag_filters_input';
@@ -46,7 +45,7 @@ class FilterBar extends React.Component {
         <input
           type="text"
           id={this.TAG_FILTERS_INPUT_ID}
-          disabled={this.props.fileNameKey !== SOURCE_FILE_NAME || !this.props.readOnly}
+          disabled={!this.props.readOnly}
           placeholder={
             this.props.readOnly
               ? 'TagFilters expr - e.g. "#{tag1} | !(#{t 2} & !(#{_3}))"'
@@ -56,12 +55,12 @@ class FilterBar extends React.Component {
           onKeyPress={this.handleTagFiltersKeyPress}
         />
         <button
-          type="button"
-          disabled={this.props.fileNameKey !== SOURCE_FILE_NAME || !this.props.readOnly}
-          onClick={this.handleApplyTagFilters}>
+            type="button"
+            disabled={!this.props.readOnly}
+            onClick={this.handleApplyTagFilters}>
           Apply TagFilters
         </button>
-        <button type="button" disabled={this.props.fileNameKey !== SOURCE_FILE_NAME} onClick={this.handleToggleReadOnly}>
+        <button type="button" onClick={this.handleToggleReadOnly}>
           Make {this.props.readOnly ? 'Editable' : 'ReadOnly'}
         </button>
       </div>
