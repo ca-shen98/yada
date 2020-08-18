@@ -6,8 +6,8 @@ import FilterBar from '../components/FilterBar';
 import {
   DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX,
   DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX,
-  DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX,
-  SOURCE_FILE_NAME
+  SOURCE_FILE_NAME_TYPE,
+  CUSTOM_VIEW_FILE_TYPE,
 } from '../reducers/SetFile';
 
 class Editor extends React.Component {
@@ -30,70 +30,70 @@ class Editor extends React.Component {
   }
 
   handleEditorChange = debounce(value => {
-    if (!this.props.readOnly) {
-      const docNodeStr = value(true);
-      const docNode = JSON.parse(docNodeStr);
-      const docTagsStr = localStorage.getItem(DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
-      const docTags = docTagsStr ? JSON.parse(docTagsStr) : {};
-      const updatedDocTags = {};
-      const nodes = [];
-      for (const node of docNode.content) { nodes.push(node); }
-      while (nodes.length > 0) {
-        const node = nodes.shift();
-        let save = true;
-        if (node.hasOwnProperty('attrs') && node.attrs.hasOwnProperty('tags')) {
-          for (const tag of Object.keys(node.attrs.tags)) {
-            const tagId = node.attrs.tags[tag];
-            if (!docTags.hasOwnProperty(tag) || !docTags[tag].hasOwnProperty(tagId)) {
-              save = false;
-              break;
-            }
-            docTags[tag][tagId] = node;
-            if (!updatedDocTags.hasOwnProperty(tag)) { updatedDocTags[tag] = {}; }
-            updatedDocTags[tag][tagId] = node;
+    if (this.props.readOnly) { return; }
+    const docNodeStr = value(true);
+    const docNode = JSON.parse(docNodeStr);
+    const docSourceStrExisting =
+      localStorage.getItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
+    const docSource = docSourceStrExisting ? JSON.parse(docSourceStrExisting) : {};
+    if (this.props.fileNameKey !== SOURCE_FILE_NAME_TYPE && !docSource.hasOwnProperty('doc')) { return; }
+    if (!docSource.hasOwnProperty('tags')) { docSource['tags'] = {}; }
+    const updatedDocTags = {};
+    const nodes = [];
+    for (const node of docNode.content) { nodes.push(node); }
+    while (nodes.length > 0) {
+      const node = nodes.shift();
+      let save = true;
+      if (node.hasOwnProperty('attrs') && node.attrs.hasOwnProperty('tags')) {
+        for (const tag of Object.keys(node.attrs.tags)) {
+          const tagId = node.attrs.tags[tag];
+          if (!docSource.tags.hasOwnProperty(tag) || !docSource.tags[tag].hasOwnProperty(tagId)) {
+            save = false;
+            break;
           }
-        }
-        if (save && node.type !== 'paragraph' && node.type !== 'heading' && node.hasOwnProperty('content')) {
-          for (const child of node.content) { nodes.push(child); }
+          docSource.tags[tag][tagId] = node;
+          if (!updatedDocTags.hasOwnProperty(tag)) { updatedDocTags[tag] = {}; }
+          updatedDocTags[tag][tagId] = node;
         }
       }
-      localStorage.setItem(DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey, JSON.stringify(docTags));
-      let docSourceStr = docNodeStr;
-      if (this.props.fileNameKey !== SOURCE_FILE_NAME) {
-        const docSource =
-          JSON.parse(localStorage.getItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey));
-        for (let i = 0; i < docSource.content.length; ++i) {
-          Editor.updateDocBlocks(docSource, i, docSource.content[i], updatedDocTags);
-        }
-        docSourceStr = JSON.stringify(docSource);
+      if (save && node.type !== 'paragraph' && node.type !== 'heading' && node.hasOwnProperty('content')) {
+        for (const child of node.content) { nodes.push(child); }
       }
-      localStorage.setItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey, docSourceStr);
     }
+    if (this.props.fileType !== CUSTOM_VIEW_FILE_TYPE) { docSource['doc'] = docNode; }
+    else if (docSource.hasOwnProperty('doc')) {
+      for (let i = 0; i < docSource.doc.content.length; ++i) {
+        Editor.updateDocBlocks(docSource.doc, i, docSource.doc.content[i], updatedDocTags);
+      }
+    }
+    localStorage.setItem(
+      DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey,
+      JSON.stringify(docSource)
+    );
   }, 250);
 
   render = () => {
+    const docSourceStr = localStorage.getItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
+    const docSource = docSourceStr ? JSON.parse(docSourceStr) : {};
     let value = '';
-    if (this.props.fileNameKey !== SOURCE_FILE_NAME) {
-      const docTagsStr = localStorage.getItem(DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
-      const docTags = docTagsStr ? JSON.parse(docTagsStr) : {};
-      const docViews =
-        JSON.parse(localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey));
-      const viewTags = docViews[this.props.fileNameKey];
+    if (this.props.fileType !== CUSTOM_VIEW_FILE_TYPE) { value = JSON.stringify(docSource.doc); }
+    else if (docSource.hasOwnProperty('doc')) {
+      const docCustomViews = JSON.parse(
+        localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey)
+      )[CUSTOM_VIEW_FILE_TYPE];
+      const docTags = docSource.hasOwnProperty('tags') ? docSource.tags : {};
+      const viewTags = docCustomViews[this.props.fileNameKey]
+        .filter(tag => !docTags.hasOwnProperty(tag.tag) || !docTags.hasOwnProperty(tag.id));
       if (viewTags.length > 0) {
-        value = JSON.stringify({
-          type: 'doc',
-          content: viewTags.map(tag => docTags[tag.tag][tag.id]),
-        });
+        value = JSON.stringify({type: 'doc', content: viewTags.map(tag => docTags[tag.tag][tag.id])});
       }
-    } else {
-      value = localStorage.getItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey) || '';
     }
     return (
       <div className="MainPane">
         <FilterBar />
         <div className="Editor">
           <RichMarkdownEditor
-            key={this.props.docNameKey + '.' + this.props.fileNameKey}
+            key={this.props.docNameKey + '.' + this.props.fileNameKey + this.props.fileType}
             defaultValue={value}
             jsonStrValue={!(!value)}
             tagFilters={this.props.tagFiltersExpr}
@@ -110,7 +110,8 @@ export default connect(
   state => ({
     docNameKey: state.file.docNameKey,
     fileNameKey: state.file.fileNameKey,
+    fileType: state.file.fileType,
     tagFiltersExpr: state.tagFilters.expr,
     readOnly: state.readOnly,
-  }),
+  })
 )(Editor);
