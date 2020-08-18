@@ -5,126 +5,361 @@ import {
   DOC_NAME_KEYS_LIST_LOCAL_STORAGE_KEY,
   DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX,
   DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX,
-  DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX,
-  SOURCE_FILE_NAME,
   DEFAULT_DOC_NAME_KEY,
+  SOURCE_FILE_NAME_TYPE,
+  CUSTOM_VIEW_FILE_TYPE,
+  FILTER_VIEW_FILE_TYPE,
 } from '../reducers/SetFile';
 import SortedMap from 'collections/sorted-map';
 import SortedSet from 'collections/sorted-set';
+import {parse as parseTagFilters} from '../lib/TagFilters';
+
+const DOC_NAME_KEY_INPUT_ID = 'doc_name_key_input';
+const DOC_NAME_KEY_LIST_ID = 'doc_name_key_list';
+const FILE_NAME_KEY_INPUT_ID = 'file_name_key_input';
+const FILE_NAME_KEY_LIST_ID = 'file_name_key_list';
+const DOC_FILE_NAME_KEY_CHAR_REGEX = /\w/;
 
 class Navigator extends React.Component {
-  DOC_NAME_KEY_INPUT_ID = 'doc_name_key_input';
-  DOC_NAME_KEY_LIST_ID = 'doc_name_key_list';
-  FILE_NAME_KEY_INPUT_ID = 'file_name_key_input';
-  FILE_NAME_KEY_LIST_ID = 'file_name_key_list';
-  DOC_FILE_NAME_KEY_CHAR_REGEX = /\w/;
 
   constructor(props) {
     super(props);
     const docNameKeys = JSON.parse(localStorage.getItem(DOC_NAME_KEYS_LIST_LOCAL_STORAGE_KEY));
-    const docFileNameKeys = new SortedMap();
+    const docViewFileNameKeys = new SortedMap();
     for (const docNameKey of docNameKeys) {
       const docViewsStr = localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey);
-      const docViews = docViewsStr ? JSON.parse(docViewsStr) : {};
-      docFileNameKeys.add(SortedSet.from(Array.from(Object.keys(docViews))), docNameKey);
+      const docViews = docViewsStr ?
+        JSON.parse(docViewsStr) :
+        { [CUSTOM_VIEW_FILE_TYPE]: {}, [FILTER_VIEW_FILE_TYPE]: { viewTagFilters: {}, tagFilterViews: {} } };
+      docViewFileNameKeys.add(
+        {
+          [CUSTOM_VIEW_FILE_TYPE]: SortedSet.from(Object.keys(docViews[CUSTOM_VIEW_FILE_TYPE])),
+          [FILTER_VIEW_FILE_TYPE]: SortedSet.from(Object.keys(docViews[FILTER_VIEW_FILE_TYPE].viewTagFilters)),
+        },
+        docNameKey
+      );
     }
-    this.state = { docFileNameKeys: docFileNameKeys };
+    this.state = { docViewFileNameKeys: docViewFileNameKeys };
   };
 
   handleDocNameInputKeyPress = event => {
-    if (event.key === 'Enter') { this.handleLoadFile(null, SOURCE_FILE_NAME); }
-    if (event.key.length !== 1 || !this.DOC_FILE_NAME_KEY_CHAR_REGEX.test(event.key)) { event.preventDefault(); }
+    if (event.key === 'Enter') {
+      this.handleLoadFile({ docNameKey: null, fileNameKey: SOURCE_FILE_NAME_TYPE, fileType: SOURCE_FILE_NAME_TYPE });
+    }
+    if (event.key.length !== 1 || !DOC_FILE_NAME_KEY_CHAR_REGEX.test(event.key)) { event.preventDefault(); }
   };
 
   handleFileNameInputKeyPress = event => {
-    if (event.key === 'Enter') { this.handleLoadFile(this.props.docNameKey, null); }
-    if (event.key.length !== 1 || !this.DOC_FILE_NAME_KEY_CHAR_REGEX.test(event.key)) { event.preventDefault(); }
+    if (event.key === 'Enter') {
+      this.handleLoadFile({ docNameKey: this.props.docNameKey, fileNameKey: null, fileType: null });
+    }
+    if (event.key.length !== 1 || !DOC_FILE_NAME_KEY_CHAR_REGEX.test(event.key)) { event.preventDefault(); }
   };
 
-  handleLoadFile = (docNameKey, fileNameKey) => {
-    if (!docNameKey) { docNameKey = document.getElementById(this.DOC_NAME_KEY_INPUT_ID).value.trim(); }
-    if (!fileNameKey) { fileNameKey = document.getElementById(this.FILE_NAME_KEY_INPUT_ID).value.trim(); }
+  resetFileSearchBar = () => {
+    document.getElementById(DOC_NAME_KEY_INPUT_ID).value = this.props.docNameKey;
+    document.getElementById(FILE_NAME_KEY_INPUT_ID).value = this.props.fileNameKey;
+    return false;
+  }
+
+  checkFileSearchBar = (file, docViewFileNameKeys) => {
+    if (!file.docNameKey) { file['docNameKey'] = document.getElementById(DOC_NAME_KEY_INPUT_ID).value.trim(); }
+    if (!file.fileNameKey) { file['fileNameKey'] = document.getElementById(FILE_NAME_KEY_INPUT_ID).value.trim(); }
     if (
-      !docNameKey || !fileNameKey ||
-      (!this.state.docFileNameKeys.has(docNameKey) && fileNameKey !== SOURCE_FILE_NAME)
+      (file.docNameKey === this.props.docNameKey && file.fileNameKey === this.props.fileNameKey) ||
+      !file.docNameKey || !file.fileNameKey ||
+      (
+        file.fileNameKey !== SOURCE_FILE_NAME_TYPE && (
+          (docViewFileNameKeys && !docViewFileNameKeys.has(file.docNameKey)) ||
+          (!docViewFileNameKeys && !this.state.docViewFileNameKeys.has(file.docNameKey))
+        )
+      )
     ) {
-      document.getElementById(this.DOC_NAME_KEY_INPUT_ID).value = this.props.docNameKey;
-      document.getElementById(this.FILE_NAME_KEY_INPUT_ID).value = this.props.fileNameKey;
+      return this.resetFileSearchBar();
+    }
+    document.getElementById(DOC_NAME_KEY_INPUT_ID).value = file.docNameKey;
+    document.getElementById(FILE_NAME_KEY_INPUT_ID).value = file.fileNameKey;
+    return true;
+  }
+
+  doLoadFile = (file, tagFilters) => batch(() => {
+    this.props.setFile(file);
+    this.props.setTagFilters(tagFilters);
+  });
+
+  handleOverwriteFile = (file, docViewFileNameKeys) => {
+    if (!this.checkFileSearchBar(file)) { return; }
+    let newDocViewFileNameKeys = docViewFileNameKeys;
+    const tagFilters = { text: '', expr: null };
+    if (
+      (newDocViewFileNameKeys && !newDocViewFileNameKeys.has(file.docNameKey)) ||
+      (!newDocViewFileNameKeys && !this.state.docViewFileNameKeys.has(file.docNameKey))
+    ) {
+      if (this.props.docNameKey === DEFAULT_DOC_NAME_KEY) { return this.resetFileSearchBar(); }
+      if (!newDocViewFileNameKeys) { newDocViewFileNameKeys = SortedMap.from(this.state.docViewFileNameKeys); }
+      newDocViewFileNameKeys.add(newDocViewFileNameKeys.get(this.props.docNameKey), file.docNameKey);
+      newDocViewFileNameKeys.delete(this.props.docNameKey);
+      const docSourceStr = localStorage.getItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
+      if (docSourceStr) {
+        localStorage.setItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey, docSourceStr);
+        localStorage.removeItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
+      }
+      const docViewsStr = localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
+      if (docViewsStr) {
+        localStorage.setItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey, docViewsStr);
+        localStorage.removeItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
+      }
+      localStorage.setItem(
+        DOC_NAME_KEYS_LIST_LOCAL_STORAGE_KEY,
+        JSON.stringify(Array.from(newDocViewFileNameKeys.keys()))
+      );
+      this.setState({ docViewFileNameKeys: newDocViewFileNameKeys });
+    }
+    if (file.fileNameKey === SOURCE_FILE_NAME_TYPE || this.props.fileType === SOURCE_FILE_NAME_TYPE) {
+      if (this.props.fileType === SOURCE_FILE_NAME_TYPE && this.props.tagFiltersText) {
+        for (const viewFileType of [CUSTOM_VIEW_FILE_TYPE, FILTER_VIEW_FILE_TYPE]) {
+          if (
+            (
+              newDocViewFileNameKeys && newDocViewFileNameKeys.get(file.docNameKey)[viewFileType].has(file.fileNameKey)
+            ) ||
+            (
+              !newDocViewFileNameKeys &&
+              this.state.docViewFileNameKeys.get(file.docNameKey)[viewFileType].has(file.fileNameKey)
+            )
+          ) {
+            this.handleDeleteFile(
+              { docNameKey: file.docNameKey, fileNameKey: file.fileNameKey, fileType: viewFileType },
+              newDocViewFileNameKeys
+            );
+            break;
+          }
+        }
+        const docViewsStr = localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey);
+        const docViews = docViewsStr ?
+          JSON.parse(docViewsStr) :
+          { [CUSTOM_VIEW_FILE_TYPE]: {}, [FILTER_VIEW_FILE_TYPE]: { viewTagFilters: {}, tagFilterViews: {} } };
+        if (docViews[FILTER_VIEW_FILE_TYPE].tagFilterViews.hasOwnProperty(this.props.tagFiltersText)) {
+          this.handleDeleteFile(
+            {
+              docNameKey: file.docNameKey,
+              fileNameKey: docViews[FILTER_VIEW_FILE_TYPE].tagFilterViews[this.props.tagFiltersText],
+              fileType: FILTER_VIEW_FILE_TYPE,
+            },
+            newDocViewFileNameKeys
+          );
+        }
+      }
+      this.handleLoadFile(file, newDocViewFileNameKeys);
       return;
     }
-    document.getElementById(this.DOC_NAME_KEY_INPUT_ID).value = docNameKey;
-    document.getElementById(this.FILE_NAME_KEY_INPUT_ID).value = fileNameKey;
-    if (!this.state.docFileNameKeys.has(docNameKey)) {
-      const newDocFileNameKeys = SortedMap.from(this.state.docFileNameKeys);
-      newDocFileNameKeys.add(new SortedSet(), docNameKey);
-      localStorage.setItem(DOC_NAME_KEYS_LIST_LOCAL_STORAGE_KEY, JSON.stringify(Array.from(newDocFileNameKeys.keys())));
-      this.setState({ docFileNameKeys: newDocFileNameKeys });
-    } else if (fileNameKey !== SOURCE_FILE_NAME && !this.state.docFileNameKeys.get(docNameKey).has(fileNameKey)) {
-      const newDocFileNameKeys = SortedMap.from(this.state.docFileNameKeys);
-      newDocFileNameKeys.get(docNameKey).push(fileNameKey);
-      const docViewsStr = localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey);
-      const docViews = docViewsStr ? JSON.parse(docViewsStr) : {};
-      docViews[fileNameKey] = [];
-      localStorage.setItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey, JSON.stringify(docViews));
-      this.setState({ docFileNameKeys: newDocFileNameKeys });
+    if (!newDocViewFileNameKeys) { newDocViewFileNameKeys = SortedMap.from(this.state.docViewFileNameKeys); }
+    const docViews =
+      JSON.parse(localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey));
+    if (
+      this.props.fileType === CUSTOM_VIEW_FILE_TYPE ||
+      newDocViewFileNameKeys.get(file.docNameKey)[CUSTOM_VIEW_FILE_TYPE].has(file.fileNameKey)
+    ) {
+      if (this.props.fileType === CUSTOM_VIEW_FILE_TYPE) {
+        docViews[CUSTOM_VIEW_FILE_TYPE][file.fileNameKey] = docViews[CUSTOM_VIEW_FILE_TYPE][this.props.fileNameKey];
+      }
+      const removeFileNameKey =
+        this.props.fileType !== CUSTOM_VIEW_FILE_TYPE ? file.fileNameKey : this.props.fileNameKey;
+      delete docViews[CUSTOM_VIEW_FILE_TYPE][removeFileNameKey];
+      newDocViewFileNameKeys.get(file.docNameKey)[CUSTOM_VIEW_FILE_TYPE].delete(removeFileNameKey);
     }
-    batch(() => {
-      this.props.setFile({ docNameKey: docNameKey, fileNameKey: fileNameKey });
-      this.props.setTagFilters({ text: '', expr: null });
-    });
+    if (
+      this.props.fileType === FILTER_VIEW_FILE_TYPE ||
+      newDocViewFileNameKeys.get(file.docNameKey)[FILTER_VIEW_FILE_TYPE].has(file.fileNameKey)
+    ) {
+      if (newDocViewFileNameKeys.get(file.docNameKey)[FILTER_VIEW_FILE_TYPE].has(file.fileNameKey)) {
+        const removeViewTagFilters = docViews[FILTER_VIEW_FILE_TYPE].viewTagFilters[file.fileNameKey];
+        delete docViews[FILTER_VIEW_FILE_TYPE].tagFilterViews[removeViewTagFilters];
+      }
+      if (this.props.fileType === FILTER_VIEW_FILE_TYPE) {
+        docViews[FILTER_VIEW_FILE_TYPE].tagFilterViews[this.props.tagFiltersText] = file.fileNameKey;
+        docViews[FILTER_VIEW_FILE_TYPE].viewTagFilters[file.fileNameKey] = this.props.tagFiltersText;
+        tagFilters.text = this.props.tagFiltersText;
+        tagFilters.expr = this.props.tagFiltersExpr;
+      }
+      const removeFileNameKey =
+        this.props.fileType !== FILTER_VIEW_FILE_TYPE ? file.fileNameKey : this.props.fileNameKey;
+      delete docViews[FILTER_VIEW_FILE_TYPE].viewTagFilters[removeFileNameKey];
+      newDocViewFileNameKeys.get(file.docNameKey)[FILTER_VIEW_FILE_TYPE].delete(removeFileNameKey);
+    }
+    localStorage.setItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey, JSON.stringify(docViews));
+    newDocViewFileNameKeys.get(file.docNameKey)[this.props.fileType].push(file.fileNameKey);
+    this.setState({ docViewFileNameKeys: newDocViewFileNameKeys });
+    file.fileType = this.props.fileType;
+    this.doLoadFile(file, tagFilters);
   };
 
-  handleDelete = (docNameKey, fileNameKey) => {
-    if (docNameKey === this.props.docNameKey && fileNameKey === this.props.fileNameKey) { return; }
-    const newDocFileNameKeys = SortedMap.from(this.state.docFileNameKeys);
-    if (fileNameKey !== SOURCE_FILE_NAME) {
-      newDocFileNameKeys.get(docNameKey).delete(fileNameKey);
-      const docViews = JSON.parse(localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey));
-      delete docViews[fileNameKey];
-      localStorage.setItem(
-        DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey,
-        JSON.stringify(docViews),
+  handleLoadFile = (file, docViewFileNameKeys) => {
+    if (!this.checkFileSearchBar(file, docViewFileNameKeys)) { return; }
+    let newDocViewFileNameKeys = docViewFileNameKeys;
+    const tagFilters = { text: '', expr: null };
+    if (
+      (newDocViewFileNameKeys && !newDocViewFileNameKeys.has(file.docNameKey)) ||
+      (!newDocViewFileNameKeys && !this.state.docViewFileNameKeys.has(file.docNameKey))
+    ) {
+      if (!newDocViewFileNameKeys) { newDocViewFileNameKeys = SortedMap.from(this.state.docViewFileNameKeys); }
+      newDocViewFileNameKeys.add(
+        { [CUSTOM_VIEW_FILE_TYPE]: new SortedSet(), [FILTER_VIEW_FILE_TYPE]: new SortedSet() },
+        file.docNameKey
       );
-    } else {
-      newDocFileNameKeys.delete(docNameKey);
-      localStorage.removeItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey);
-      localStorage.removeItem(DOC_TAGS_LOCAL_STORAGE_KEY_PREFIX + docNameKey);
-      localStorage.removeItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey);
-      localStorage.setItem(DOC_NAME_KEYS_LIST_LOCAL_STORAGE_KEY, JSON.stringify(Array.from(newDocFileNameKeys.keys())));
+      localStorage.setItem(
+        DOC_NAME_KEYS_LIST_LOCAL_STORAGE_KEY,
+        JSON.stringify(Array.from(newDocViewFileNameKeys.keys()))
+      );
+      this.setState({ docViewFileNameKeys: newDocViewFileNameKeys });
     }
-    this.setState({ docFileNameKeys: newDocFileNameKeys });
+    if (
+      (
+        newDocViewFileNameKeys &&
+        newDocViewFileNameKeys.get(file.docNameKey)[FILTER_VIEW_FILE_TYPE].has(file.fileNameKey)
+      ) ||
+      (
+        !newDocViewFileNameKeys &&
+        this.state.docViewFileNameKeys.get(file.docNameKey)[FILTER_VIEW_FILE_TYPE].has(file.fileNameKey)
+      )
+    ) {
+      const docFilterViews = JSON.parse(
+        localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey)
+      )[FILTER_VIEW_FILE_TYPE];
+      tagFilters.text = docFilterViews.viewTagFilters[file.fileNameKey];
+      tagFilters.expr = parseTagFilters(tagFilters.text);
+      file.fileType = FILTER_VIEW_FILE_TYPE;
+    } else if (
+      (
+        newDocViewFileNameKeys &&
+        newDocViewFileNameKeys.get(file.docNameKey)[CUSTOM_VIEW_FILE_TYPE].has(file.fileNameKey)
+      ) ||
+      (
+        !newDocViewFileNameKeys &&
+        this.state.docViewFileNameKeys.get(file.docNameKey)[CUSTOM_VIEW_FILE_TYPE].has(file.fileNameKey)
+      )
+    ) {
+      file.fileType = CUSTOM_VIEW_FILE_TYPE;
+    } else if (file.fileNameKey === SOURCE_FILE_NAME_TYPE) { file.fileType = SOURCE_FILE_NAME_TYPE; }
+    else {
+      if (!newDocViewFileNameKeys) { newDocViewFileNameKeys = SortedMap.from(this.state.docViewFileNameKeys); }
+      const docViewsStr = localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey);
+      const docViews = docViewsStr ?
+        JSON.parse(docViewsStr) :
+        { [CUSTOM_VIEW_FILE_TYPE]: {}, [FILTER_VIEW_FILE_TYPE]: { viewTagFilters: {}, tagFilterViews: {} } };
+      if (!this.props.tagFiltersText) {
+        docViews[CUSTOM_VIEW_FILE_TYPE][file.fileNameKey] = [];
+        file.fileType = CUSTOM_VIEW_FILE_TYPE;
+      } else {
+        if (docViews[FILTER_VIEW_FILE_TYPE].tagFilterViews.hasOwnProperty(this.props.tagFiltersText)) {
+          return this.resetFileSearchBar();
+        }
+        docViews[FILTER_VIEW_FILE_TYPE].tagFilterViews[this.props.tagFiltersText] = file.fileNameKey;
+        docViews[FILTER_VIEW_FILE_TYPE].viewTagFilters[file.fileNameKey] = this.props.tagFiltersText;
+        tagFilters.text = this.props.tagFiltersText;
+        tagFilters.expr = this.props.tagFiltersExpr;
+        file.fileType = FILTER_VIEW_FILE_TYPE;
+      }
+      newDocViewFileNameKeys.get(file.docNameKey)[file.fileType].push(file.fileNameKey);
+      localStorage.setItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey, JSON.stringify(docViews));
+      this.setState({ docViewFileNameKeys: newDocViewFileNameKeys });
+    }
+    this.doLoadFile(file, tagFilters);
+  };
+
+  handleDeleteFile = (file, docViewFileNameKeys) => {
+    if (file.docNameKey === this.props.docNameKey && file.fileNameKey === this.props.fileNameKey) { return; }
+    const newDocViewFileNameKeys =
+      docViewFileNameKeys ? docViewFileNameKeys : SortedMap.from(this.state.docViewFileNameKeys);
+    if (file.fileNameKey !== SOURCE_FILE_NAME_TYPE) {
+      newDocViewFileNameKeys.get(file.docNameKey)[file.fileType].delete(file.fileNameKey);
+      const docViews =
+        JSON.parse(localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey));
+      if (file.fileType !== CUSTOM_VIEW_FILE_TYPE) {
+        const removeViewTagFilters = docViews[FILTER_VIEW_FILE_TYPE].viewTagFilters[file.fileNameKey];
+        delete docViews[FILTER_VIEW_FILE_TYPE].tagFilterViews[removeViewTagFilters];
+        delete docViews[FILTER_VIEW_FILE_TYPE].viewTagFilters[file.fileNameKey];
+      } else { delete docViews[CUSTOM_VIEW_FILE_TYPE][file.fileNameKey]; }
+      localStorage.setItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey, JSON.stringify(docViews));
+    } else {
+      newDocViewFileNameKeys.delete(file.docNameKey);
+      localStorage.removeItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey);
+      localStorage.removeItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + file.docNameKey);
+      localStorage.setItem(
+        DOC_NAME_KEYS_LIST_LOCAL_STORAGE_KEY,
+        JSON.stringify(Array.from(newDocViewFileNameKeys.keys()))
+      );
+    }
+    this.setState({ docViewFileNameKeys: newDocViewFileNameKeys });
   };
 
   componentDidUpdate = prevProps => {
     if (this.props.docNameKey !== prevProps.docNameKey) {
-      document.getElementById(this.DOC_NAME_KEY_INPUT_ID).value = this.props.docNameKey;
+      document.getElementById(DOC_NAME_KEY_INPUT_ID).value = this.props.docNameKey;
     }
     if (this.props.fileNameKey !== prevProps.fileNameKey) {
-      document.getElementById(this.FILE_NAME_KEY_INPUT_ID).value = this.props.fileNameKey;
+      document.getElementById(FILE_NAME_KEY_INPUT_ID).value = this.props.fileNameKey;
     }
   };
 
+  ViewTypeListItem = ({ docNameKey, fileType, viewFileNameKeys }) => (
+    <li key={docNameKey + fileType}>{fileType} views ({viewFileNameKeys.length}):
+      <ul>
+        {viewFileNameKeys.map(viewFileNameKey => (
+          <li key={docNameKey + '.' + viewFileNameKey + fileType}>
+            <button
+                type="button"
+                onClick={() => this.handleLoadFile({ docNameKey, fileNameKey: viewFileNameKey, fileType })}>
+              {viewFileNameKey}
+            </button>
+            <button
+                type="button"
+                onClick={() => this.handleDeleteFile({ docNameKey, fileNameKey: viewFileNameKey, fileType })}>
+              {'<'}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </li>
+  );
+
   DocListItem = ({ docNameKey, viewFileNameKeys }) => {
-    const docSourceNameKeyButton =
-      (<button type="button" onClick={() => this.handleLoadFile(docNameKey, SOURCE_FILE_NAME)}>{docNameKey}</button>);
-    const docViewFileNameKeysListItems = viewFileNameKeys.map(viewFileNameKey => (
-      <li key={viewFileNameKey}>
-        <button type="button" onClick={() => this.handleLoadFile(docNameKey, viewFileNameKey)}>
-          {viewFileNameKey}
-        </button>
-        <button type="button" onClick={() => this.handleDelete(docNameKey, viewFileNameKey)}>-</button>
-      </li>
-    ));
+    const docSourceNameKeyButton = (
+      <button
+          type="button"
+          onClick={() => this.handleLoadFile(
+            { docNameKey, fileNameKey: SOURCE_FILE_NAME_TYPE, fileType: SOURCE_FILE_NAME_TYPE }
+          )}>
+        {docNameKey}
+      </button>
+    );
+    const viewFileNameKeysList = (
+      <ul>
+        {[CUSTOM_VIEW_FILE_TYPE, FILTER_VIEW_FILE_TYPE].map(viewFileType => (
+          <this.ViewTypeListItem
+            key={docNameKey + viewFileType}
+            docNameKey={docNameKey}
+            fileType={viewFileType}
+            viewFileNameKeys={viewFileNameKeys[viewFileType]}
+          />
+        ))}
+      </ul>
+    );
     if (docNameKey !== DEFAULT_DOC_NAME_KEY) {
       return (
         <li key={docNameKey}>
           {docSourceNameKeyButton}
-          <button type="button" onClick={() => this.handleDelete(docNameKey, SOURCE_FILE_NAME)}>-</button>
-          <ul>{docViewFileNameKeysListItems}</ul>
+          <button
+              type="button"
+              onClick={() => this.handleDeleteFile(
+                { docNameKey, fileNameKey: SOURCE_FILE_NAME_TYPE, fileType: SOURCE_FILE_NAME_TYPE }
+              )}>
+            {'<'}
+          </button>
+          {viewFileNameKeysList}
         </li>
       );
     }
-    return (<li key={docNameKey}>{docSourceNameKeyButton}<ul>{docViewFileNameKeysListItems}</ul></li>);
+    return (<li key={docNameKey}>{docSourceNameKeyButton}{viewFileNameKeysList}</li>);
   };
 
   render = () => {
@@ -133,41 +368,67 @@ class Navigator extends React.Component {
         <div className="SearchBar">
           <input
             type="text"
-            id={this.DOC_NAME_KEY_INPUT_ID}
-            list={this.DOC_NAME_KEY_LIST_ID}
+            id={DOC_NAME_KEY_INPUT_ID}
+            list={DOC_NAME_KEY_LIST_ID}
             placeholder="doc name/key"
             defaultValue={this.props.docNameKey}
             onKeyPress={this.handleDocNameInputKeyPress}
           />
-          <datalist id={this.DOC_NAME_KEY_LIST_ID}>
+          <datalist id={DOC_NAME_KEY_LIST_ID}>
             {
-              Array.from(this.state.docFileNameKeys.keys()).map(
+              Array.from(this.state.docViewFileNameKeys.keys()).map(
                 docNameKey => <option key={docNameKey}>{docNameKey}</option>
               )
             }
           </datalist>
-          <button type="button" onClick={() => this.handleLoadFile(null, SOURCE_FILE_NAME)}>></button>
+          <button
+              type="button"
+              onClick={() => this.handleOverwriteFile(
+                { docNameKey: null, fileNameKey: SOURCE_FILE_NAME_TYPE, fileType: SOURCE_FILE_NAME_TYPE }
+              )}>
+            ^
+          </button>
+          <button
+            type="button"
+            onClick={() => this.handleLoadFile(
+              { docNameKey: null, fileNameKey: SOURCE_FILE_NAME_TYPE, fileType: SOURCE_FILE_NAME_TYPE }
+            )}>
+            >
+          </button>
           <input
             type="text"
-            id={this.FILE_NAME_KEY_INPUT_ID}
-            list={this.FILE_NAME_KEY_LIST_ID}
+            id={FILE_NAME_KEY_INPUT_ID}
+            list={FILE_NAME_KEY_LIST_ID}
             placeholder="file name/key"
             defaultValue={this.props.fileNameKey}
             onKeyPress={this.handleFileNameInputKeyPress}
           />
-          <datalist id={this.FILE_NAME_KEY_LIST_ID}>
-            <option key={SOURCE_FILE_NAME}>{SOURCE_FILE_NAME}</option>
+          <datalist id={FILE_NAME_KEY_LIST_ID}>
+            <option key={SOURCE_FILE_NAME_TYPE}>{SOURCE_FILE_NAME_TYPE}</option>
             {
-              this.state.docFileNameKeys.get(this.props.docNameKey).map(
-                viewFileNameKey => <option key={viewFileNameKey}>{viewFileNameKey}</option>
-              )
+              this.state.docViewFileNameKeys.get(this.props.docNameKey)[FILTER_VIEW_FILE_TYPE]
+                .concat(this.state.docViewFileNameKeys.get(this.props.docNameKey)[CUSTOM_VIEW_FILE_TYPE])
+                .map(viewFileNameKey => <option key={viewFileNameKey}>{viewFileNameKey}</option>)
             }
           </datalist>
-          <button type="button" onClick={() => this.handleLoadFile(this.props.docNameKey, null)}>></button>
+          <button
+              type="button"
+              onClick={() => this.handleOverwriteFile(
+                { docNameKey: this.props.docNameKey, fileNameKey: null, fileType: null }
+              )}>
+            ^
+          </button>
+          <button
+            type="button"
+            onClick={() => this.handleLoadFile(
+              { docNameKey: null, fileNameKey: SOURCE_FILE_NAME_TYPE, fileType: SOURCE_FILE_NAME_TYPE }
+            )}>
+            >
+          </button>
         </div>
         <ul className="Navigator">
           {
-            this.state.docFileNameKeys.map(
+            this.state.docViewFileNameKeys.map(
               (viewFileNameKeys, docNameKey) =>
                 <this.DocListItem key={docNameKey} docNameKey={docNameKey} viewFileNameKeys={viewFileNameKeys} />
             )
@@ -179,9 +440,15 @@ class Navigator extends React.Component {
 }
 
 export default connect(
-  state => ({ docNameKey: state.file.docNameKey, fileNameKey: state.file.fileNameKey }),
+  state => ({
+    docNameKey: state.file.docNameKey,
+    fileNameKey: state.file.fileNameKey,
+    fileType: state.file.fileType,
+    tagFiltersText: state.tagFilters.text,
+    tagFiltersExpr: state.tagFilters.expr,
+  }),
   dispatch => ({
     setFile: file => dispatch(Actions.setFile(file)),
     setTagFilters: tagFilters => dispatch(Actions.setTagFilters(tagFilters)),
-  }),
+  })
 )(Navigator);
