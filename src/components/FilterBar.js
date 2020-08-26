@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import Actions from '../actions';
-import {parse as parseTagFilters} from '../lib/TagFilters';
+import {parse as parseTagFilters} from '../lib/TagFiltersExpression';
 import {SOURCE_FILE_NAME_TYPE} from "../reducers/SetFile";
 
 const TAG_FILTERS_INPUT_ID = 'tag_filters_input';

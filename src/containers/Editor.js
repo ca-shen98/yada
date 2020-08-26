@@ -2,6 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {debounce} from 'lodash';
 import RichMarkdownEditor from 'rich-markdown-editor';
+import TagFilteringEditorExtension from '../lib/TagFilteringEditorExtension';
 import FilterBar from '../components/FilterBar';
 import {
   DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX,
@@ -11,6 +12,7 @@ import {
 } from '../reducers/SetFile';
 
 class Editor extends React.Component {
+  tagFilteringExtension = new TagFilteringEditorExtension();
 
   static updateDocBlocks = (parent, childIdx, node, updatedDocTags) => {
     if (node.hasOwnProperty('attrs') && node.attrs.hasOwnProperty('tags')) {
@@ -72,6 +74,20 @@ class Editor extends React.Component {
     );
   }, 250);
 
+  handleTagFiltersChange = () => {
+    const transaction = this.tagFilteringExtension.editor.view.state.tr.setMeta(
+      TagFilteringEditorExtension.pluginKey,
+      this.props.tagFiltersExpr
+    );
+    this.tagFilteringExtension.editor.view.dispatch(transaction);
+  }
+
+  componentDidMount = () => this.handleTagFiltersChange();
+
+  componentDidUpdate = prevProps => {
+    if (this.props.tagFiltersText !== prevProps.tagFiltersText) { this.handleTagFiltersChange(); }
+  };
+
   render = () => {
     const docSourceStr = localStorage.getItem(DOC_SOURCE_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + this.props.docNameKey);
     const docSource = docSourceStr ? JSON.parse(docSourceStr) : {};
@@ -96,9 +112,9 @@ class Editor extends React.Component {
             key={this.props.docNameKey + '.' + this.props.fileNameKey + this.props.fileType}
             defaultValue={value}
             jsonStrValue={!(!value)}
-            tagFilters={this.props.tagFiltersExpr}
             readOnly={this.props.readOnly}
             onChange={this.handleEditorChange}
+            extensions={[this.tagFilteringExtension]}
           />
         </div>
       </div>
@@ -111,6 +127,7 @@ export default connect(
     docNameKey: state.file.docNameKey,
     fileNameKey: state.file.fileNameKey,
     fileType: state.file.fileType,
+    tagFiltersText: state.tagFilters.text,
     tagFiltersExpr: state.tagFilters.expr,
     readOnly: state.readOnly,
   })

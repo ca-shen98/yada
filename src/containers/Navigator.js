@@ -12,7 +12,7 @@ import {
 } from '../reducers/SetFile';
 import SortedMap from 'collections/sorted-map';
 import SortedSet from 'collections/sorted-set';
-import {parse as parseTagFilters} from '../lib/TagFilters';
+import {parse as parseTagFilters} from '../lib/TagFiltersExpression';
 
 const DOC_NAME_KEY_INPUT_ID = 'doc_name_key_input';
 const DOC_NAME_KEY_LIST_ID = 'doc_name_key_list';
