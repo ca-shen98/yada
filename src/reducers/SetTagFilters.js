@@ -1,5 +1,5 @@
 import Actions from '../actions';
-import {parse as parseTagFilters} from '../lib/TagFiltersExpression';
+import {parse as parseTagFilters} from '../Tagging/lib/TagFilteringExprGrammar';
 
 export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = 'initialTagFilters';
 
