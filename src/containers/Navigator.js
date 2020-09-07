@@ -12,7 +12,8 @@ import {
 } from '../reducers/SetFile';
 import SortedMap from 'collections/sorted-map';
 import SortedSet from 'collections/sorted-set';
-import {parse as parseTagFilters} from '../lib/TagFiltersExpression';
+import {parse as parseTagFilters} from '../Tagging/lib/TagFilteringExprGrammar';
+import {INITIAL_SELECTION_LOCAL_STORAGE_KEY} from '../Tagging/extensions/BlockTagging';
 
 const DOC_NAME_KEY_INPUT_ID = 'doc_name_key_input';
 const DOC_NAME_KEY_LIST_ID = 'doc_name_key_list';
@@ -30,7 +31,7 @@ class Navigator extends React.Component {
       const docViewsStr = localStorage.getItem(DOC_VIEWS_NAME_KEY_LOCAL_STORAGE_KEY_PREFIX + docNameKey);
       const docViews = docViewsStr ?
         JSON.parse(docViewsStr) :
-        { [CUSTOM_VIEW_FILE_TYPE]: {}, [FILTER_VIEW_FILE_TYPE]: { viewTagFilters: {}, tagFilterViews: {} } };
+        {[CUSTOM_VIEW_FILE_TYPE]: {}, [FILTER_VIEW_FILE_TYPE]: {viewTagFilters: {}, tagFilterViews: {}}};
       docViewFileNameKeys.add(
         {
           [CUSTOM_VIEW_FILE_TYPE]: SortedSet.from(Object.keys(docViews[CUSTOM_VIEW_FILE_TYPE])),
@@ -39,21 +40,25 @@ class Navigator extends React.Component {
         docNameKey
       );
     }
-    this.state = { docViewFileNameKeys: docViewFileNameKeys };
+    this.state = {docViewFileNameKeys: docViewFileNameKeys};
   };
 
   handleDocNameInputKeyPress = event => {
     if (event.key === 'Enter') {
-      this.handleLoadFile({ docNameKey: null, fileNameKey: SOURCE_FILE_NAME_TYPE, fileType: SOURCE_FILE_NAME_TYPE });
+      this.handleLoadFile({docNameKey: null, fileNameKey: SOURCE_FILE_NAME_TYPE, fileType: SOURCE_FILE_NAME_TYPE});
     }
-    if (event.key.length !== 1 || !DOC_FILE_NAME_KEY_CHAR_REGEX.test(event.key)) { event.preventDefault(); }
+    if (event.key.length !== 1 || !DOC_FILE_NAME_KEY_CHAR_REGEX.test(event.key)) {
+      event.preventDefault();
+    }
   };
 
   handleFileNameInputKeyPress = event => {
     if (event.key === 'Enter') {
-      this.handleLoadFile({ docNameKey: this.props.docNameKey, fileNameKey: null, fileType: null });
+      this.handleLoadFile({docNameKey: this.props.docNameKey, fileNameKey: null, fileType: null});
     }
-    if (event.key.length !== 1 || !DOC_FILE_NAME_KEY_CHAR_REGEX.test(event.key)) { event.preventDefault(); }
+    if (event.key.length !== 1 || !DOC_FILE_NAME_KEY_CHAR_REGEX.test(event.key)) {
+      event.preventDefault();
+    }
   };
 
   resetFileSearchBar = () => {
@@ -63,8 +68,12 @@ class Navigator extends React.Component {
   }
 
   checkFileSearchBar = (file, docViewFileNameKeys) => {
-    if (!file.docNameKey) { file['docNameKey'] = document.getElementById(DOC_NAME_KEY_INPUT_ID).value.trim(); }
-    if (!file.fileNameKey) { file['fileNameKey'] = document.getElementById(FILE_NAME_KEY_INPUT_ID).value.trim(); }
+    if (!file.docNameKey) {
+      file['docNameKey'] = document.getElementById(DOC_NAME_KEY_INPUT_ID).value.trim();
+    }
+    if (!file.fileNameKey) {
+      file['fileNameKey'] = document.getElementById(FILE_NAME_KEY_INPUT_ID).value.trim();
+    }
     if (
       (file.docNameKey === this.props.docNameKey && file.fileNameKey === this.props.fileNameKey) ||
       !file.docNameKey || !file.fileNameKey ||
@@ -82,10 +91,14 @@ class Navigator extends React.Component {
     return true;
   }
 
-  doLoadFile = (file, tagFilters) => batch(() => {
-    this.props.setFile(file);
-    this.props.setTagFilters(tagFilters);
-  });
+  doLoadFile = (file, tagFilters) => {
+    batch(() => {
+      this.props.setFile(file);
+      localStorage.removeItem(INITIAL_SELECTION_LOCAL_STORAGE_KEY);
+      this.props.setReadOnly(file.fileType !== SOURCE_FILE_NAME_TYPE);
+      this.props.setTagFilters(tagFilters);
+    });
+  }
 
   handleOverwriteFile = (file, docViewFileNameKeys) => {
     if (!this.checkFileSearchBar(file)) { return; }
@@ -449,6 +462,7 @@ export default connect(
   }),
   dispatch => ({
     setFile: file => dispatch(Actions.setFile(file)),
+    setReadOnly: readOnly => dispatch(Actions.setReadOnly(readOnly)),
     setTagFilters: tagFilters => dispatch(Actions.setTagFilters(tagFilters)),
   })
 )(Navigator);

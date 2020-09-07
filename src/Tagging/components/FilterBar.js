@@ -1,8 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import Actions from '../actions';
-import {parse as parseTagFilters} from '../lib/TagFiltersExpression';
-import {SOURCE_FILE_NAME_TYPE} from "../reducers/SetFile";
+import Actions from '../../actions';
+import {parse as parseTagFilters} from '../lib/TagFilteringExprGrammar';
+import {SOURCE_FILE_NAME_TYPE, FILTER_VIEW_FILE_TYPE} from '../../reducers/SetFile';
 
 const TAG_FILTERS_INPUT_ID = 'tag_filters_input';
 
@@ -11,23 +11,21 @@ class FilterBar extends React.Component {
 
   handleApplyTagFilters = () => {
     const tagFiltersInput = document.getElementById(TAG_FILTERS_INPUT_ID).value.trim();
-    if (tagFiltersInput === this.state.tagFiltersText) { return; } // don't need to re-apply
+    if (tagFiltersInput === this.state.tagFiltersText) { return; }
     let tagFiltersExpr = null;
     if (tagFiltersInput) {
       tagFiltersExpr = parseTagFilters(tagFiltersInput);
-      if (!tagFiltersExpr) { // if invalid expr, reset the input value to the current valid tag filters text state
+      if (!tagFiltersExpr) {
         document.getElementById(TAG_FILTERS_INPUT_ID).value = this.state.tagFiltersText;
         return;
       }
     }
     this.props.setTagFilters({ text: tagFiltersInput, expr: tagFiltersExpr });
-    // state set in componentDidUpdate
   };
 
   handleTagFiltersKeyPress = event => { if (event.key === 'Enter') { this.handleApplyTagFilters(); } };
 
   handleToggleReadOnly = () => {
-    // currently the prop is the previous value, before toggling
     document.getElementById(TAG_FILTERS_INPUT_ID).value = this.props.readOnly ? '' : this.state.tagFiltersText;
     this.handleApplyTagFilters();
     this.props.setReadOnly(!this.props.readOnly);
@@ -61,7 +59,10 @@ class FilterBar extends React.Component {
             onClick={this.handleApplyTagFilters}>
           Apply TagFilters
         </button>
-        <button type="button" onClick={this.handleToggleReadOnly}>
+        <button
+            type="button"
+            disabled={this.props.fileType === FILTER_VIEW_FILE_TYPE}
+            onClick={this.handleToggleReadOnly}>
           Make {this.props.readOnly ? 'Editable' : 'ReadOnly'}
         </button>
       </div>
