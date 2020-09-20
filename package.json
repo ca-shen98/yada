@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^1.1.0",
+    "axios": "^0.20.0",
     "bootstrap": "^4.5.0",
     "collections": "^5.1.11",
     "js-cookie": "^2.2.1",

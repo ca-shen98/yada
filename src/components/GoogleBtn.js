@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import Cookies from 'js-cookie'
+import {loginBackend} from "../backend/yaas";
 
 const CLIENT_ID = '709358329925-gic89ini15sgaenfrta1gshej1ik72jg.apps.googleusercontent.com';
 
@@ -16,11 +17,21 @@ class GoogleBtn extends Component {
 	}
 	
 	login = (response) => {
-		const tokenObj = response.tokenObj
+		const tokenObj = response.tokenObj;
+		const profileObj = response.profileObj;
 		if(tokenObj){
-			const expiry = new Date(tokenObj.expires_at)
-			Cookies.set('access_token', tokenObj.id_token, { expires: expiry })
-			this.props.login(true);
+			loginBackend(profileObj.name, profileObj.email, tokenObj.id_token).then(
+				ok => {
+					if (ok) {
+						const expiry = new Date(tokenObj.expires_at)
+						Cookies.set('access_token', tokenObj.id_token, { expires: expiry })
+						this.props.login(true);
+					} else {
+						// failed to login
+						this.props.login(false);
+					}
+				}
+			);
 		}
 	}
 	
