@@ -55,13 +55,11 @@ export async function loginBackend(name, email, token) {
             'Content-Type': 'application/json',
             'Set-Cookie': `token=${token}`
             },
-        credentials: 'include',
         body: JSON.stringify({ name: name, email: email, token: token })
     };
-    const response = await fetch(SERVER_URL + "register_user", requestOptions);
-    // const response = await axios.post(SERVER_URL + "register_user", requestOptions, {
-    //     withCredentials: true
-    // });
+    const response = await axios.post(SERVER_URL + "register_user", requestOptions, {
+        withCredentials: true
+    });
     
     const data = await response.json();
     console.log(data);
