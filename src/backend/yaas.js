@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 let SERVER_URL = "https://yaas.azurewebsites.net/";
 
 if (process.env.NODE_ENV === "development"){
@@ -44,4 +46,22 @@ export async function putDocument(documentJSON, docID) {
     if (response.ok) {
         alert("Document Saved Successfully");
     }
+}
+
+export async function loginBackend(name, email, token) {
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Set-Cookie': `token=${token}`
+            },
+        body: JSON.stringify({ name: name, email: email, token: token })
+    };
+    const response = await axios.post(SERVER_URL + "register_user", requestOptions, {
+        withCredentials: true
+    });
+    
+    const data = await response.json();
+    console.log(data);
+    return response.ok;
 }
