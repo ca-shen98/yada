@@ -109,6 +109,16 @@ class TagEditor extends React.Component {
 		this.setState(newState);
 	}
 	
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		if (prevProps.tagsInView !== this.props.tagsInView) {
+			const tagsInView = new Set(this.props.tagsInView);
+			const availableTags = this.props.allTags.filter(t => !tagsInView.has(t));
+			const newState = Object.assign({}, this.state);
+			newState.columns.tags_in_view.tagIds = tagsInView;
+			newState.columns.tags_available.tagIds = availableTags;
+			this.setState(newState);
+		}
+	}
 	
 	render = () => {
 		return (

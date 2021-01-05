@@ -31,13 +31,16 @@ class Card extends React.Component {
 				className="BootstrapCard"
 				onClick={this.handleClick}
 			>
-				<RichMarkdownEditor
-					className="Card"
-					readOnly={true}
-					dark={this.props.editorDarkMode}
-					key={`card${key}`}
-					setJSON={JSON.stringify(json)}
-				/>
+				{
+					json &&
+					<RichMarkdownEditor
+						className="Card"
+						readOnly={true}
+						dark={this.props.editorDarkMode}
+						key={`card${key}`}
+						setJSON={JSON.stringify(json)}
+					/>
+				}
 			</BootstrapCard>
 		);
 	}
