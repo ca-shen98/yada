@@ -1,6 +1,8 @@
 import axios from 'axios';
+import Cookies from 'js-cookie'
 
 let SERVER_URL = "https://yaas.azurewebsites.net/";
+let CARD_VIEW_NAME = "cards";
 
 if (process.env.NODE_ENV === "development"){
     SERVER_URL = "http://localhost:5000/";
@@ -66,7 +68,16 @@ export async function loginBackend(name, email, token) {
 
 export async function getCardView(docID, viewID) {
     try {
-        const response = await fetchWithTimeout(`${SERVER_URL}query?docID=${docID}&viewID=${viewID}`);
+        // const response = await fetchWithTimeout(`${SERVER_URL}view?docID=${docID}&viewID=${viewID}&viewName=${CARD_VIEW_NAME}`);
+        const token = Cookies.get('access_token');
+        const response = await fetchWithTimeout(`${SERVER_URL}view?docID=${docID}&viewID=${viewID}&viewName=textView1`, {
+          method: 'GET',
+          headers: new Headers({
+              'Content-Type': 'application/json',
+              'Set-Cookie': `token=${token}`
+            })
+        });
+        console.log(response);
         return await response.json();
     } catch (err) {
         const front_1 = {

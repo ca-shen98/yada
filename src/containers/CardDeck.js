@@ -57,7 +57,7 @@ class CardDeck extends React.Component {
 	}
 	
 	componentDidMount(){
-		getCardView(1, 1)
+		getCardView(427, 1234)
 			.then((cardView) => {
 				this.setState({tags: cardView.tags, allTags: cardView.allTags});
 				this.props.setTagsInView(cardView.tagsInView);
