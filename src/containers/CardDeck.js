@@ -58,7 +58,7 @@ class CardDeck extends React.Component {
 	}
 	
 	componentDidMount(){
-		getCardView(427, 1234)
+		getCardView(438, 1)
 			.then((results) => {
 				const currentViewData = results[0];
 				const allTagData = results[1];
