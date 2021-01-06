@@ -30,7 +30,8 @@ class CardDeck extends React.Component {
 	}
 	
 	constructDoc = (tagId) => {
-		console.log(this.state.tags)
+		console.log(this.state.tags);
+		console.log(tagId);
 		const node = this.state.tags[tagId]["content"]
 		return {
 			"doc": {
@@ -54,18 +55,39 @@ class CardDeck extends React.Component {
 		} else {
 			cardContent["back"] = null;
 		}
+		console.log(cardContent);
 		return <Card content={cardContent}/>;
 	}
 	
 	componentDidMount(){
 		getCardView(438, 1)
 			.then((results) => {
+				// tags: {
+				// 	'uuid1': {"id": "uuid1", "name": "question", "content": front_1},
+				// 	'uuid2': {"id": "uuid2", "name": "answer",   "content": back_1},
+				// 	'uuid3': {"id": "uuid3", "name": "question", "content": front_2},
+				// 	'uuid4': {"id": "uuid4", "name": "answer",   "content": back_2},
+				//     },
+				//     tagsInView: ["uuid1", "uuid2"],
+				//     allTags: allTags
+
+				// [
+				// 	{
+				// 	    "type": "text",
+				// 	    "text": "How do you print \"Hello World\" in Python3?"
+				// 	}
+				//     ]
+
 				const currentViewData = results[0];
 				const allTagData = results[1];
 				console.log(currentViewData);
 				console.log(allTagData);
-				this.setState({tags: currentViewData, allTags: allTagData});
-				this.props.setTagsInView(allTagData);
+				this.setState({tags: allTagData.items, allTags: Object.keys(allTagData.items)});
+				this.props.setTagsInView(currentViewData.tagIDs);
+
+				// tags: items
+				// allTags: list of all tag ids
+				// setTagsInView(currentViewData.tagIDs)
 			});
 		document.addEventListener('keydown',this.keydownHandler);
 	}
@@ -95,7 +117,10 @@ class CardDeck extends React.Component {
 					</Row>
 				);
 			}
-			
+			console.log("STATE");
+			console.log(this.state);
+			console.log("TAGS IN VIEW")
+			console.log(this.props.tagsInView);
 			return (
 				<Container>
 					<TagEditor tags={this.state.tags} tagsInView={this.props.tagsInView} allTags={this.state.allTags}/>

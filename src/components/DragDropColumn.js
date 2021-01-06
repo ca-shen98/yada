@@ -14,9 +14,9 @@ class Tag extends React.Component {
 		`;
 		const TagId = styled.h5``;
 		const Content = styled.div``
-		
+		console.log(this.props.tagInfo);
 		return (
-			<Draggable draggableId={this.props.tagInfo.id} index={this.props.index}>
+			<Draggable draggableId={this.props.tagInfo.id.toString()} index={this.props.index}>
 				{(provided, snapshot) => (
 					<Container
 						ref={provided.innerRef}
@@ -24,7 +24,7 @@ class Tag extends React.Component {
 						{...provided.dragHandleProps}
 						isDragging={snapshot.isDragging}
 					>
-						<TagId>{this.props.tagInfo.name}</TagId>
+						<TagId>{"this.props.tagInfo.name"}</TagId>
 						<Content>{this.props.tagInfo.preview}</Content>
 					</Container>
 				)}
