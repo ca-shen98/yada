@@ -30,6 +30,7 @@ class CardDeck extends React.Component {
 	}
 	
 	constructDoc = (tagId) => {
+		console.log(this.state.tags)
 		const node = this.state.tags[tagId]["content"]
 		return {
 			"doc": {
@@ -58,9 +59,13 @@ class CardDeck extends React.Component {
 	
 	componentDidMount(){
 		getCardView(427, 1234)
-			.then((cardView) => {
-				this.setState({tags: cardView.tags, allTags: cardView.allTags});
-				this.props.setTagsInView(cardView.tagsInView);
+			.then((results) => {
+				const currentViewData = results[0];
+				const allTagData = results[1];
+				console.log(currentViewData);
+				console.log(allTagData);
+				this.setState({tags: currentViewData, allTags: allTagData});
+				this.props.setTagsInView(allTagData);
 			});
 		document.addEventListener('keydown',this.keydownHandler);
 	}

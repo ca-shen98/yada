@@ -65,20 +65,30 @@ export async function loginBackend(name, email, token) {
     console.log(data);
     return true;
 }
-
-export async function getCardView(docID, viewID) {
+//TODO: create our own request wrapper that includes token & common headers
+export async function getCardView(docID, viewID) { // TODO: rename
     try {
         // const response = await fetchWithTimeout(`${SERVER_URL}view?docID=${docID}&viewID=${viewID}&viewName=${CARD_VIEW_NAME}`);
         const token = Cookies.get('access_token');
-        const response = await fetchWithTimeout(`${SERVER_URL}view?docID=${docID}&viewID=${viewID}&viewName=textView1`, {
+        const current_view_data = await fetchWithTimeout(`${SERVER_URL}view?docID=${docID}&viewID=${viewID}&viewName=textView1`, {
           method: 'GET',
           headers: new Headers({
               'Content-Type': 'application/json',
               'Set-Cookie': `token=${token}`
             })
         });
-        console.log(response);
-        return await response.json();
+        const all_tag_data = await fetchWithTimeout(`${SERVER_URL}tags?docID=${docID}`, {
+            method: 'GET',
+            headers: new Headers({
+                'Content-Type': 'application/json',
+                'Set-Cookie': `token=${token}`
+              })
+          });
+        const view_json = await current_view_data.json();
+        const tags_json = await all_tag_data.json();
+        console.log(view_json);
+        console.log(tags_json);
+        return [view_json, tags_json];
     } catch (err) {
         const front_1 = {
             "type": "heading",
