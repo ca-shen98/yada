@@ -86,8 +86,6 @@ export async function getCardView(docID, viewID) { // TODO: rename
           });
         const view_json = await current_view_data.json();
         const tags_json = await all_tag_data.json();
-        console.log(view_json);
-        console.log(tags_json);
         return [view_json, tags_json];
     } catch (err) {
         const front_1 = {

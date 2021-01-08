@@ -13,8 +13,7 @@ class CardDeck extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			tags: null,
-			allTags: []
+			allTagsData: null,
 		};
 	}
 	
@@ -30,9 +29,9 @@ class CardDeck extends React.Component {
 	}
 	
 	constructDoc = (tagId) => {
-		console.log(this.state.tags);
+		console.log(this.state.allTagsData);
 		console.log(tagId);
-		const node = this.state.tags[tagId]["content"]
+		const node = this.state.allTagsData[tagId]["content"]
 		return {
 			"doc": {
 				"type": "doc",
@@ -60,34 +59,19 @@ class CardDeck extends React.Component {
 	}
 	
 	componentDidMount(){
+		console.log("HEREEE");
 		getCardView(438, 1)
 			.then((results) => {
-				// tags: {
-				// 	'uuid1': {"id": "uuid1", "name": "question", "content": front_1},
-				// 	'uuid2': {"id": "uuid2", "name": "answer",   "content": back_1},
-				// 	'uuid3': {"id": "uuid3", "name": "question", "content": front_2},
-				// 	'uuid4': {"id": "uuid4", "name": "answer",   "content": back_2},
-				//     },
-				//     tagsInView: ["uuid1", "uuid2"],
-				//     allTags: allTags
-
-				// [
-				// 	{
-				// 	    "type": "text",
-				// 	    "text": "How do you print \"Hello World\" in Python3?"
-				// 	}
-				//     ]
-
+				console.log("wow");
 				const currentViewData = results[0];
-				const allTagData = results[1];
-				console.log(currentViewData);
-				console.log(allTagData);
-				this.setState({tags: allTagData.items, allTags: Object.keys(allTagData.items)});
+				const allTagsData = results[1];
+				console.log("CALLBACK")
+				console.log("view", currentViewData.tagIDs);
+				console.log("state", this.state);
+				
 				this.props.setTagsInView(currentViewData.tagIDs);
-
-				// tags: items
-				// allTags: list of all tag ids
-				// setTagsInView(currentViewData.tagIDs)
+				console.log("set tags", this.props);
+				this.setState({allTagsData: allTagsData.items});
 			});
 		document.addEventListener('keydown',this.keydownHandler);
 	}
@@ -97,7 +81,7 @@ class CardDeck extends React.Component {
 	}
 	
 	render = () => {
-		if (this.state.tags === null){
+		if (this.state.allTagsData === null || this.state.allTagsData === undefined){
 			console.log("No content to display")
 			return null;
 		}else{
@@ -117,13 +101,13 @@ class CardDeck extends React.Component {
 					</Row>
 				);
 			}
-			console.log("STATE");
-			console.log(this.state);
-			console.log("TAGS IN VIEW")
-			console.log(this.props.tagsInView);
+			// console.log("STATE");
+			// console.log(this.state);
+			// console.log("TAGS IN VIEW")
+			// console.log(this.props.tagsInView);
 			return (
 				<Container>
-					<TagEditor tags={this.state.tags} tagsInView={this.props.tagsInView} allTags={this.state.allTags}/>
+					<TagEditor tags={this.state.allTagsData} tagsInView={this.props.tagsInView} allTags={this.state.allTags}/>
 					{cards}
 				</Container>
 			);

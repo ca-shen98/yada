@@ -36,12 +36,12 @@ class Tag extends React.Component {
 class InnerTagList extends React.Component {
 	// performance optimization to prevent unnecessary renders
 	shouldComponentUpdate(nextProps, nextState, nextContext) {
-		return nextProps.tags !== this.props.tags;
+		return nextProps.tagData !== this.props.tagData;
 	}
 	
 	render() {
-		return this.props.tags.map((tagInfo, index) => (
-			<Tag key={tagInfo.id} index={index} tagInfo={tagInfo}/>
+		return Object.keys(this.props.tagData).map((tagId, index) => (
+			<Tag key={tagId} index={index} tagInfo={this.props.tagData[tagId]}/>
 		));
 	}
 }
@@ -99,7 +99,7 @@ class DragDropColumn extends React.Component {
 									{...provided.droppableProps}
 								>
 									<TagList ref={this.tagListRef}>
-										<InnerTagList tags={this.props.tags}/>
+										<InnerTagList tagData={this.props.tagData}/>
 										{provided.placeholder}
 									</TagList>
 								</DroppableRegion>
