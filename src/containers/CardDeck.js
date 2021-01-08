@@ -66,11 +66,11 @@ class CardDeck extends React.Component {
 				const currentViewData = results[0];
 				const allTagsData = results[1];
 				console.log("CALLBACK")
+				console.log("alldata", allTagsData);
 				console.log("view", currentViewData.tagIDs);
 				console.log("state", this.state);
 				
 				this.props.setTagsInView(currentViewData.tagIDs);
-				console.log("set tags", this.props);
 				this.setState({allTagsData: allTagsData.items});
 			});
 		document.addEventListener('keydown',this.keydownHandler);
@@ -107,7 +107,7 @@ class CardDeck extends React.Component {
 			// console.log(this.props.tagsInView);
 			return (
 				<Container>
-					<TagEditor tags={this.state.allTagsData} tagsInView={this.props.tagsInView} allTags={this.state.allTags}/>
+					<TagEditor allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView}/>
 					{cards}
 				</Container>
 			);
