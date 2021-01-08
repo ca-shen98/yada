@@ -11,8 +11,6 @@ class TagEditor extends React.Component {
 	constructor(props) {
 		super(props);
 		const tagsInView = new Set(this.props.tagsInView);
-		console.log("props", this.props);
-		console.log("state", this.state);
 		const availableTags = Object.keys(this.props.allTagsData).filter(t => !tagsInView.has(t));
 		
 		// parse nodes to obtain preview

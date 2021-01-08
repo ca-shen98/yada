@@ -29,8 +29,6 @@ class CardDeck extends React.Component {
 	}
 	
 	constructDoc = (tagId) => {
-		console.log(this.state.allTagsData);
-		console.log(tagId);
 		const node = this.state.allTagsData[tagId]["content"]
 		return {
 			"doc": {
@@ -47,31 +45,20 @@ class CardDeck extends React.Component {
 	
 	constructCard = (index) => {
 		const cardContent = {"index": index}
-		console.log(this.props.tagsInView);
 		cardContent["front"] = this.constructDoc(this.props.tagsInView[index]);
 		if (index+1 < this.props.tagsInView.length) {
 			cardContent["back"] = this.constructDoc(this.props.tagsInView[index+1]);
 		} else {
 			cardContent["back"] = null;
 		}
-		console.log(cardContent);
 		return <Card content={cardContent}/>;
 	}
 	
 	componentDidMount(){
-		console.log("HEREEE");
 		getCardView(438, 1)
-			.then((results) => {
-				console.log("wow");
-				const currentViewData = results[0];
-				const allTagsData = results[1];
-				console.log("CALLBACK")
-				console.log("alldata", allTagsData);
-				console.log("view", currentViewData.tagIDs);
-				console.log("state", this.state);
-				
-				this.props.setTagsInView(currentViewData.tagIDs);
-				this.setState({allTagsData: allTagsData.items});
+			.then(([currentViewData, allTagsData]) => {
+				this.props.setTagsInView(Object.keys(currentViewData["items"]));
+				this.setState({allTagsData: allTagsData["items"]});
 			});
 		document.addEventListener('keydown',this.keydownHandler);
 	}
@@ -101,10 +88,6 @@ class CardDeck extends React.Component {
 					</Row>
 				);
 			}
-			// console.log("STATE");
-			// console.log(this.state);
-			// console.log("TAGS IN VIEW")
-			// console.log(this.props.tagsInView);
 			return (
 				<Container>
 					<TagEditor allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView}/>

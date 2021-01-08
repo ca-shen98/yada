@@ -62,7 +62,6 @@ export async function loginBackend(name, email, token) {
     const data = await axios.post(SERVER_URL + "register_user", requestOptions, {
         withCredentials: true
     });
-    console.log(data);
     return true;
 }
 //TODO: create our own request wrapper that includes token & common headers

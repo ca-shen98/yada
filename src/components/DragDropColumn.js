@@ -14,8 +14,6 @@ class Tag extends React.Component {
 		`;
 		const TagId = styled.h5``;
 		const Content = styled.div``
-		console.log(this.props.tagInfo);
-		console.log(this.props);
 		return (
 			<Draggable draggableId={this.props.tagId} index={this.props.index}>
 				{(provided, snapshot) => (
@@ -25,7 +23,7 @@ class Tag extends React.Component {
 						{...provided.dragHandleProps}
 						isDragging={snapshot.isDragging}
 					>
-						<TagId>{"this.props.tagInfo.name"}</TagId>
+						<TagId>{this.props.tagInfo["tag_name"]}</TagId>
 						<Content>{this.props.tagInfo.preview}</Content>
 					</Container>
 				)}
@@ -41,7 +39,6 @@ class InnerTagList extends React.Component {
 	}
 	
 	render() {
-		console.log(this.props.tagData);
 		return Object.keys(this.props.tagData).map((tagId, index) => (
 			<Tag key={tagId} tagId={tagId} index={index} tagInfo={this.props.tagData[tagId]}/>
 		));
