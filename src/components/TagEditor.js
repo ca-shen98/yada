@@ -11,7 +11,7 @@ class TagEditor extends React.Component {
 	constructor(props) {
 		super(props);
 		const tagsInView = new Set(this.props.tagsInView);
-		const availableTags = this.props.allTags.filter(t => !tagsInView.has(t));
+		const availableTags = Object.keys(this.props.allTagsData).filter(t => !tagsInView.has(t));
 		
 		// parse nodes to obtain preview
 		function getPreview(node) {
@@ -27,18 +27,18 @@ class TagEditor extends React.Component {
 			return "";
 		}
 		
-		const tags = this.props.tags;
-		Object.keys(tags).forEach(tagId => {
-			const preview = getPreview(tags[tagId].content);
+		const tagData = this.props.allTagsData;
+		Object.keys(tagData).forEach(tagId => {
+			const preview = getPreview(tagData[tagId].content);
 			const maxPreviewLength = 50;
-			tags[tagId]["preview"] = preview.substring(0, maxPreviewLength);
+			tagData[tagId]["preview"] = preview.substring(0, maxPreviewLength);
 			if (preview.length > maxPreviewLength) {
-				tags[tagId]["preview"] += " . . .";
+				tagData[tagId]["preview"] += " . . .";
 			}
 		});
 		
 		this.state = {
-			tags: tags,
+			tagData: tagData,
 			columns: {
 				tags_in_view: {
 					id: 'tags_in_view',
@@ -109,6 +109,16 @@ class TagEditor extends React.Component {
 		this.setState(newState);
 	}
 	
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		if (prevProps.tagsInView !== this.props.tagsInView) {
+			const tagsInView = new Set(this.props.tagsInView);
+			const availableTags = Object.keys(this.props.allTagsData).filter(t => !tagsInView.has(t));
+			const newState = Object.assign({}, this.state);
+			newState.columns.tags_in_view.tagIds = tagsInView;
+			newState.columns.tags_available.tagIds = availableTags;
+			this.setState(newState);
+		}
+	}
 	
 	render = () => {
 		return (
@@ -117,10 +127,14 @@ class TagEditor extends React.Component {
 					<Row className="justify-content-md-center">
 						{this.state.columnOrder.map(columnId => {
 							const column = this.state.columns[columnId];
-							const tags = column.tagIds.map(tagId => this.state.tags[tagId])
+							// Generate subdict here
+							let tagDataInColumn = {};
+							for (const tagId of column.tagIds) {
+								tagDataInColumn[tagId] = this.state.tagData[tagId];
+							}
 							return (
 								<Col key={column.id} md="12" lg="6">
-									<DragDropColumn key={column.id} column={column} tags={tags}/>
+									<DragDropColumn key={column.id} column={column} tagData={tagDataInColumn}/>
 								</Col>
 							);
 						})}
@@ -132,7 +146,7 @@ class TagEditor extends React.Component {
 }
 
 export default connect(
-	state => ({ tagInView: state.tagsInView }),
+	state => ({ tagsInView: state.tagsInView }),
 	dispatch => ({
 		setTagsInView: tagsInView => dispatch(Actions.setTagsInView(tagsInView)),
 	}),

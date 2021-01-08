@@ -14,9 +14,8 @@ class Tag extends React.Component {
 		`;
 		const TagId = styled.h5``;
 		const Content = styled.div``
-		
 		return (
-			<Draggable draggableId={this.props.tagInfo.id} index={this.props.index}>
+			<Draggable draggableId={this.props.tagId} index={this.props.index}>
 				{(provided, snapshot) => (
 					<Container
 						ref={provided.innerRef}
@@ -24,7 +23,7 @@ class Tag extends React.Component {
 						{...provided.dragHandleProps}
 						isDragging={snapshot.isDragging}
 					>
-						<TagId>{this.props.tagInfo.name}</TagId>
+						<TagId>{this.props.tagInfo["tag_name"]}</TagId>
 						<Content>{this.props.tagInfo.preview}</Content>
 					</Container>
 				)}
@@ -36,12 +35,12 @@ class Tag extends React.Component {
 class InnerTagList extends React.Component {
 	// performance optimization to prevent unnecessary renders
 	shouldComponentUpdate(nextProps, nextState, nextContext) {
-		return nextProps.tags !== this.props.tags;
+		return nextProps.tagData !== this.props.tagData;
 	}
 	
 	render() {
-		return this.props.tags.map((tagInfo, index) => (
-			<Tag key={tagInfo.id} index={index} tagInfo={tagInfo}/>
+		return Object.keys(this.props.tagData).map((tagId, index) => (
+			<Tag key={tagId} tagId={tagId} index={index} tagInfo={this.props.tagData[tagId]}/>
 		));
 	}
 }
@@ -99,7 +98,7 @@ class DragDropColumn extends React.Component {
 									{...provided.droppableProps}
 								>
 									<TagList ref={this.tagListRef}>
-										<InnerTagList tags={this.props.tags}/>
+										<InnerTagList tagData={this.props.tagData}/>
 										{provided.placeholder}
 									</TagList>
 								</DroppableRegion>

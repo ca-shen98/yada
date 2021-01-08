@@ -5,20 +5,31 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import TagEditor from "../components/TagEditor";
+import {getCardView, putCardView} from "../backend/yaas";
+import Actions from "../actions";
 
 class CardDeck extends React.Component {
 	
 	constructor(props) {
 		super(props);
 		this.state = {
-			content: null,
-			tags: null,
-			all_tags: []
+			allTagsData: null,
 		};
 	}
 	
+	keydownHandler = (e) => {
+		if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)  && e.keyCode === 83) {
+			e.preventDefault();
+			console.log("save");
+			// TODO: fix docID and viewID
+			putCardView({"tagIds": this.props.tagsInView},1,1)
+				.then(() => console.log("Saved view"))
+				.catch(() => console.log("Failed to save view"))
+		}
+	}
+	
 	constructDoc = (tagId) => {
-		const node = this.state.tags[tagId]["content"]
+		const node = this.state.allTagsData[tagId]["content"]
 		return {
 			"doc": {
 				"type": "doc",
@@ -37,97 +48,30 @@ class CardDeck extends React.Component {
 		cardContent["front"] = this.constructDoc(this.props.tagsInView[index]);
 		if (index+1 < this.props.tagsInView.length) {
 			cardContent["back"] = this.constructDoc(this.props.tagsInView[index+1]);
+		} else {
+			cardContent["back"] = null;
 		}
 		return <Card content={cardContent}/>;
 	}
 	
 	componentDidMount(){
-		const front_1 = {
-			"type": "heading",
-			"attrs": {
-				"hidden": false,
-				"level": 1
-			},
-			"content": [
-				{
-					"type": "text",
-					"text": "How many bones are in a shark's body"
-				}
-			]
-		};
-		const back_1 = {
-			"type": "paragraph",
-			"attrs": {
-				"hidden": false
-			},
-			"content": [
-				{
-					"type": "text",
-					"text": "0 bones - "
-				},
-				{
-					"type": "text",
-					"marks": [
-						{
-							"type": "strong"
-						}
-					],
-					"text": "shark skeleton is all cartilage"
-				}
-			]
-		};
-		const front_2 = {
-			"type": "heading",
-			"attrs": {
-				"hidden": false,
-				"level": 1
-			},
-			"content": [
-				{
-					"type": "text",
-					"text": "How do you print \"Hello World\" in Python3?"
-				}
-			]
-		};
-		const back_2 = {
-			"type": "paragraph",
-			"attrs": {
-				"hidden": false
-			},
-			"content": [
-				{
-					"type": "text",
-					"marks": [
-						{
-							"type": "code_inline"
-						}
-					],
-					"text": "print(\"Hello World\")"
-				}
-			]
-		};
-		
-		
-		let allTags = ['uuid1', 'uuid2', 'uuid3', 'uuid4']
-		
-		const newState = {
-			tags: {
-				'uuid1': {"id": "uuid1", "name": "question", "content": front_1},
-				'uuid2': {"id": "uuid2", "name": "answer",   "content": back_1},
-				'uuid3': {"id": "uuid3", "name": "question", "content": front_2},
-				'uuid4': {"id": "uuid4", "name": "answer",   "content": back_2},
-			},
-			allTags: allTags
-		}
-		this.setState(newState)
+		getCardView(438, 1)
+			.then(([currentViewData, allTagsData]) => {
+				this.props.setTagsInView(Object.keys(currentViewData["items"]));
+				this.setState({allTagsData: allTagsData["items"]});
+			});
+		document.addEventListener('keydown',this.keydownHandler);
+	}
+	
+	componentWillUnmount(){
+		document.removeEventListener('keydown',this.keydownHandler);
 	}
 	
 	render = () => {
-		if (this.state.tags === null){
+		if (this.state.allTagsData === null || this.state.allTagsData === undefined){
 			console.log("No content to display")
 			return null;
 		}else{
-			console.log(this.props.tagsInView);
 			const cards = [];
 		
 			for (let i = 0; i < this.props.tagsInView.length; i+=4) {
@@ -144,10 +88,9 @@ class CardDeck extends React.Component {
 					</Row>
 				);
 			}
-			
 			return (
 				<Container>
-					<TagEditor tags={this.state.tags} tagsInView={this.props.tagsInView} allTags={this.state.allTags}/>
+					<TagEditor allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView}/>
 					{cards}
 				</Container>
 			);
@@ -158,5 +101,8 @@ class CardDeck extends React.Component {
 export default connect(
 	state => ({
 		tagsInView: state.tagsInView
+	}),
+	dispatch => ({
+		setTagsInView: tagsInView => dispatch(Actions.setTagsInView(tagsInView)),
 	}),
 )(CardDeck);
