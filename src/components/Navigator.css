@@ -1,0 +1,41 @@
+#current_file_container {
+  padding: 0 4px 6px;
+  margin: 0 8px;
+  border-bottom: 3px solid darkslategray;
+}
+
+#current_file_container>.InputRow {
+  margin-top: 3px;
+}
+
+#current_file_container>.InputRow:first-child {
+  margin-top: 0;
+}
+
+#search_file_names_input_row {
+  padding: 9px 12px;
+}
+
+#file_list, #no_files_placeholder, #filtered_files_placeholder {
+  overflow: auto;
+  padding: 0 12px;
+  margin: 0 4px;
+  list-style: none;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+#file_list ul {
+  padding: 0 0 0 12px;
+  list-style: none;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+#filtered_files_placeholder {
+  padding-top: 6px;
+}
+
+#create_source_name_input_row {
+  padding: 9px 16px;
+}

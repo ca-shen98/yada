@@ -1,0 +1,40 @@
+#editor_container {
+  position: relative;
+  padding-top: 24px;
+  flex: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#current_open_file_controls {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+}
+
+#tag_filtering_input_row {
+  flex-grow: 4;
+  min-width: 0;
+}
+
+#editor, #no_file_editor_placeholder {
+  flex: auto;
+  overflow: auto;
+  padding: 9px 8px;
+  border: 2px dashed lightgray;
+  border-radius: 12px;
+}
+
+#editor {
+  padding-left: 32px;
+}
+
+#no_file_editor_placeholder {
+  display: flex;
+  flex-direction: column;
+}
+
+#no_file_editor_placeholder[hidden] {
+  display: none;
+}
