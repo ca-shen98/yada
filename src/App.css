@@ -9,7 +9,7 @@
   display: flex;
 }
 
-.NoApp {
+/* .NoApp {
   display: none;
 }
 
@@ -21,7 +21,7 @@
   .NoApp {
     display: block;
   }
-}
+} */
 
 .SidePane {
   flex: none;

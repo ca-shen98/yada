@@ -1,5 +1,6 @@
 import './Navigator.css';
 import {debounce, defer} from 'lodash';
+import Cookies from 'js-cookie';
 import React from 'react';
 import {batch, connect} from 'react-redux';
 import store from '../store';
@@ -23,6 +24,7 @@ import {
   RENAME_INPUT_TYPES,
   setRenamingInputStateAction,
 } from '../reducers/RenamingInputState';
+import {ACCESS_TOKEN_COOKIE_KEY, setUserSignedInAction} from '../reducers/UserSignedIn';
 
 const INITIAL_FILE_ID_KEY_LOCAL_STORAGE_KEY = 'initialFileIdKey';
 
@@ -339,6 +341,7 @@ class Navigator extends React.Component {
       inputType: RENAME_INPUT_TYPES.CURRENT_VIEW,
       fileIdKey: this.props.currentOpenFileIdKey,
     };
+    // API(s)
     let numFilteredViews = 0;
     const filteredSourceViews = Object.keys(this.props.viewsState).reduce(
       (partial, sourceIdKey) => {
@@ -372,101 +375,112 @@ class Navigator extends React.Component {
             <this.renameInput {...currentViewRenameComponentProps} title="current open view" />
           </div>
         </div>
-        <div className="InputRow" id="search_file_names_input_row">
-          <input
-            id={SEARCH_FILE_NAMES_INPUT_ID}
-            title="search file names"
-            placeholder="search file names"
-            onChange={debounce(this.handleSearchFileNames, 150)}
-            onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
-            onKeyDown={event => { if (event.key === 'Escape') { event.target.blur(); } }}
-          />
-          <button
-            className="MonospaceCharButton"
-            title="clear"
-            disabled={!this.state[SEARCH_FILE_NAMES_INPUT_ID]}
-            onClick={() => { this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID); }}>
-            {'✕'}
-          </button>
-        </div>
-        {
-          filteredSources.size > 0
-            ? <ul id={FILE_LIST_ID}>
-                {
-                  Array.from(filteredSources).map(sourceIdKey =>
-                    <li key={sourceIdKey}>
-                      <this.fileListItemButtonRow
-                        inputType={RENAME_INPUT_TYPES.SOURCE_LIST_ITEM}
-                        fileIdKey={{ sourceIdKey, viewIdKey: 0 }}
-                      />
-                      {
-                        filteredSourceViews.hasOwnProperty(sourceIdKey)
-                          ? <ul>
-                              {
-                                Array.from(filteredSourceViews[sourceIdKey]).map(viewIdKey => {
-                                  const fileIdKey = { sourceIdKey, viewIdKey };
-                                  return (
-                                    <li key={getFileIdKeyStr(fileIdKey)}>
-                                      <this.fileListItemButtonRow
-                                        inputType={RENAME_INPUT_TYPES.VIEW_LIST_ITEM}
-                                        fileIdKey={fileIdKey}
-                                      />
-                                    </li>
-                                  );
-                                })
-                              }
-                            </ul>
-                          : null
-                      }
-                    </li>
-                  )
-                }
-              </ul>
-            : <div className="PlaceholderDivWithText" id="no_files_placeholder">
-                no files
-              </div>
-        }
-        <div
-          className="PlaceholderDivWithText"
-          id="filtered_files_placeholder"
-          hidden={!this.state[SEARCH_FILE_NAMES_INPUT_ID]}>
+        <div id="file_list_container">
+          <div className="InputRow" id="search_file_names_input_row">
+            <input
+              id={SEARCH_FILE_NAMES_INPUT_ID}
+              title="search file names"
+              placeholder="search file names"
+              onChange={debounce(this.handleSearchFileNames, 150)}
+              onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
+              onKeyDown={event => { if (event.key === 'Escape') { event.target.blur(); } }}
+            />
+            <button
+              className="MonospaceCharButton"
+              title="clear"
+              disabled={!this.state[SEARCH_FILE_NAMES_INPUT_ID]}
+              onClick={() => { this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID); }}>
+              {'✕'}
+            </button>
+          </div>
           {
-            (
-              Object.keys(this.props.sourcesList).length + this.props.numViews -
-              filteredSources.size - numFilteredViews
-            ) + ' of ' + (Object.keys(this.props.sourcesList).length + this.props.numViews) + ' files filtered'
+            filteredSources.size > 0
+              ? <ul id={FILE_LIST_ID}>
+                  {
+                    Array.from(filteredSources).map(sourceIdKey =>
+                      <li key={sourceIdKey}>
+                        <this.fileListItemButtonRow
+                          inputType={RENAME_INPUT_TYPES.SOURCE_LIST_ITEM}
+                          fileIdKey={{ sourceIdKey, viewIdKey: 0 }}
+                        />
+                        {
+                          filteredSourceViews.hasOwnProperty(sourceIdKey)
+                            ? <ul>
+                                {
+                                  Array.from(filteredSourceViews[sourceIdKey]).map(viewIdKey => {
+                                    const fileIdKey = { sourceIdKey, viewIdKey };
+                                    return (
+                                      <li key={getFileIdKeyStr(fileIdKey)}>
+                                        <this.fileListItemButtonRow
+                                          inputType={RENAME_INPUT_TYPES.VIEW_LIST_ITEM}
+                                          fileIdKey={fileIdKey}
+                                        />
+                                      </li>
+                                    );
+                                  })
+                                }
+                              </ul>
+                            : null
+                        }
+                      </li>
+                    )
+                  }
+                </ul>
+              : <div className="PlaceholderDivWithText" id="no_files_placeholder">
+                  no files
+                </div>
           }
+          <div
+            className="PlaceholderDivWithText"
+            id="filtered_files_placeholder"
+            hidden={!this.state[SEARCH_FILE_NAMES_INPUT_ID]}>
+            {
+              (
+                Object.keys(this.props.sourcesList).length + this.props.numViews -
+                filteredSources.size - numFilteredViews
+              ) + ' of ' + (Object.keys(this.props.sourcesList).length + this.props.numViews) + ' files filtered'
+            }
+          </div>
+          <div className="InputRow" id="create_source_name_input_row">
+            <input
+              id={CREATE_SOURCE_NAME_INPUT_ID}
+              title="new source name"
+              placeholder="new source name"
+              onChange={event => { this.setState({ [CREATE_SOURCE_NAME_INPUT_ID]: event.target.value }); }}
+              onKeyPress={event => {
+                if (event.key === 'Enter' && this.handleCreateNewSource()) {
+                  this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
+                  this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID);
+                }
+              }}
+              onKeyDown={event => {
+                if (event.key === 'Escape') {
+                  this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
+                  event.target.blur();
+                }
+              }}
+            />
+            <button
+              className="MonospaceCharButton"
+              title="create"
+              disabled={!this.state[CREATE_SOURCE_NAME_INPUT_ID]}
+              onClick={() => {
+                if (this.handleCreateNewSource()) {
+                  this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
+                  this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID);
+                }
+              }}>
+              {'+'}
+            </button>
+          </div>
         </div>
-        <div className="InputRow" id="create_source_name_input_row">
-          <input
-            id={CREATE_SOURCE_NAME_INPUT_ID}
-            title="new source name"
-            placeholder="new source name"
-            onChange={event => { this.setState({ [CREATE_SOURCE_NAME_INPUT_ID]: event.target.value }); }}
-            onKeyPress={event => {
-              if (event.key === 'Enter' && this.handleCreateNewSource()) {
-                this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
-                this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID);
-              }
-            }}
-            onKeyDown={event => {
-              if (event.key === 'Escape') {
-                this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
-                event.target.blur();
-              }
-            }}
-          />
+        <div className="InputRow" id="user_sign_out_button_row">
           <button
-            className="MonospaceCharButton"
-            title="create"
-            disabled={!this.state[CREATE_SOURCE_NAME_INPUT_ID]}
             onClick={() => {
-              if (this.handleCreateNewSource()) {
-                this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
-                this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID);
-              }
+              Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
+              this.props.dispatchSetUserSignedInAction(false);
             }}>
-            {'+'}
+            Sign out
           </button>
         </div>
       </div>
@@ -493,5 +507,6 @@ export default connect(
       (sourceIdKey, viewIdKey, newName) => dispatch(renameViewAction(sourceIdKey, viewIdKey, newName)),
     dispatchSetRenamingInputStateAction:
       renamingInputState => dispatch(setRenamingInputStateAction(renamingInputState)),
+    dispatchSetUserSignedInAction: status => dispatch(setUserSignedInAction(status)),
   }),
 )(Navigator);

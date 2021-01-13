@@ -12,14 +12,22 @@
   margin-top: 0;
 }
 
+#file_list_container {
+  padding: 9px 8px;
+  flex: auto;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 #search_file_names_input_row {
-  padding: 9px 12px;
+  padding: 0 4px;
 }
 
 #file_list, #no_files_placeholder, #filtered_files_placeholder {
   overflow: auto;
   padding: 0 12px;
-  margin: 0 4px;
+  margin: 9px 0;
   list-style: none;
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -37,5 +45,16 @@
 }
 
 #create_source_name_input_row {
-  padding: 9px 16px;
+  padding: 0 12px;
+}
+
+#user_sign_out_button_row {
+  border-top: 5px solid black;
+  margin: 0 4px;
+  padding: 6px 4px 0;
+  display: flex;
+}
+
+#user_sign_out_button_row>:first-child {
+  flex: auto;
 }

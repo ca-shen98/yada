@@ -8,6 +8,7 @@ import {
   modifyingTagFiltersFlagReducer,
 } from './reducers/CurrentOpenFileState';
 import {renamingInputStateReducer} from './reducers/RenamingInputState';
+import {userSignedInReducer} from './reducers/UserSignedIn';
 
 export default configureStore({
   reducer: combineReducers({
@@ -17,5 +18,6 @@ export default configureStore({
     selectNode: selectNodeReducer,
     modifyingTagFiltersFlag: modifyingTagFiltersFlagReducer,
     renamingInputState: renamingInputStateReducer,
+    userSignedIn: userSignedInReducer,
   }),
 });

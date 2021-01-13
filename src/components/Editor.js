@@ -2,6 +2,7 @@ import './Editor.css';
 import {defer} from 'lodash';
 import React from 'react';
 import {connect} from 'react-redux';
+import store from '../store';
 import {
   getFileIdKeyStr,
   doSaveSourceContent,
@@ -33,6 +34,15 @@ import RichMarkdownEditor from 'rich-markdown-editor';
 import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
 
 export const TAG_FILTERING_INPUT_ID = 'tag_filtering_input';
+
+export const handleSaveCurrentFileEditorContent = () => {
+  const currentOpenFileIdKey = store.getState().currentOpenFileIdKey;
+  const { fileType } = calculateFileIdKeyDerivedParameters(currentOpenFileIdKey);
+  if ((fileType === FILE_TYPES.SOURCE || fileType === FILE_TYPES.FILTER_VIEW) && store.getState().saveDirtyFlag) {
+    doSaveSourceContent(currentOpenFileIdKey.sourceIdKey, BlockTaggingEditorExtension.editor.value(true));
+    store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+  }
+};
 
 class Editor extends React.Component {
 
@@ -114,17 +124,6 @@ class Editor extends React.Component {
     return true;
   };
 
-  handleSaveFileContent = () => {
-    const { fileType } = calculateFileIdKeyDerivedParameters(this.props.currentOpenFileIdKey);
-    if ((fileType === FILE_TYPES.SOURCE || fileType === FILE_TYPES.FILTER_VIEW) && this.props.saveDirtyFlag) {
-      doSaveSourceContent(
-        this.props.currentOpenFileIdKey.sourceIdKey,
-        BlockTaggingEditorExtension.editor.value(true),
-      );
-      this.props.dispatchClearSaveDirtyFlagAction();
-    }
-  };
-
   componentDidUpdate = (prevProps, prevState) => {
     if (prevState.currentTagFiltersStr !== this.state.currentTagFiltersStr) {
       document.getElementById(TAG_FILTERING_INPUT_ID).value = this.state.currentTagFiltersStr;
@@ -161,7 +160,7 @@ class Editor extends React.Component {
               className="MonospaceCharButton"
               title="save"
               disabled={fileType === FILE_TYPES.INVALID || !this.props.saveDirtyFlag}
-              onClick={this.handleSaveFileContent}>
+              onClick={handleSaveCurrentFileEditorContent}>
               {'^'}
             </button>
             <div style={{ flex: 'auto', minWidth: '5px' }} />
@@ -232,7 +231,7 @@ class Editor extends React.Component {
               key={fileIdKeyStr}
               defaultValue={value}
               jsonStrValue={!(!value)}
-              onSave={this.handleSaveFileContent}
+              onSave={handleSaveCurrentFileEditorContent}
               onKeyDown={event => {
                 if (event.key === 'Escape') {
                   BlockTaggingEditorExtension.editor.view.dispatch(
@@ -277,7 +276,6 @@ export default connect(
     dispatchModifyFilterViewAction:
       (sourceIdKey, viewIdKey, tagFilters) => dispatch(modifyFilterViewAction(sourceIdKey, viewIdKey, tagFilters)),
     dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
-    dispatchClearSaveDirtyFlagAction: () => dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE }),
     dispatchSetModifyingTagFiltersFlagAction: () => dispatch({ type: SET_MODIFYING_TAG_FILTERS_FLAG_ACTION_TYPE }),
     dispatchClearModifyingTagFiltersFlagAction: () => dispatch({ type: CLEAR_MODIFYING_TAG_FILTERS_FLAG_ACTION_TYPE }),
     dispatchSetRenamingInputStateAction:
