@@ -13,7 +13,10 @@ export const doGetSourceContent = sourceIdKey => {
     try {
       Node.fromJSON(BlockTaggingEditorExtension.editor.schema, JSON.parse(sourceContentStr));
       sourceContentVal = sourceContentStr;
-    } catch {}
+    } catch (e) {
+      console.log('invalid sourceContent doc');
+      console.log(e);
+    }
   }
   return sourceContentVal;
 };
