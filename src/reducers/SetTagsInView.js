@@ -1,13 +1,5 @@
-import Actions from '../actions';
-
-export const INITIAL_TAGS_IN_VIEW_LOCAL_STORAGE_KEY = 'initialTagsInView';
-
-const initialTagsInView = JSON.parse(localStorage.getItem(INITIAL_TAGS_IN_VIEW_LOCAL_STORAGE_KEY)) || []
-
-export const SetTagsInViewReducer = (
-	state = initialTagsInView,
-	action,
-) => {
-	if (action.type !== Actions.SET_TAGS_IN_VIEW) { return state; }
-	return action.tagsInView;
-};
+export const SET_TAGS_IN_VIEW_ACTION_TYPE = 'tagsInView/set';
+export const setTagsInViewAction = tagsInView => ({ type: SET_TAGS_IN_VIEW_ACTION_TYPE, tagsInView });
+export const SetTagsInViewReducer = (state = null, action) => {
+	action.type !== SET_TAGS_IN_VIEW_ACTION_TYPE || !action.hasOwnProperty('tagsInView')
+		? state : action.tagsInView;

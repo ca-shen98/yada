@@ -2,7 +2,6 @@ import axios from 'axios';
 import Cookies from 'js-cookie'
 
 let SERVER_URL = "https://yaas.azurewebsites.net/";
-let CARD_VIEW_NAME = "cards";
 
 if (process.env.NODE_ENV === "development"){
     SERVER_URL = "http://localhost:5000/";

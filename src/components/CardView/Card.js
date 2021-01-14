@@ -1,6 +1,5 @@
 import React from 'react';
 import RichMarkdownEditor from 'rich-markdown-editor';
-import {connect} from 'react-redux';
 import BootstrapCard from 'react-bootstrap/Card';
 import ReactCardFlip from 'react-card-flip';
 
@@ -63,6 +62,4 @@ class Card extends React.Component {
 	};
 }
 
-export default connect(
-	state => ({}),
-)(Card);
+export default Card;

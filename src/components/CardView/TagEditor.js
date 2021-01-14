@@ -1,11 +1,11 @@
-import React from "react";
-import {connect} from "react-redux";
+import React from 'react';
+import {connect} from 'react-redux';
 import Container from 'react-bootstrap/Container'
-import DragDropColumn from "./DragDropColumn";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import {DragDropContext} from "react-beautiful-dnd";
-import Actions from "../actions";
+import DragDropColumn from './DragDropColumn';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import {DragDropContext} from 'react-beautiful-dnd';
+import {setTagsInViewAction} from '../../reducers/SetTagsInView';
 
 class TagEditor extends React.Component {
 	constructor(props) {
@@ -147,7 +147,5 @@ class TagEditor extends React.Component {
 
 export default connect(
 	state => ({ tagsInView: state.tagsInView }),
-	dispatch => ({
-		setTagsInView: tagsInView => dispatch(Actions.setTagsInView(tagsInView)),
-	}),
+	dispatch => ({ setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)) }),
 )(TagEditor);

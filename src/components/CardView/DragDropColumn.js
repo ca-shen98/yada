@@ -1,7 +1,6 @@
 import styled from 'styled-components'
-import React from "react";
-import {connect} from "react-redux";
-import {Droppable, Draggable} from "react-beautiful-dnd";
+import React from 'react';
+import {Droppable, Draggable} from 'react-beautiful-dnd';
 
 class Tag extends React.Component {
 	render = () => {
@@ -110,6 +109,4 @@ class DragDropColumn extends React.Component {
 	};
 }
 
-export default connect(
-	state => ({}),
-)(DragDropColumn);
+export default DragDropColumn;

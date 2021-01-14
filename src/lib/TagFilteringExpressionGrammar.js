@@ -10,13 +10,13 @@ Factor_ -> Term _ "&" _ Factor {% function(d) { return [d[0], d[2], d[4]] } %}
 Term -> Not {% id %} | Nested {% id %} | Tag {% id %}
 Not -> "!" (Nested {% id %} | Tag {% id %})
 Nested -> "(" _ Expression _ ")" {% function(d) { return d[2] } %}
-Tag -> "#{" [^#{}]:+ "}" {% function(d) { return [d[0], d[1].join(""), d[2]].join("") } %}
+Tag -> "#{" [^{}]:+ "}" {% function(d) { return [d[0], d[1].join(""), d[2]].join("") } %}
 _ -> " ":* {% function(d) { return null } %}
 */
 function id(x) {
   return x[0];
 }
-export const Grammar = {
+const Grammar = {
   Lexer: undefined,
   ParserRules: [
     { name: "Main", symbols: ["Expression"], postprocess: id },
@@ -67,10 +67,10 @@ export const Grammar = {
         return d.join("");
       },
     },
-    { name: "Tag$ebnf$1", symbols: [/[^#{}]/] },
+    { name: "Tag$ebnf$1", symbols: [/[^{}]/] },
     {
       name: "Tag$ebnf$1",
-      symbols: [/[^#{}]/, "Tag$ebnf$1"],
+      symbols: [/[^{}]/, "Tag$ebnf$1"],
       postprocess: function arrconcat(d) {
         return [d[0]].concat(d[1]);
       },
@@ -79,7 +79,7 @@ export const Grammar = {
       name: "Tag",
       symbols: ["Tag$string$1", "Tag$ebnf$1", { literal: "}", pos: 131 }],
       postprocess: function(d) {
-        return [d[0], d[1].join(""), d[2]].join("");
+        return d[1].join("").trim();
       },
     },
     { name: "_$ebnf$1", symbols: [] },
@@ -108,12 +108,8 @@ export const parse = (inputText, throwErrors = true) => {
       parser.feed(inputText.trim());
       if (parser.results.length > 0) {
         outputParsedExpr = parser.results;
-      } else {
-        // TODO (incomplete)
       }
-    } catch (ex) {
-      // TODO (invalid)
-    }
+    } catch (ex) {}
   }
   return outputParsedExpr;
 };

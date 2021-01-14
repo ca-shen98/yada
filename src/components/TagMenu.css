@@ -1,0 +1,29 @@
+#tag_menu_wrapper, #tag_menu_list_container {
+  flex: auto;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#tag_menu_wrapper {
+  margin-top: 24px;
+  border: 1px solid #DCDCDC;
+  border-radius: 8px;
+  background-color: #FAFAFA;
+}
+
+#add_tag_input_row {
+  padding: 6px 4px;
+}
+
+#tag_menu_list_container {
+  margin-bottom: 9px;
+}
+
+#block_node_tags_list, #no_tags_placeholder {
+  padding: 0 12px;
+  margin: 0;
+  list-style: none;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}

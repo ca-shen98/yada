@@ -1,27 +1,40 @@
-import React from 'react';
 import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Home from './containers/Home';
-import Navigator from "./containers/Navigator";
-import Editor from './containers/Editor';
-import { HashRouter, Route } from "react-router-dom";
-import CardDeck from "./containers/CardDeck";
+import React from 'react';
+import {connect} from 'react-redux';
+import LandingPage from './components/LandingPage';
+import Navigator from './components/Navigator';
+import Editor, {handleSaveCurrentFileEditorContent} from './components/Editor';
 
-const Edit = () => (
-  <div className="App">
-    <Navigator />
-    <Editor />
-  </div>
-);
+class App extends React.Component {
+	
+	keydownHandler = event => {
+		if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey) && event.keyCode === 83) {
+      event.preventDefault();
+      if (this.props.userSignedIn) { handleSaveCurrentFileEditorContent(); }
+		}
+	}
+	
+	componentDidMount = () => { document.addEventListener('keydown',this.keydownHandler); };
+	componentWillUnmount = () => { document.removeEventListener('keydown', this.keydownHandler); };
+  
+  render = () => this.props.userSignedIn
+    ? (
+        // <React.Fragment>
+        <div className="App">
+          <div style={{ position: 'fixed', top: '9px', right: '16px', fontSize: '.75em' }}>
+            <span role="img" aria-label="Yet Another Docs App">
+              🐇 &nbsp; <b>Y</b>et <b>A</b>nother <b>D</b>ocs <b>A</b>pp
+            </span>
+          </div>
+          <Navigator />
+          <Editor />
+        </div>
+          // <div className="NoApp">
+          //   This app doesn't support mobile screen widths.
+          // </div>
+        // </React.Fragment>
+      )
+    : (<LandingPage />);
+};
 
-const CardView = () => {
-    return (<div className="App">
-        <CardDeck/>
-    </div>);
-}
-
-export default () => (<HashRouter basename="/yada">
-  <Route exact path="/" component={Home} />
-  <Route exact path="/edit" component={Edit} />
-  <Route exact path="/cards" component={CardView} />
-</HashRouter>);
+export default connect(state => ({ userSignedIn: state.userSignedIn }))(App);
