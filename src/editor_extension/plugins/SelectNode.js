@@ -1,9 +1,8 @@
 import {Plugin, PluginKey} from 'prosemirror-state';
 import {Decoration, DecorationSet} from 'prosemirror-view';
 import store from '../../store';
+import {FILE_TYPE, getFileType} from '../../util/FileIdAndTypeUtils';
 import {setSelectNodeAction} from '../../reducers/CurrentOpenFileState';
-import {FILE_TYPES} from '../../reducers/FileStorageSystem';
-import {calculateFileIdKeyDerivedParameters} from '../../components/Navigator';
 import {TagFilteringPluginKey} from './TagFiltering';
 
 const SELECT_NODE_PLUGIN_NAME = 'select-node';
@@ -18,7 +17,9 @@ export default new Plugin({
     apply: (tr, _value, oldState) => {
       let head = tr.selection.head;
       let newState = null;
-      tr.doc.nodesBetween(head, head, (node, pos) => { if (node.isTextblock) { newState = { node, pos }; } });
+      tr.doc.nodesBetween(head, head, (node, pos) => {
+        if (node.hasOwnProperty('attrs') && node.attrs['tags']) { newState = { node, pos }; }
+      });
       if (
         (!oldState && newState) || (oldState && !newState) ||
         (oldState && newState && (newState.pos !== oldState.pos || !newState.node.eq(oldState.node)))
@@ -27,8 +28,8 @@ export default new Plugin({
     },
   },
   filterTransaction: (tr, state) => {
-    const { fileType } = calculateFileIdKeyDerivedParameters(store.getState().currentOpenFileIdKey);
-    return (fileType === FILE_TYPES.SOURCE && !TagFilteringPluginKey.getState(state)) ||
+    const currentOpenFileId = store.getState().currentOpenFileId;
+    return (getFileType(currentOpenFileId) === FILE_TYPE.SOURCE && !TagFilteringPluginKey.getState(state)) ||
       tr.steps.every(step => !checkEnterStepType(step.toJSON()));
   },
   props: {

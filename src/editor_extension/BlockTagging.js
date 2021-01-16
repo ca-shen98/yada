@@ -1,5 +1,4 @@
 import {Extension} from 'rich-markdown-editor';
-
 import SelectNodePlugin from './plugins/SelectNode';
 import TagFilteringPlugin from './plugins/TagFiltering';
 
