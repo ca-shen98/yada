@@ -16,7 +16,12 @@ import {
   RENAME_INPUT_TYPES,
   setRenamingInputStateAction,
 } from '../reducers/RenamingInputState';
-import {ACCESS_TOKEN_COOKIE_KEY, setUserSignedInAction} from '../reducers/UserSignedIn';
+import {
+  ACCESS_TOKEN_COOKIE_KEY,
+  BACKEND_MODE_SIGNED_IN_STATUS,
+  getUserSignedInStatus,
+  setBackendModeSignedInStatusAction,
+} from '../reducers/BackendModeSignedInStatus';
 import {
   doSetLocalStorageSourceIdNames,
   doSetLocalStorageSourceViewIdNames,
@@ -25,6 +30,7 @@ import {
   doFileNamesSearch,
   countNumFiles,
   calculateNextNewId,
+  calculateNextNewFileIds,
   doCreateNewSource,
   doDeleteSource,
   doDeleteView,
@@ -76,12 +82,9 @@ class Navigator extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state.nextNewFileIds = {
-      source: calculateNextNewId(this.state.filesList, 0),
-      nextNewViewIdsForSourceIds: Object.fromEntries(Object.entries(filesList).map(
-        ([sourceId, { viewIdNames }]) => [sourceId, calculateNextNewId(viewIdNames, 0)]
-      )),
-    };
+    if (props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+      this.state.nextNewFileIds = calculateLocalStorageNextNewFileIds(this.state.filesList);
+    }
   };
 
   getSourceName = fileId => validateFileIdObj(fileId) && this.state.filesList.hasOwnProperty(fileId.sourceId)
@@ -128,18 +131,21 @@ class Navigator extends React.Component {
 
   handleCreateNewSource = () => {
     if (!this.state[CREATE_SOURCE_NAME_INPUT_ID]) { return false; }
-    const nextNewSourceId = this.state.nextNewFileIds.source;
+    const nextNewSourceId = this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
+      ? this.state.nextNewFileIds.source : null;
     const newFilesList = {...this.state.filesList};
     const { id, name } = doCreateNewSource(this.state[CREATE_SOURCE_NAME_INPUT_ID], nextNewSourceId);
     newFilesList[id] = { name, viewIdNames: {} };
     this.setState({ filesList: newFilesList });
-    doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
-    this.setState({
-      nextNewFileIds: {
-        source: calculateNextNewId(newFilesList, parseInt(nextNewSourceId)),
-        nextNewViewIdsForSourceIds: this.state.nextNewFileIds.nextNewViewIdsForSourceIds,
-      },
-    });
+    if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+      doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
+      this.setState({
+        nextNewFileIds: {
+          source: calculateNextNewId(newFilesList, parseInt(nextNewSourceId)),
+          nextNewViewIdsForSourceIds: this.state.nextNewFileIds.nextNewViewIdsForSourceIds,
+        },
+      });
+    }
     defer(() => { handleSetCurrentOpenFileId({ sourceId: newSource.id, viewId: 0 }); });
     return true;
   };
@@ -157,19 +163,23 @@ class Navigator extends React.Component {
       const newSourceViewIdNames = {...newFilesList[fileId.sourceId].viewIdNames}
       delete newSourceViewIdNames[fileId.viewId];
       newFilesList[fileId.sourceId] = { name: newFilesList[fileId.sourceId].name, viewIdNames: newSourceViewIdNames };
-      doSetLocalStorageSourceViewIdNames(fileId.sourceId, newSourceViewIdNames);
+      if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+        doSetLocalStorageSourceViewIdNames(fileId.sourceId, newSourceViewIdNames);
+      }
     } else {
       doDeleteSource(fileId.sourceId, Object.keys(newFilesList[fileId.sourceId].viewIdNames));
       delete newFilesList[fileId.sourceId];
-      doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
-      const newNextNewViewIdsForSourceIds = {...this.state.nextNewFileIds.nextNewViewIdsForSourceIds};
-      delete newNextNewViewIdsForSourceIds[fileId.sourceId];
-      this.setState({
-        nextNewFileIds: {
-          source: this.state.nextNewFileIds.source,
-          nextNewViewIdsForSourceIds: newNextNewViewIdsForSourceIds,
-        },
-      });
+      if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+        doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
+        const newNextNewViewIdsForSourceIds = {...this.state.nextNewFileIds.nextNewViewIdsForSourceIds};
+        delete newNextNewViewIdsForSourceIds[fileId.sourceId];
+        this.setState({
+          nextNewFileIds: {
+            source: this.state.nextNewFileIds.source,
+            nextNewViewIdsForSourceIds: newNextNewViewIdsForSourceIds,
+          },
+        });
+      }
     }
     this.setState({ filesList: newFilesList });
     return true;
@@ -190,11 +200,15 @@ class Navigator extends React.Component {
         newSourceViewIdNames[fileId.viewId] = newName;
         newFilesList[fileId.sourceId] =
           { name: newFilesList[fileId.sourceId].name, viewIdNames: newSourceViewIdNames };
-        doSetLocalStorageSourceViewIdNames(fileId.sourceId, newSourceViewIdNames);
+        if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+          doSetLocalStorageSourceViewIdNames(fileId.sourceId, newSourceViewIdNames);
+        }
       } else {
         doRenameSource(fileId.sourceId, newName);
         newFilesList[fileId.sourceId] = { name: newName, viewIdNames: newFilesList[fileId.sourceId].viewIdNames };
-        doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
+        if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+          doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
+        }
       }
       this.setState({ filesList: newFilesList });
     }
@@ -446,14 +460,35 @@ class Navigator extends React.Component {
             </button>
           </div>
         </div>
-        <div className="InputRow" id="user_sign_out_button_row">
+        <div id="user_controls_container">
           <button
             onClick={() => {
-              Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
-              this.props.dispatchSetUserSignedInAction(false);
+              this.dispatchSetBackendModeAction(
+                this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
+                  ? getUserSignedInStatus() : BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
+              );
             }}>
-            Sign out
+            {
+              'Switch to ' +
+              (
+                this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
+                  ? 'cloud' : 'local'
+              ) + ' storage'
+            }
           </button>
+          {
+            this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN
+              ? <button
+                  onClick={() => {
+                    Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
+                    this.props.dispatchSetBackendModeSignedInStatusAction(
+                      BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
+                    );
+                  }}>
+                  Sign out
+                </button>
+              : null
+          }
         </div>
       </div>
     );
@@ -461,10 +496,14 @@ class Navigator extends React.Component {
 };
 
 export default connect(
-  state => ({ currentOpenFileId: state.currentOpenFileId, renamingInputState: state.renamingInputState }),
+  state => ({
+    currentOpenFileId: state.currentOpenFileId,
+    renamingInputState: state.renamingInputState,
+    backendModeSignedInStatus: state.backendModeSignedInStatus,
+  }),
   dispatch => ({
     dispatchSetRenamingInputStateAction:
       renamingInputState => dispatch(setRenamingInputStateAction(renamingInputState)),
-    dispatchSetUserSignedInAction: status => dispatch(setUserSignedInAction(status)),
+    dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
   }),
 )(Navigator);

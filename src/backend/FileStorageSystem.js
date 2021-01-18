@@ -1,5 +1,7 @@
+import store from '../store';
 import convertStrValueOrDefault from '../util/ConvertStrValueOrDefault';
 import {getFileIdKeyStr} from '../util/FileIdAndTypeUtils';
+import {BACKEND_MODE_SIGNED_IN_STATUS} from '../reducers/BackendModeSignedInStatus';
 
 const SOURCE_ID_NAMES_LOCAL_STORAGE_KEY = 'sourceIdNames';
 
@@ -30,12 +32,18 @@ export const convertFilesListStateToFileIdNamesList = filesListState => Object.f
 );
 
 // API
-export const doGetFilesList = () => Object.fromEntries(Object.entries(doGetLocalStorageSourceIdNames()).map(
-  ([sourceId, sourceName]) => [
-    sourceId,
-    { name: sourceName, viewIdNames: doGetLocalStorageSourceViewIdNames(sourceId) },
-  ]
-));
+export const doGetFilesList = () => {
+  const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
+  if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+    return Object.fromEntries(Object.entries(doGetLocalStorageSourceIdNames()).map(
+      ([sourceId, sourceName]) => [
+        sourceId,
+        { name: sourceName, viewIdNames: doGetLocalStorageSourceViewIdNames(sourceId) },
+      ]
+    ));
+  }
+  return null;
+};
 
 // API-ish
 export const doFileNamesSearch = (filesList, search) => Object.fromEntries(
@@ -75,19 +83,30 @@ export const doSaveSourceContent = (sourceId, value) => {
       return valueStr;
     },
   );
-  if (saveValue) { localStorage.setItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId, saveValue); }
+  if (!saveValue) { return false; }
+  if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+    localStorage.setItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId, saveValue);
+    return true;
+  }
+  return false;
 };
 
 // API
-export const doGetSourceContent = (sourceId, strValue = true) => convertStrValueOrDefault(
-  localStorage.getItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId),
-  strValue ? '' : { type: 'doc', content: [] },
-  'invalid sourceContent',
-  valueStr => {
-    const sourceContentDoc = JSON.parse(valueStr);
-    return strValue ? valueStr : sourceContentDoc;
-  },
-);
+export const doGetSourceContent = (sourceId, strValue = true) => {
+  const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
+  if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+    return convertStrValueOrDefault(
+      localStorage.getItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId),
+      strValue ? '' : { type: 'doc', content: [] },
+      'invalid sourceContent',
+      valueStr => {
+        const sourceContentDoc = JSON.parse(valueStr);
+        return strValue ? valueStr : sourceContentDoc;
+      },
+    );
+  }
+  return null;
+};
 
 const SOURCE_SAVED_TAG_FILTERS_LOCAL_STORAGE_KEY_PREFIX = 'sourceSavedTagFilters_';
 
@@ -130,21 +149,39 @@ export const doCreateNewSource = (name, localStorageNextNewSourceId) => {
 
 // API
 export const doDeleteSource = (sourceId, localStorageSourceViewIds) => {
-  localStorage.removeItem(SOURCE_SAVED_TAG_FILTERS_LOCAL_STORAGE_KEY_PREFIX + sourceId);
-  localStorage.removeItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId);
-  for (const viewId of localStorageSourceViewIds) {
-    localStorage.removeItem(VIEW_CONTENT_SPEC_LOCAL_STORAGE_KEY_PREFIX + getFileIdKeyStr(sourceId, viewId));
+  const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
+  if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+    localStorage.removeItem(SOURCE_SAVED_TAG_FILTERS_LOCAL_STORAGE_KEY_PREFIX + sourceId);
+    localStorage.removeItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId);
+    for (const viewId of localStorageSourceViewIds) {
+      localStorage.removeItem(VIEW_CONTENT_SPEC_LOCAL_STORAGE_KEY_PREFIX + getFileIdKeyStr(sourceId, viewId));
+    }
+    localStorage.removeItem(SOURCE_VIEW_ID_NAMES_LOCAL_STORAGE_KEY_PREFIX + sourceId);
+    return true;
   }
-  localStorage.removeItem(SOURCE_VIEW_ID_NAMES_LOCAL_STORAGE_KEY_PREFIX + sourceId);
+  return false;
 };
 
 // API
 export const doDeleteView = (sourceId, viewId) => {
-  localStorage.removeItem(VIEW_CONTENT_SPEC_LOCAL_STORAGE_KEY_PREFIX + getFileIdKeyStr(sourceId, viewId));
+  const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
+  if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+    localStorage.removeItem(VIEW_CONTENT_SPEC_LOCAL_STORAGE_KEY_PREFIX + getFileIdKeyStr(sourceId, viewId));
+    return true;
+  }
+  return false;
 };
 
 // API
-export const doRenameSource = () => {};
+export const doRenameSource = (sourceId, name) => {
+  const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
+  if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) { return true; }
+  return false;
+};
 
 // API
-export const doRenameView = () => {};
+export const doRenameView = (sourceId, viewId, name) => {
+  const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
+  if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) { return true; }
+  return false;
+};
