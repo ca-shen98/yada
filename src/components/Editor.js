@@ -2,66 +2,73 @@ import './Editor.css';
 import {defer} from 'lodash';
 import React from 'react';
 import {connect} from 'react-redux';
+import {FILE_TYPE, getFileType, getFileIdKeyStr} from '../util/FileIdAndTypeUtils';
 import store from '../store';
-import {
-  getFileIdKeyStr,
-  doSaveSourceContent,
-  doGetSourceContent,
-  calculateNextNewIdKey,
-  persistNewFilterViewAction,
-  modifyFilterViewAction,
-  FILE_TYPES,
-} from '../reducers/FileStorageSystem';
 import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   SET_SAVE_DIRTY_FLAG_ACTION_TYPE,
-  SET_MODIFYING_TAG_FILTERS_FLAG_ACTION_TYPE,
-  CLEAR_MODIFYING_TAG_FILTERS_FLAG_ACTION_TYPE,
-  NO_OPEN_FILE_ID_KEY,
+  NO_OPEN_FILE_ID,
 } from '../reducers/CurrentOpenFileState';
-import {RENAME_INPUT_TYPES, setRenamingInputStateAction} from '../reducers/RenamingInputState';
-import {TagFilteringPluginKey} from '../editor_extension/plugins/TagFiltering';
-import {parse as parseTagFilters} from '../lib/TagFilteringExpressionGrammar';
-import {TextSelection} from 'prosemirror-state';
+import {setRenamingInputStateAction} from '../reducers/RenamingInputState';
 import {
-  calculateFileIdKeyDerivedParameters,
-  getRenameInputIdFunctions,
-  handleSetCurrentOpenFileIdKey,
-} from './Navigator';
+  doSaveSourceContent,
+  doGetSourceContent,
+  doSetSourceSavedTagFilters,
+  doGetSourceSavedTagFilters,
+} from '../backend/FileStorageSystem';
+import {TextSelection} from 'prosemirror-state';
+import {parse as parseTagFilters} from '../lib/TagFiltersGrammar';
+import {TagFilteringPluginKey} from '../editor_extension/plugins/TagFiltering';
+import {handleSetCurrentOpenFileId} from './Navigator';
 import TagMenu from './TagMenu';
 import RichMarkdownEditor from 'rich-markdown-editor';
 
 import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
 
-export const TAG_FILTERING_INPUT_ID = 'tag_filtering_input';
-
 export const handleSaveCurrentFileEditorContent = () => {
-  const currentOpenFileIdKey = store.getState().currentOpenFileIdKey;
-  const { fileType } = calculateFileIdKeyDerivedParameters(currentOpenFileIdKey);
-  if ((fileType === FILE_TYPES.SOURCE || fileType === FILE_TYPES.FILTER_VIEW) && store.getState().saveDirtyFlag) {
-    doSaveSourceContent(currentOpenFileIdKey.sourceIdKey, BlockTaggingEditorExtension.editor.value(true));
+  const currentOpenFileId = store.getState().currentOpenFileId;
+  if (getFileType(this.props.currentOpenFileId) === FILE_TYPE.SOURCE && store.getState().saveDirtyFlag) {
+    doSaveSourceContent(currentOpenFileId.sourceId, BlockTaggingEditorExtension.editor.value(true));
     store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
   }
 };
 
+const TAG_FILTERS_INPUT_ID = 'tag_filters_input';
+
+const SAVED_TAG_FILTERS_DATALIST_ID = 'saved_tag_filters_datalist';
+
 class Editor extends React.Component {
 
-  state = { currentTagFiltersStr: '' };
+  state = {
+    modifyingTagFilters: false,
+    currentTagFiltersStr: '',
+    currentParsedTagFiltersStr: null,
+    sourceSavedTagFilters: {},
+  };
 
-  handleResetTagFilteringInput = () => {
-    const input = document.getElementById(TAG_FILTERING_INPUT_ID);
-    if (input.value !== this.state.currentTagFiltersStr) { input.value = this.state.currentTagFiltersStr; }
-    this.props.dispatchClearModifyingTagFiltersFlagAction();
+  handleResetTagFiltersInput = () => {
+    const input = document.getElementById(TAG_FILTERS_INPUT_ID);
+    input.value = this.state.currentTagFiltersStr;
+    this.setState({ modifyingTagFilters: false });
+  };
+
+  handleStartModifyingTagFilters = () => {
+    this.setState({ modifyingTagFilters: true });
+    defer(() => {
+      const input = document.getElementById(TAG_FILTERS_INPUT_ID);
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    });
   };
 
   handleApplyTagFilters = () => {
     let tagFilters = null;
-    const tagFiltersStr = document.getElementById(TAG_FILTERING_INPUT_ID).value.trim();
+    const tagFiltersStr = document.getElementById(TAG_FILTERS_INPUT_ID).value.trim();
     if (tagFiltersStr === this.state.currentTagFiltersStr) { return true; }
     if (tagFiltersStr) {
       tagFilters = parseTagFilters(tagFiltersStr);
       if (!tagFilters) {
-        alert('invalid tag filtering expression');
+        alert('invalid tag filters');
         return false;
       }
     }
@@ -73,78 +80,59 @@ class Editor extends React.Component {
       );
     }
     BlockTaggingEditorExtension.editor.view.dispatch(editorStateTransaction);
-    this.setState({ currentTagFiltersStr: tagFiltersStr });
+    this.setState({ currentTagFiltersStr: tagFiltersStr, currentParsedTagFiltersStr: JSON.stringify(tagFilters) });
     defer(() => {
+      document.getElementById(TAG_FILTERS_INPUT_ID).value = tagFiltersStr;
       if (tagFiltersStr) { BlockTaggingEditorExtension.editor.view.dom.blur(); } 
       else { BlockTaggingEditorExtension.editor.focusAtStart(); }
     });
     return true;
   };
 
-  handleModifyFilterView = () => {
-    const tagFiltersStr = document.getElementById(TAG_FILTERING_INPUT_ID).value.trim();
-    if (!tagFiltersStr) {
-      alert('empty tag filtering expression');
-      return false;
-    }
-    if (this.handleApplyTagFilters()) {
-      this.props.dispatchModifyFilterViewAction(
-        this.props.currentOpenFileIdKey.sourceIdKey,
-        this.props.currentOpenFileIdKey.viewIdKey,
-        tagFiltersStr,
-      );
-      return true;
-    }
-    return false;
-  };
-
-  handlePersistNewFilterView = () => {
-    if (!this.state.currentTagFiltersStr) { return false; }
-    this.props.dispatchPersistNewFilterViewAction(
-      this.props.currentOpenFileIdKey.sourceIdKey,
-      this.state.currentTagFiltersStr,
-    );
-    const fileIdKey = {
-      sourceIdKey: this.props.currentOpenFileIdKey.sourceIdKey,
-      viewIdKey: this.props.viewsState.hasOwnProperty(this.props.currentOpenFileIdKey.sourceIdKey)
-        ? this.props.viewsState[this.props.currentOpenFileIdKey.sourceIdKey].nextNewViewIdKey
-        : calculateNextNewIdKey({}, 0),
-    };
-    defer(() => {
-      this.props.dispatchSetRenamingInputStateAction({
-        inputType: RENAME_INPUT_TYPES.VIEW_LIST_ITEM,
-        fileIdKey: fileIdKey,
-      });
-      defer(() => {
-        const input = document.getElementById(getRenameInputIdFunctions[RENAME_INPUT_TYPES.VIEW_LIST_ITEM](fileIdKey));
-        input.focus();
-        input.setSelectionRange(0, input.value.length);
-      });
-    });
-    return true;
-  };
-
-  componentDidUpdate = (prevProps, prevState) => {
-    if (prevState.currentTagFiltersStr !== this.state.currentTagFiltersStr) {
-      document.getElementById(TAG_FILTERING_INPUT_ID).value = this.state.currentTagFiltersStr;
-    }
+  handleUnpersistCurrentTagFilters = () => {
     if (
-      prevProps.currentOpenFileIdKey.sourceIdKey !== this.props.currentOpenFileIdKey.sourceIdKey ||
-      prevProps.currentOpenFileIdKey.viewIdKey !== this.props.currentOpenFileIdKey.viewIdKey
+      !this.state.currentTagFiltersStr ||
+      !this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentParsedTagFiltersStr)
+    ) { return false; }
+    const newSourceSavedTagFilters = {...this.state.sourceSavedTagFilters};
+    delete newSourceSavedTagFilters[this.state.currentParsedTagFiltersStr];
+    doSetSourceSavedTagFilters(this.props.currentOpenFileId.sourceId, newSourceSavedTagFilters);
+    this.setState({ sourceSavedTagFilters: newSourceSavedTagFilters });
+  };
+
+  handlePersistNewSavedTagFilters = () => {
+    if (
+      !this.state.currentTagFiltersStr ||
+      this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentParsedTagFiltersStr)
+    ) { return false; }
+    const newSourceSavedTagFilters = {...this.state.sourceSavedTagFilters};
+    newSourceSavedTagFilters[this.state.currentParsedTagFiltersStr] = this.state.currentTagFiltersStr;
+    doSetSourceSavedTagFilters(this.props.currentOpenFileId.sourceId, newSourceSavedTagFilters);
+    this.setState({ sourceSavedTagFilters: newSourceSavedTagFilters });
+  };
+
+  componentDidUpdate = prevProps => {
+    if (
+      prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
+      prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
     ) {
-      const { fileType, tagFilters } = calculateFileIdKeyDerivedParameters(this.props.currentOpenFileIdKey);
-      if (fileType === FILE_TYPES.FILTER_VIEW) { document.getElementById(TAG_FILTERING_INPUT_ID).value = tagFilters; }
-      else { document.getElementById(TAG_FILTERING_INPUT_ID).value = ''; }
-      if (fileType !== FILE_TYPES.INVALID) { this.handleApplyTagFilters(); }
-      if (fileType === FILE_TYPES.SOURCE) { BlockTaggingEditorExtension.editor.focusAtStart(); }
+      const fileType = getFileType(this.props.currentOpenFileId);
+      this.setState({
+        sourceSavedTagFilters: fileType === FILE_TYPE.SOURCE
+          ? doGetSourceSavedTagFilters(this.props.currentOpenFileId.sourceId) : {}
+      });
+      document.getElementById(TAG_FILTERS_INPUT_ID).value = '';
+      if (fileType) { this.handleApplyTagFilters(); }
+      if (fileType === FILE_TYPE.SOURCE) { BlockTaggingEditorExtension.editor.focusAtStart(); }
     }
   };
 
   render = () => {
-    const fileIdKeyStr = getFileIdKeyStr(this.props.currentOpenFileIdKey);
-    const { fileType } = calculateFileIdKeyDerivedParameters(this.props.currentOpenFileIdKey);
-    const value = fileType === FILE_TYPES.SOURCE || fileType === FILE_TYPES.FILTER_VIEW
-      ? doGetSourceContent(this.props.currentOpenFileIdKey.sourceIdKey) : '';
+    const fileIdKeyStr = getFileIdKeyStr(this.props.currentOpenFileId);
+    const fileType = getFileType(this.props.currentOpenFileId);
+    const currentTagFiltersSaved =
+      this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentParsedTagFiltersStr);
+    const value = fileType === FILE_TYPE.SOURCE ? doGetSourceContent(this.props.currentOpenFileId.sourceId) : '';
     return (
       <div className="MainPane">
         <div id="editor_container">
@@ -152,80 +140,75 @@ class Editor extends React.Component {
             <button
               className="MonospaceCharButton"
               title="close"
-              disabled={fileType === FILE_TYPES.INVALID}
-              onClick={() => { handleSetCurrentOpenFileIdKey(NO_OPEN_FILE_ID_KEY); }}>
+              disabled={!fileType}
+              onClick={() => { handleSetCurrentOpenFileId(NO_OPEN_FILE_ID); }}>
               {'✕'}
             </button>
             <button
               className="MonospaceCharButton"
               title="save"
-              disabled={fileType === FILE_TYPES.INVALID || !this.props.saveDirtyFlag}
+              disabled={!fileType || !this.props.saveDirtyFlag}
               onClick={handleSaveCurrentFileEditorContent}>
               {'^'}
             </button>
             <div style={{ flex: 'auto', minWidth: '5px' }} />
-            <div className="InputRow" id="tag_filtering_input_row">
+            <div className="InputRow" id="tag_filters_input_row">
               <button
                 className="MonospaceCharButton"
-                title="persist"
-                hidden={fileType !== FILE_TYPES.SOURCE || this.props.modifyingTagFiltersFlag}
+                title={(currentTagFiltersSaved ? 'un-' : '') + 'persist'}
+                hidden={fileType !== FILE_TYPE.SOURCE || this.state.modifyingTagFilters}
                 disabled={!this.state.currentTagFiltersStr}
-                onClick={this.handlePersistNewFilterView}>
-                {'+'}
+                onClick={
+                  currentTagFiltersSaved ? this.handleUnpersistCurrentTagFilters : this.handlePersistNewSavedTagFilters
+                }>
+                {currentTagFiltersSaved ? '-' : '+'}
               </button>
               <button
                 className="MonospaceCharButton"
                 title="modify"
-                hidden={this.props.modifyingTagFiltersFlag}
-                disabled={fileType !== FILE_TYPES.SOURCE && fileType !== FILE_TYPES.FILTER_VIEW}
-                onClick={() =>{
-                  this.props.dispatchSetModifyingTagFiltersFlagAction();
-                  defer(() => {
-                    const input = document.getElementById(TAG_FILTERING_INPUT_ID);
-                    input.focus();
-                    input.setSelectionRange(input.value.length, input.value.length);
-                  });
-                }}>
+                hidden={this.state.modifyingTagFilters}
+                disabled={fileType !== FILE_TYPE.SOURCE}
+                onClick={this.handleStartModifyingTagFilters}>
                 {'#'}
               </button>
               <input
-                id={TAG_FILTERING_INPUT_ID}
+                id={TAG_FILTERS_INPUT_ID}
                 defaultValue={this.state.currentTagFiltersStr}
-                placeholder="tag filtering expression"
-                title="tag filtering expression - example syntax: ( #{tag1} | !( #{tag2} ) ) & #{tag3}"
-                disabled={
-                  (fileType !== FILE_TYPES.SOURCE && fileType !== FILE_TYPES.FILTER_VIEW) ||
-                  !this.props.modifyingTagFiltersFlag
-                }
+                placeholder="tag filters"
+                title="tag filters - example syntax: ( #{tag1} | !( #{tag2} ) ) & #{tag3}"
+                list={SAVED_TAG_FILTERS_DATALIST_ID}
+                disabled={fileType !== FILE_TYPE.SOURCE || !this.state.modifyingTagFilters}
                 onBlur={event => {
-                  if (
-                    (fileType === FILE_TYPES.FILTER_VIEW && this.handleModifyFilterView()) ||
-                    (fileType === FILE_TYPES.SOURCE && this.handleApplyTagFilters())
-                  ) { this.handleResetTagFilteringInput(); }
+                  if (this.handleApplyTagFilters()) { this.handleResetTagFiltersInput(); }
                   else {
                     const input = event.target;
                     defer(() => { input.focus(); });
                   }
                 }}
-                onKeyDown={event => { if (event.key === 'Escape') { this.handleResetTagFilteringInput(); } }}
+                onKeyDown={event => { if (event.key === 'Escape') { this.handleResetTagFiltersInput(); } }}
                 onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
               />
+              <datalist id={SAVED_TAG_FILTERS_DATALIST_ID}>
+                {
+                  Object.entries(this.state.sourceSavedTagFilters)
+                    .map(([_parsedTagFiltersStr, tagFiltersStr]) => <option value={tagFiltersStr} />)
+                }
+              </datalist>
               <button
                 className="MonospaceCharButton"
                 title="clear"
                 hidden={
-                  fileType !== FILE_TYPES.SOURCE || !this.state.currentTagFiltersStr ||
-                  this.props.modifyingTagFiltersFlag
+                  fileType !== FILE_TYPE.SOURCE || !this.state.currentTagFiltersStr || this.state.modifyingTagFilters
                 }
                 onClick={() => {
-                  document.getElementById(TAG_FILTERING_INPUT_ID).value = '';
+                  document.getElementById(TAG_FILTERS_INPUT_ID).value = '';
                   this.handleApplyTagFilters();
                 }}>
                 {'✕'}
               </button>
             </div>
           </div>
-          <div id="editor" hidden={fileType === FILE_TYPES.INVALID}>
+          <div id="editor" hidden={!fileType}>
             <RichMarkdownEditor
               extensions={[BlockTaggingEditorExtension]}
               key={fileIdKeyStr}
@@ -247,7 +230,7 @@ class Editor extends React.Component {
           <div
             className="PlaceholderDivWithText"
             id="no_file_editor_placeholder"
-            hidden={fileType !== FILE_TYPES.INVALID}>
+            hidden={fileType}>
             <div style={{ flexGrow: 1 }} />
             <div style={{ display: 'flex' }}>
               <div style={{ flexGrow: 2 }} />
@@ -264,20 +247,9 @@ class Editor extends React.Component {
 };
 
 export default connect(
-  state => ({
-    viewsState: state.fileStorageSystem.viewsState,
-    currentOpenFileIdKey: state.currentOpenFileIdKey,
-    saveDirtyFlag: state.saveDirtyFlag,
-    modifyingTagFiltersFlag: state.modifyingTagFiltersFlag,
-  }),
+  state => ({ currentOpenFileId: state.currentOpenFileId, saveDirtyFlag: state.saveDirtyFlag }),
   dispatch => ({
-    dispatchPersistNewFilterViewAction:
-      (sourceIdKey, tagFilters) => dispatch(persistNewFilterViewAction(sourceIdKey, tagFilters)),
-    dispatchModifyFilterViewAction:
-      (sourceIdKey, viewIdKey, tagFilters) => dispatch(modifyFilterViewAction(sourceIdKey, viewIdKey, tagFilters)),
     dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
-    dispatchSetModifyingTagFiltersFlagAction: () => dispatch({ type: SET_MODIFYING_TAG_FILTERS_FLAG_ACTION_TYPE }),
-    dispatchClearModifyingTagFiltersFlagAction: () => dispatch({ type: CLEAR_MODIFYING_TAG_FILTERS_FLAG_ACTION_TYPE }),
     dispatchSetRenamingInputStateAction:
       renamingInputState => dispatch(setRenamingInputStateAction(renamingInputState)),
   }),

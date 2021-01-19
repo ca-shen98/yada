@@ -1,22 +1,14 @@
 import {configureStore} from '@reduxjs/toolkit';
 import {combineReducers} from 'redux';
-import {fileStorageSystemReducer} from './reducers/FileStorageSystem';
-import {
-  currentOpenFileIdKeyReducer,
-  saveDirtyFlagReducer,
-  selectNodeReducer,
-  modifyingTagFiltersFlagReducer,
-} from './reducers/CurrentOpenFileState';
+import {currentOpenFileIdReducer, saveDirtyFlagReducer, selectNodeReducer} from './reducers/CurrentOpenFileState';
 import {renamingInputStateReducer} from './reducers/RenamingInputState';
 import {userSignedInReducer} from './reducers/UserSignedIn';
 
 export default configureStore({
   reducer: combineReducers({
-    fileStorageSystem: fileStorageSystemReducer,
-    currentOpenFileIdKey: currentOpenFileIdKeyReducer,
+    currentOpenFileId: currentOpenFileIdReducer,
     saveDirtyFlag: saveDirtyFlagReducer,
     selectNode: selectNodeReducer,
-    modifyingTagFiltersFlag: modifyingTagFiltersFlagReducer,
     renamingInputState: renamingInputStateReducer,
     userSignedIn: userSignedInReducer,
   }),

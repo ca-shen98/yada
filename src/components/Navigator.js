@@ -3,21 +3,13 @@ import {debounce, defer} from 'lodash';
 import Cookies from 'js-cookie';
 import React from 'react';
 import {batch, connect} from 'react-redux';
+import convertStrValueOrDefault from '../util/ConvertStrValueOrDefault';
+import {FILE_TYPE, getFileType, validateFileIdObj, getFileIdKeyStr} from '../util/FileIdAndTypeUtils';
 import store from '../store';
-import {validateFileIdKeyObj} from '../util/ValidateFileIdKey';
-import {
-  getFileIdKeyStr,
-  newSourceAction,
-  deleteSourceAction,
-  renameSourceAction,
-  deleteViewAction,
-  renameViewAction,
-  FILE_TYPES,
-} from '../reducers/FileStorageSystem';
 import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
-  NO_OPEN_FILE_ID_KEY,
-  setCurrentOpenFileIdKeyActionType,
+  NO_OPEN_FILE_ID,
+  setCurrentOpenFileIdAction,
 } from '../reducers/CurrentOpenFileState';
 import {
   NO_RENAMING_INPUT_STATE,
@@ -25,8 +17,35 @@ import {
   setRenamingInputStateAction,
 } from '../reducers/RenamingInputState';
 import {ACCESS_TOKEN_COOKIE_KEY, setUserSignedInAction} from '../reducers/UserSignedIn';
+import {
+  doSetLocalStorageSourceIdNames,
+  doSetLocalStorageSourceViewIdNames,
+  convertFilesListStateToFileIdNamesList,
+  doGetFilesList,
+  doFileNamesSearch,
+  countNumFiles,
+  calculateNextNewId,
+  doCreateNewSource,
+  doDeleteSource,
+  doDeleteView,
+  doRenameSource,
+  doRenameView,
+} from '../backend/FileStorageSystem';
 
-const INITIAL_FILE_ID_KEY_LOCAL_STORAGE_KEY = 'initialFileIdKey';
+const INITIAL_FILE_ID_LOCAL_STORAGE_KEY = 'initialFileId';
+
+export const handleSetCurrentOpenFileId = fileId => {
+  if (!validateFileIdObj(fileId)) { return; }
+  const currentOpenFileId = store.getState().currentOpenFileId;
+  if (fileId.sourceId !== currentOpenFileId.sourceId || fileId.viewId !== currentOpenFileId.viewId) {
+    if (store.getState().saveDirtyFlag && !window.confirm('confirm discard unsaved changes')) { return; }
+    batch(() => {
+      store.dispatch(setCurrentOpenFileIdAction(fileId));
+      store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+    });
+    localStorage.setItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY, JSON.stringify(fileId));
+  }
+};
 
 const FILE_LIST_ID = 'file_list';
 
@@ -39,263 +58,235 @@ const CURRENT_VIEW_NAME_INPUT_ID = 'current_view_name_input';
 const RENAME_SOURCE_LIST_ITEM_INPUT_ID_PREFIX = 'rename_source_list_item_input_';
 const RENAME_VIEW_LIST_ITEM_INPUT_ID_PREFIX = 'rename_view_list_item_input_';
 
-export const calculateFileIdKeyDerivedParameters = (fileIdKey, sourcesList, viewsState) => {
-  if (!sourcesList) { sourcesList = store.getState().fileStorageSystem.sourcesList; }
-  if (!viewsState) { viewsState = store.getState().fileStorageSystem.viewsState; }
-  const validFileIdKeyObj = validateFileIdKeyObj(fileIdKey);
-  const validSourceIdKey = (validFileIdKeyObj || fileIdKey.hasOwnProperty('sourceIdKey')) &&
-    sourcesList.hasOwnProperty(fileIdKey.sourceIdKey) && sourcesList[fileIdKey.sourceIdKey].hasOwnProperty('name');
-  const validViewIdKey = validFileIdKeyObj && validSourceIdKey && viewsState.hasOwnProperty(fileIdKey.sourceIdKey) &&
-    viewsState[fileIdKey.sourceIdKey].sourceViews.hasOwnProperty(fileIdKey.viewIdKey) &&
-    viewsState[fileIdKey.sourceIdKey].sourceViews[fileIdKey.viewIdKey].hasOwnProperty('name');
-  const fileType =
-    validViewIdKey && viewsState[fileIdKey.sourceIdKey].sourceViews[fileIdKey.viewIdKey].hasOwnProperty('tagFilters')
-      ? FILE_TYPES.FILTER_VIEW
-      : (
-          validViewIdKey && viewsState[fileIdKey.sourceIdKey].sourceViews[fileIdKey.viewIdKey].hasOwnProperty('listHead')
-            ? FILE_TYPES.REFERENCE_VIEW
-            : validSourceIdKey && validFileIdKeyObj && !fileIdKey.viewIdKey ? FILE_TYPES.SOURCE : FILE_TYPES.INVALID
-        );
-  const validFileIdKey = fileType !== FILE_TYPES.INVALID;
-  const sourceName = validFileIdKey ? sourcesList[fileIdKey.sourceIdKey].name : '';
-  return {
-    validFileIdKeyObj,
-    validFileIdKey,
-    fileType,
-    sourceName,
-    fileName: validFileIdKey
-      ? (
-          fileType !== FILE_TYPES.SOURCE
-            ? viewsState[fileIdKey.sourceIdKey].sourceViews[fileIdKey.viewIdKey].name : sourceName
-        )
-      : '',
-    tagFilters: fileType === FILE_TYPES.FILTER_VIEW
-      ? viewsState[fileIdKey.sourceIdKey].sourceViews[fileIdKey.viewIdKey].tagFilters : '',
-    listHead: fileType === FILE_TYPES.REFERENCE_VIEW
-      ? viewsState[fileIdKey.sourceIdKey].sourceViews[fileIdKey.viewIdKey].listHead : '',
-  };
-};
-
-export const handleSetCurrentOpenFileIdKey = fileIdKey => {
-  const { validFileIdKeyObj } = calculateFileIdKeyDerivedParameters(fileIdKey);
-  if (!validFileIdKeyObj) { return; }
-  if (
-    fileIdKey.sourceIdKey !== store.getState().currentOpenFileIdKey.sourceIdKey ||
-    fileIdKey.viewIdKey !== store.getState().currentOpenFileIdKey.viewIdKey
-  ) {
-    if (store.getState().saveDirtyFlag && !window.confirm('confirm discard unsaved changes')) { return; }
-    batch(() => {
-      store.dispatch(setCurrentOpenFileIdKeyActionType(fileIdKey));
-      if (store.getState().saveDirtyFlag) { store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE }); }
-    });
-    localStorage.setItem(INITIAL_FILE_ID_KEY_LOCAL_STORAGE_KEY, JSON.stringify(fileIdKey));
-  }
-};
-
-export const getRenameInputIdFunctions = {
+const getRenameInputIdFunctions = {
   [RENAME_INPUT_TYPES.CURRENT_SOURCE]: () => CURRENT_SOURCE_NAME_INPUT_ID,
   [RENAME_INPUT_TYPES.CURRENT_VIEW]: () => CURRENT_VIEW_NAME_INPUT_ID,
-  [RENAME_INPUT_TYPES.SOURCE_LIST_ITEM]: fileIdKey =>
-    RENAME_SOURCE_LIST_ITEM_INPUT_ID_PREFIX + (fileIdKey.hasOwnProperty('sourceIdKey') ? fileIdKey.sourceIdKey : ''),
-  [RENAME_INPUT_TYPES.VIEW_LIST_ITEM]: fileIdKey =>
-    RENAME_VIEW_LIST_ITEM_INPUT_ID_PREFIX + getFileIdKeyStr(fileIdKey),
-};
-
-const getDisplaySourceName = fileIdKey => {
-  const { sourceName } = calculateFileIdKeyDerivedParameters(fileIdKey);
-  return sourceName;
-};
-
-const getDisplayViewName = fileIdKey => {
-  const { fileType, fileName } = calculateFileIdKeyDerivedParameters(fileIdKey);
-  return fileType !== FILE_TYPES.SOURCE ? fileName : '';
-};
-
-const getRenameInputValueFunctions = {
-  [RENAME_INPUT_TYPES.CURRENT_SOURCE]: getDisplaySourceName,
-  [RENAME_INPUT_TYPES.CURRENT_VIEW]: getDisplayViewName,
-  [RENAME_INPUT_TYPES.SOURCE_LIST_ITEM]: getDisplaySourceName,
-  [RENAME_INPUT_TYPES.VIEW_LIST_ITEM]: getDisplayViewName,
+  [RENAME_INPUT_TYPES.SOURCE_LIST_ITEM]: fileId => RENAME_SOURCE_LIST_ITEM_INPUT_ID_PREFIX + fileId.sourceId,
+  [RENAME_INPUT_TYPES.VIEW_LIST_ITEM]: fileId => RENAME_VIEW_LIST_ITEM_INPUT_ID_PREFIX + getFileIdKeyStr(fileId),
 };
 
 class Navigator extends React.Component {
   
-  state = { [SEARCH_FILE_NAMES_INPUT_ID]: '', [CREATE_SOURCE_NAME_INPUT_ID]: '' };
+  state = {
+    [SEARCH_FILE_NAMES_INPUT_ID]: '',
+    [CREATE_SOURCE_NAME_INPUT_ID]: '',
+    filesList: doGetFilesList(),
+    nextNewFileIds: null,
+  };
+
+  constructor(props) {
+    super(props);
+    this.state.nextNewFileIds = {
+      source: calculateNextNewId(this.state.filesList, 0),
+      nextNewViewIdsForSourceIds: Object.fromEntries(Object.entries(filesList).map(
+        ([sourceId, { viewIdNames }]) => [sourceId, calculateNextNewId(viewIdNames, 0)]
+      )),
+    };
+  };
+
+  getSourceName = fileId => validateFileIdObj(fileId) && this.state.filesList.hasOwnProperty(fileId.sourceId)
+      ? this.state.filesList[fileId.sourceId].name : '';
+  
+  getViewName = fileId => getFileType(fileId) === FILE_TYPE.VIEW &&
+    this.state.filesList.hasOwnProperty(fileId.sourceId) &&
+    this.state.filesList[fileId.sourceId].viewIdNames.hasOwnProperty(fileId.viewId)
+      ? this.state.filesList[fileId.sourceId].viewIdNames[fileId.viewId] : '';
+
+  getFileName = fileId => getFileType(fileId) === FILE_TYPE.VIEW
+    ? this.getViewName(fileId) : this.getSourceName(fileId);
 
   handleClearInputState = inputId => {
     document.getElementById(inputId).value = '';
     this.setState({ [inputId]: '' });
   };
 
-  resetRenameInput = (inputType, fileIdKey) => {
-    const { validFileIdKeyObj, fileName } = calculateFileIdKeyDerivedParameters(fileIdKey);
-    if (!validFileIdKeyObj) { return; }
-    const input = document.getElementById(getRenameInputIdFunctions[inputType](fileIdKey));
-    if (input.value !== fileName) { input.value = fileName; }
+  handleResetRenameInput = (inputType, fileId) => {
+    if (!validateFileIdObj(fileId)) { return; }
+    const input = document.getElementById(getRenameInputIdFunctions[inputType](fileId));
+    input.value = this.getFileName(fileId);
+    input.setSelectionRange(0, 0);
     if (
       this.props.renamingInputState.inputType === inputType &&
-      this.props.renamingInputState.fileIdKey.sourceIdKey === fileIdKey.sourceIdKey &&
-      this.props.renamingInputState.fileIdKey.viewIdKey === fileIdKey.viewIdKey
+      this.props.renamingInputState.fileId.sourceId === fileId.sourceId &&
+      this.props.renamingInputState.fileId.viewId === fileId.viewId
     ) { this.props.dispatchSetRenamingInputStateAction(NO_RENAMING_INPUT_STATE); }
   };
 
-  doFileNamesSearchFilter = idKeysDict => {
-    const idKeys = Object.keys(idKeysDict);
-    return new Set(
-      this.state[SEARCH_FILE_NAMES_INPUT_ID]
-        ? idKeys.filter(idKey => idKeysDict[idKey].name.includes(this.state[SEARCH_FILE_NAMES_INPUT_ID])) : idKeys
-    );
+  handleStartRenaming = (inputType, fileId) => {
+    this.props.dispatchSetRenamingInputStateAction({ inputType, fileId });
+    const inputId = getRenameInputIdFunctions[inputType](fileId);
+    defer(() => {
+      const input = document.getElementById(inputId);
+      input.focus();
+      input.setSelectionRange(0, input.value.length);
+    });
   };
 
-  handleSearchFileNames = () => {
+  handleUpdateSearchInputState = () => {
     this.setState({ [SEARCH_FILE_NAMES_INPUT_ID]: document.getElementById(SEARCH_FILE_NAMES_INPUT_ID).value.trim() });
   };
 
   handleCreateNewSource = () => {
     if (!this.state[CREATE_SOURCE_NAME_INPUT_ID]) { return false; }
-    this.props.dispatchNewSourceAction(this.state[CREATE_SOURCE_NAME_INPUT_ID]);
-    defer(
-      newSourceIdKey => { handleSetCurrentOpenFileIdKey({ sourceIdKey: newSourceIdKey, viewIdKey: 0 }); },
-      this.props.nextNewSourceIdKey,
-    );
+    const nextNewSourceId = this.state.nextNewFileIds.source;
+    const newFilesList = {...this.state.filesList};
+    const { id, name } = doCreateNewSource(this.state[CREATE_SOURCE_NAME_INPUT_ID], nextNewSourceId);
+    newFilesList[id] = { name, viewIdNames: {} };
+    this.setState({ filesList: newFilesList });
+    doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
+    this.setState({
+      nextNewFileIds: {
+        source: calculateNextNewId(newFilesList, parseInt(nextNewSourceId)),
+        nextNewViewIdsForSourceIds: this.state.nextNewFileIds.nextNewViewIdsForSourceIds,
+      },
+    });
+    defer(() => { handleSetCurrentOpenFileId({ sourceId: newSource.id, viewId: 0 }); });
     return true;
   };
 
-  handleDeleteFile = fileIdKey => {
-    const { validFileIdKeyObj, fileType } = calculateFileIdKeyDerivedParameters(fileIdKey);
-    if (!validFileIdKeyObj || fileType === FILE_TYPES.INVALID) { return false; }
+  handleDeleteFile = fileId => {
+    const fileType = getFileType(fileId);
+    if (!fileType) { return false; }
     if (
-      fileIdKey.sourceIdKey === this.props.currentOpenFileIdKey.sourceIdKey &&
-      fileIdKey.viewIdKey === this.props.currentOpenFileIdKey.viewIdKey
-    ) { handleSetCurrentOpenFileIdKey(NO_OPEN_FILE_ID_KEY); }
-    if (fileType !== FILE_TYPES.SOURCE) {
-      this.props.dispatchDeleteViewAction(fileIdKey.sourceIdKey, fileIdKey.viewIdKey);
-    } else { this.props.dispatchDeleteSourceAction(fileIdKey.sourceIdKey); }
+      fileId.sourceId === this.props.currentOpenFileId.sourceId &&
+      fileId.viewId === this.props.currentOpenFileId.viewId
+    ) { handleSetCurrentOpenFileId(NO_OPEN_FILE_ID); }
+    const newFilesList = {...this.state.filesList};
+    if (fileType !== FILE_TYPE.SOURCE) {
+      doDeleteView(fileId.sourceId, fileId.viewId);
+      const newSourceViewIdNames = {...newFilesList[fileId.sourceId].viewIdNames}
+      delete newSourceViewIdNames[fileId.viewId];
+      newFilesList[fileId.sourceId] = { name: newFilesList[fileId.sourceId].name, viewIdNames: newSourceViewIdNames };
+      doSetLocalStorageSourceViewIdNames(fileId.sourceId, newSourceViewIdNames);
+    } else {
+      doDeleteSource(fileId.sourceId, Object.keys(newFilesList[fileId.sourceId].viewIdNames));
+      delete newFilesList[fileId.sourceId];
+      doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
+      const newNextNewViewIdsForSourceIds = {...this.state.nextNewFileIds.nextNewViewIdsForSourceIds};
+      delete newNextNewViewIdsForSourceIds[fileId.sourceId];
+      this.setState({
+        nextNewFileIds: {
+          source: this.state.nextNewFileIds.source,
+          nextNewViewIdsForSourceIds: newNextNewViewIdsForSourceIds,
+        },
+      });
+    }
+    this.setState({ filesList: newFilesList });
     return true;
   }
 
-  handleRenameFile = (inputType, fileIdKey) => {
-    const { validFileIdKeyObj, fileType, fileName: oldName } =
-      calculateFileIdKeyDerivedParameters(fileIdKey);
-    if (!validFileIdKeyObj || fileType === FILE_TYPES.INVALID) { return false; }
-    const input = document.getElementById(getRenameInputIdFunctions[inputType](fileIdKey));
+  handleRenameFile = (inputType, fileId) => {
+    const fileType = getFileType(fileId);
+    if (!fileType) { return false; }
+    const input = document.getElementById(getRenameInputIdFunctions[inputType](fileId));
     if (!input) { return false; }
     const newName = input.value.trim();
     if (!newName) { return false; }
-    if (newName !== oldName) {
-      if (fileType !== FILE_TYPES.SOURCE) {
-        this.props.dispatchRenameViewAction(fileIdKey.sourceIdKey, fileIdKey.viewIdKey, newName);
-      } else { this.props.dispatchRenameSourceAction(fileIdKey.sourceIdKey, newName); }
+    if (newName !== this.getFileName(fileId)) {
+      const newFilesList = {...this.state.filesList};
+      if (fileType !== FILE_TYPE.SOURCE) {
+        doRenameView(fileId.sourceId, fileId.viewId, newName);
+        const newSourceViewIdNames = {...newFilesList[fileId.sourceId].viewIdNames}
+        newSourceViewIdNames[fileId.viewId] = newName;
+        newFilesList[fileId.sourceId] =
+          { name: newFilesList[fileId.sourceId].name, viewIdNames: newSourceViewIdNames };
+        doSetLocalStorageSourceViewIdNames(fileId.sourceId, newSourceViewIdNames);
+      } else {
+        doRenameSource(fileId.sourceId, newName);
+        newFilesList[fileId.sourceId] = { name: newName, viewIdNames: newFilesList[fileId.sourceId].viewIdNames };
+        doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
+      }
+      this.setState({ filesList: newFilesList });
     }
     return true;
   }
 
   componentDidMount = () => {
-    const storedInitialFileIdKeyStr = localStorage.getItem(INITIAL_FILE_ID_KEY_LOCAL_STORAGE_KEY);
-    let storedInitialFileIdKey = {};
-    if (storedInitialFileIdKeyStr) {
-      try { storedInitialFileIdKey = JSON.parse(storedInitialFileIdKeyStr); }
-      catch (e) {
-        console.log('invalid initial fileIdKey');
-        console.log(e);
-      }
-    }
-    const initialFileIdKey = {
-      sourceIdKey: storedInitialFileIdKey.hasOwnProperty('sourceIdKey')
-        ? storedInitialFileIdKey.sourceIdKey : NO_OPEN_FILE_ID_KEY.sourceIdKey,
-      viewIdKey: storedInitialFileIdKey.hasOwnProperty('viewIdKey')
-        ? storedInitialFileIdKey.viewIdKey : NO_OPEN_FILE_ID_KEY.viewIdKey,
+    const storedInitialFileId = convertStrValueOrDefault(
+      localStorage.getItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY),
+      {},
+      'invalid initialFileId',
+    );
+    const initialFileId = {
+      sourceId: storedInitialFileId.hasOwnProperty('sourceId')
+        ? storedInitialFileId.sourceId : NO_OPEN_FILE_ID.sourceId,
+      viewId: storedInitialFileId.hasOwnProperty('viewId') ? storedInitialFileId.viewId : NO_OPEN_FILE_ID.viewId,
     }
     if (
-      initialFileIdKey.sourceIdKey !== this.props.currentOpenFileIdKey.sourceIdKey ||
-      initialFileIdKey.viewIdKey !== this.props.currentOpenFileIdKey.viewIdKey
-    ) { handleSetCurrentOpenFileIdKey(initialFileIdKey); }
+      initialFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
+      initialFileId.viewId !== this.props.currentOpenFileId.viewId
+    ) { handleSetCurrentOpenFileId(initialFileId); }
   };
 
   componentDidUpdate = prevProps => {
-    const { fileType: previousFileType, sourceName: previousSourceName, fileName: previousFileName } =
-      calculateFileIdKeyDerivedParameters(
-        prevProps.currentOpenFileIdKey,
-        prevProps.sourcesList,
-        prevProps.viewsState,
-      );
-    const { fileType: currentFileType, sourceName: currentSourceName, fileName: currentFileName } =
-      calculateFileIdKeyDerivedParameters(this.props.currentOpenFileIdKey);
-    if (currentSourceName !== previousSourceName) {
-      document.getElementById(CURRENT_SOURCE_NAME_INPUT_ID).value = currentSourceName;
-    }
-    if (currentFileType !== previousFileType || currentFileName !== previousFileName) {
-      document.getElementById(CURRENT_VIEW_NAME_INPUT_ID).value = getDisplayViewName(this.props.currentOpenFileIdKey);
+    if (
+      prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
+      prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
+    ) {
+      document.getElementById(CURRENT_SOURCE_NAME_INPUT_ID).value = this.getSourceName(this.props.currentOpenFileId);
+      document.getElementById(CURRENT_VIEW_NAME_INPUT_ID).value = this.getViewName(this.props.currentOpenFileId);
     }
   };
   
-  renameInput = ({ inputType, fileIdKey, ...remainingProps }) => {
-    const inputId = getRenameInputIdFunctions[inputType](fileIdKey);
-    const { validFileIdKey } = calculateFileIdKeyDerivedParameters(fileIdKey);
-    const value = getRenameInputValueFunctions[inputType](fileIdKey);
+  renameInput = ({ inputType, fileId, ...remainingProps }) => {
+    const fileType = getFileType(fileId);
+    const inputId = getRenameInputIdFunctions[inputType](fileId);
+    const value = this.getFileName(fileId);
     return (
       <input
         id={inputId}
         defaultValue={value}
         placeholder={value}
         disabled={
-          !validFileIdKey || this.props.renamingInputState.inputType !== inputType ||
-          this.props.renamingInputState.fileIdKey.sourceIdKey !== fileIdKey.sourceIdKey ||
-          this.props.renamingInputState.fileIdKey.viewIdKey !== fileIdKey.viewIdKey
+          !fileType || this.props.renamingInputState.inputType !== inputType ||
+          this.props.renamingInputState.fileId.sourceId !== fileId.sourceId ||
+          this.props.renamingInputState.fileId.viewId !== fileId.viewId
         }
         onBlur={event => {
-          if (this.handleRenameFile(inputType, fileIdKey)) { this.resetRenameInput(inputType, fileIdKey); }
+          if (this.handleRenameFile(inputType, fileId)) { this.handleResetRenameInput(inputType, fileId); }
           else { event.target.focus(); }
         }}
-        onKeyDown={event => { if (event.key === 'Escape') { this.resetRenameInput(inputType, fileIdKey); } }}
+        onKeyDown={event => { if (event.key === 'Escape') { this.handleResetRenameInput(inputType, fileId); } }}
         onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
         {...remainingProps}
       />
     );
   };
 
-  renameButton = ({ inputType, fileIdKey, ...remainingProps }) => {
-    const inputId = getRenameInputIdFunctions[inputType](fileIdKey);
-    const { validFileIdKey } = calculateFileIdKeyDerivedParameters(fileIdKey);
+  renameButton = ({ inputType, fileId, ...remainingProps }) => {
+    const fileType = getFileType(fileId);
     return (
       <button
         className="MonospaceCharButton"
         title="rename"
         hidden={
           this.props.renamingInputState.inputType === inputType &&
-          this.props.renamingInputState.fileIdKey.sourceIdKey === fileIdKey.sourceIdKey &&
-          this.props.renamingInputState.fileIdKey.viewIdKey === fileIdKey.viewIdKey
+          this.props.renamingInputState.fileId.sourceId === fileId.sourceId &&
+          this.props.renamingInputState.fileId.viewId === fileId.viewId
         }
-        disabled={!validFileIdKey}
-        onClick={() =>{
-          this.props.dispatchSetRenamingInputStateAction({ inputType, fileIdKey });
-          defer(() => {
-            const input = document.getElementById(inputId);
-            input.focus();
-            input.setSelectionRange(0, input.value.length);
-          });
-        }}
+        disabled={!fileType}
+        onClick={() => { this.handleStartRenaming(inputType, fileId); }}
         {...remainingProps}>
         {'*'}
       </button>
     );
   };
 
-  fileListItemButtonRow = ({ inputType, fileIdKey }) => {
-    const { fileType, fileName } = calculateFileIdKeyDerivedParameters(fileIdKey);
-    const currentlyOpen = fileIdKey.sourceIdKey === this.props.currentOpenFileIdKey.sourceIdKey &&
-      fileIdKey.viewIdKey === this.props.currentOpenFileIdKey.viewIdKey;
-    const renameComponentProps = { inputType, fileIdKey };
+  fileListItemButtonRow = ({ inputType, fileId }) => {
+    const fileName = this.getFileName(fileId);
+    const currentlyOpen = fileId.sourceId === this.props.currentOpenFileId.sourceId &&
+      fileId.viewId === this.props.currentOpenFileId.viewId;
+    const renameComponentProps = { inputType, fileId };
     return (
       <div className="ButtonRow">
         {
           this.props.renamingInputState.inputType !== inputType ||
-          this.props.renamingInputState.fileIdKey.sourceIdKey !== fileIdKey.sourceIdKey ||
-          this.props.renamingInputState.fileIdKey.viewIdKey !== fileIdKey.viewIdKey
+          this.props.renamingInputState.fileId.sourceId !== fileId.sourceId ||
+          this.props.renamingInputState.fileId.viewId !== fileId.viewId
             ? <button
                 title={(currentlyOpen ? 'currently ' : '') + 'open'}
                 disabled={currentlyOpen}
-                onClick={() => { handleSetCurrentOpenFileIdKey(fileIdKey); }}>
+                onClick={() => { handleSetCurrentOpenFileId(fileId); }}>
                 <span style={{ fontStyle: currentlyOpen ? 'italic' : 'normal' }}>
                   {
                     this.state[SEARCH_FILE_NAMES_INPUT_ID]
@@ -321,9 +312,9 @@ class Navigator extends React.Component {
           className="MonospaceCharButton"
           title="delete"
           onClick={() => {
-            if (fileType !== FILE_TYPES.SOURCE || window.confirm('confirm delete source "' + fileName + '"')) {
-              this.handleDeleteFile(fileIdKey);
-            }
+            if (
+              getFileType(fileId) !== FILE_TYPE.SOURCE || window.confirm('confirm delete source "' + fileName + '"')
+            ) { this.handleDeleteFile(fileId); }
           }}>
           {'-'}
         </button>
@@ -332,44 +323,30 @@ class Navigator extends React.Component {
   };
 
   render = () => {
-    const { fileType: currentOpenFileType } = calculateFileIdKeyDerivedParameters(this.props.currentOpenFileIdKey);
+    const currentOpenFileType = getFileType(this.props.currentOpenFileId);
     const currentSourceRenameComponentProps = {
       inputType: RENAME_INPUT_TYPES.CURRENT_SOURCE,
-      fileIdKey: { sourceIdKey: this.props.currentOpenFileIdKey.sourceIdKey, viewIdKey: 0 },
+      fileId: { sourceId: this.props.currentOpenFileId.sourceId, viewId: 0 },
     };
     const currentViewRenameComponentProps = {
       inputType: RENAME_INPUT_TYPES.CURRENT_VIEW,
-      fileIdKey: this.props.currentOpenFileIdKey,
+      fileId: this.props.currentOpenFileId,
     };
-    // API(s)
-    let numFilteredViews = 0;
-    const filteredSourceViews = Object.keys(this.props.viewsState).reduce(
-      (partial, sourceIdKey) => {
-        const filteredSourceViewIdKeys_ = this.doFileNamesSearchFilter(this.props.viewsState[sourceIdKey].sourceViews);
-        numFilteredViews += filteredSourceViewIdKeys_.size;
-        return {
-          ...partial,
-          ...(filteredSourceViewIdKeys_.size > 0 ? { [sourceIdKey]: filteredSourceViewIdKeys_ } : null),
-        };
-      },
-      {},
-    );
-    const filteredSources_ = this.doFileNamesSearchFilter(this.props.sourcesList);
-    const filteredSources = this.state[SEARCH_FILE_NAMES_INPUT_ID]
-      ? new Set([...filteredSources_, ...Object.keys(filteredSourceViews)]) : filteredSources_;
+    const filesList = doGetFilesList();
+    const numFiles = countNumFiles(filesList);
+    const filteredFilesList = this.state[SEARCH_FILE_NAMES_INPUT_ID]
+      ? doFileNamesSearch(filesList, this.state[SEARCH_FILE_NAMES_INPUT_ID]) : filesList;
+    const numFilteredFiles = countNumFiles(filteredFilesList);
     return (
       <div className="SidePane">
         <div id="current_file_container">
           <div className="InputRow">
-            {
-              currentOpenFileType !== FILE_TYPES.INVALID
-                ? <this.renameButton {...currentSourceRenameComponentProps} /> : null
-            }
+            {currentOpenFileType ? <this.renameButton {...currentSourceRenameComponentProps} /> : null}
             <this.renameInput {...currentSourceRenameComponentProps} title="current open source" />
           </div>
           <div className="InputRow">
             {
-              currentOpenFileType !== FILE_TYPES.INVALID && currentOpenFileType !== FILE_TYPES.SOURCE
+              currentOpenFileType && currentOpenFileType !== FILE_TYPE.SOURCE
                 ? <this.renameButton {...currentViewRenameComponentProps} /> : null
             }
             <this.renameInput {...currentViewRenameComponentProps} title="current open view" />
@@ -381,7 +358,7 @@ class Navigator extends React.Component {
               id={SEARCH_FILE_NAMES_INPUT_ID}
               title="search file names"
               placeholder="search file names"
-              onChange={debounce(this.handleSearchFileNames, 150)}
+              onChange={debounce(this.handleUpdateSearchInputState, 150)}
               onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
               onKeyDown={event => { if (event.key === 'Escape') { event.target.blur(); } }}
             />
@@ -394,26 +371,26 @@ class Navigator extends React.Component {
             </button>
           </div>
           {
-            filteredSources.size > 0
+            Object.keys(filteredFilesList).length > 0
               ? <ul id={FILE_LIST_ID}>
                   {
-                    Array.from(filteredSources).map(sourceIdKey =>
-                      <li key={sourceIdKey}>
+                    Object.entries(filteredFilesList).map(([sourceId, { viewIdNames }]) =>
+                      <li key={sourceId}>
                         <this.fileListItemButtonRow
                           inputType={RENAME_INPUT_TYPES.SOURCE_LIST_ITEM}
-                          fileIdKey={{ sourceIdKey, viewIdKey: 0 }}
+                          fileId={{ sourceId, viewId: 0 }}
                         />
                         {
-                          filteredSourceViews.hasOwnProperty(sourceIdKey)
+                          Object.keys(viewIdNames).length > 0
                             ? <ul>
                                 {
-                                  Array.from(filteredSourceViews[sourceIdKey]).map(viewIdKey => {
-                                    const fileIdKey = { sourceIdKey, viewIdKey };
+                                  Object.keys(viewIdNames).map(viewId => {
+                                    const fileId = { sourceId, viewId };
                                     return (
-                                      <li key={getFileIdKeyStr(fileIdKey)}>
+                                      <li key={getFileIdKeyStr(fileId)}>
                                         <this.fileListItemButtonRow
                                           inputType={RENAME_INPUT_TYPES.VIEW_LIST_ITEM}
-                                          fileIdKey={fileIdKey}
+                                          fileId={fileId}
                                         />
                                       </li>
                                     );
@@ -434,12 +411,7 @@ class Navigator extends React.Component {
             className="PlaceholderDivWithText"
             id="filtered_files_placeholder"
             hidden={!this.state[SEARCH_FILE_NAMES_INPUT_ID]}>
-            {
-              (
-                Object.keys(this.props.sourcesList).length + this.props.numViews -
-                filteredSources.size - numFilteredViews
-              ) + ' of ' + (Object.keys(this.props.sourcesList).length + this.props.numViews) + ' files filtered'
-            }
+            {(numFiles - numFilteredFiles) + ' of ' + (numFiles) + ' files hidden by search'}
           </div>
           <div className="InputRow" id="create_source_name_input_row">
             <input
@@ -489,22 +461,8 @@ class Navigator extends React.Component {
 };
 
 export default connect(
-  state => ({
-    sourcesList: state.fileStorageSystem.sourcesList,
-    nextNewSourceIdKey: state.fileStorageSystem.nextNewSourceIdKey,
-    viewsState: state.fileStorageSystem.viewsState,
-    numViews: state.fileStorageSystem.numViews,
-    currentOpenFileIdKey: state.currentOpenFileIdKey,
-    saveDirtyFlag: state.saveDirtyFlag,
-    renamingInputState: state.renamingInputState,
-  }),
+  state => ({ currentOpenFileId: state.currentOpenFileId, renamingInputState: state.renamingInputState }),
   dispatch => ({
-    dispatchNewSourceAction: name => dispatch(newSourceAction(name)),
-    dispatchDeleteSourceAction: sourceIdKey => dispatch(deleteSourceAction(sourceIdKey)),
-    dispatchRenameSourceAction: (sourceIdKey, newName) => dispatch(renameSourceAction(sourceIdKey, newName)),
-    dispatchDeleteViewAction: (sourceIdKey, viewIdKey) => dispatch(deleteViewAction(sourceIdKey, viewIdKey)),
-    dispatchRenameViewAction:
-      (sourceIdKey, viewIdKey, newName) => dispatch(renameViewAction(sourceIdKey, viewIdKey, newName)),
     dispatchSetRenamingInputStateAction:
       renamingInputState => dispatch(setRenamingInputStateAction(renamingInputState)),
     dispatchSetUserSignedInAction: status => dispatch(setUserSignedInAction(status)),
