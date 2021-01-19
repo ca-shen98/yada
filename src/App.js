@@ -8,14 +8,14 @@ import Editor, {handleSaveCurrentFileEditorContent} from './components/Editor';
 
 class App extends React.Component {
 	
-	keydownHandler = event => {
-		if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey) && event.keyCode === 83) {
+  keydownHandler = event => {
+    if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey) && event.keyCode === 83) {
       event.preventDefault();
       if (this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) {
         handleSaveCurrentFileEditorContent();
       }
-		}
-	}
+    }
+  }
 	
 	componentDidMount = () => { document.addEventListener('keydown',this.keydownHandler); };
 	componentWillUnmount = () => { document.removeEventListener('keydown', this.keydownHandler); };

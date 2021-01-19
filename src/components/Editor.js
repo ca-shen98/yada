@@ -28,8 +28,9 @@ import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
 export const handleSaveCurrentFileEditorContent = () => {
   const currentOpenFileId = store.getState().currentOpenFileId;
   if (getFileType(this.props.currentOpenFileId) === FILE_TYPE.SOURCE && store.getState().saveDirtyFlag) {
-    doSaveSourceContent(currentOpenFileId.sourceId, BlockTaggingEditorExtension.editor.value(true));
-    store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+    if (doSaveSourceContent(currentOpenFileId.sourceId, BlockTaggingEditorExtension.editor.value(true))) {
+      store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+    } else { alert('failed to save source content'); }
   }
 };
 
@@ -133,6 +134,8 @@ class Editor extends React.Component {
     const currentTagFiltersSaved =
       this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentParsedTagFiltersStr);
     const value = fileType === FILE_TYPE.SOURCE ? doGetSourceContent(this.props.currentOpenFileId.sourceId) : '';
+    if (value === null) { alert('failed to retrieve source content'); }
+    const editorValue = value ?? '';
     return (
       <div className="MainPane">
         <div id="editor_container">
@@ -212,8 +215,8 @@ class Editor extends React.Component {
             <RichMarkdownEditor
               extensions={[BlockTaggingEditorExtension]}
               key={fileIdKeyStr}
-              defaultValue={value}
-              jsonStrValue={!(!value)}
+              defaultValue={editorValue}
+              jsonStrValue={!(!editorValue)}
               onSave={handleSaveCurrentFileEditorContent}
               onKeyDown={event => {
                 if (event.key === 'Escape') {

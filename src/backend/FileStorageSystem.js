@@ -1,7 +1,9 @@
+import Cookies from 'js-cookie';
 import store from '../store';
+import {SERVER_BASE_URL, fetchWithTimeout} from '../util/FetchWithTimeout';
 import convertStrValueOrDefault from '../util/ConvertStrValueOrDefault';
 import {getFileIdKeyStr} from '../util/FileIdAndTypeUtils';
-import {BACKEND_MODE_SIGNED_IN_STATUS} from '../reducers/BackendModeSignedInStatus';
+import {BACKEND_MODE_SIGNED_IN_STATUS, ACCESS_TOKEN_COOKIE_KEY} from '../reducers/BackendModeSignedInStatus';
 
 const SOURCE_ID_NAMES_LOCAL_STORAGE_KEY = 'sourceIdNames';
 
@@ -41,6 +43,17 @@ export const doGetFilesList = () => {
         { name: sourceName, viewIdNames: doGetLocalStorageSourceViewIdNames(sourceId) },
       ]
     ));
+  } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
+    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    try {
+      const response = fetchWithTimeout(
+        SERVER_BASE_URL + `documents`,
+        { headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      );
+      if (response.ok) {
+        return JSON.parse(Promise.resolve(response.json()));
+      };
+    } catch (e) { console.log(e); }
   }
   return null;
 };
@@ -87,6 +100,19 @@ export const doSaveSourceContent = (sourceId, value) => {
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
     localStorage.setItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId, saveValue);
     return true;
+  } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
+    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    try {
+      const { ok } = fetchWithTimeout(
+        SERVER_BASE_URL + `document?docID=${sourceId}`,
+        {
+          method: 'PUT',
+          body: saveValue,
+          headers: new Headers({ 'Content-Type': 'application/json', 'Set-Cookie': `token=${token}` }),
+        },
+      );
+      return ok;
+    } catch (e) { console.log(e); }
   }
   return false;
 };
@@ -104,13 +130,25 @@ export const doGetSourceContent = (sourceId, strValue = true) => {
         return strValue ? valueStr : sourceContentDoc;
       },
     );
+  } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
+    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    try {
+      const response = fetchWithTimeout(
+        SERVER_BASE_URL + `document?docID=${sourceId}`,
+        { headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      );
+      if (response.ok) {
+        const responseValue = Promise.resolve(response.json());
+        return strValue ? responseValue : JSON.parse(responseValue);
+      };
+    } catch (e) { console.log(e); }
   }
   return null;
 };
 
 const SOURCE_SAVED_TAG_FILTERS_LOCAL_STORAGE_KEY_PREFIX = 'sourceSavedTagFilters_';
 
-// API-ish
+// API-ish // TODO
 export const doSetSourceSavedTagFilters = (sourceId, sourceSavedTagFilters) => {
   if (Object.keys(sourceSavedTagFilters).length > 0) {
     localStorage.setItem(
@@ -120,7 +158,7 @@ export const doSetSourceSavedTagFilters = (sourceId, sourceSavedTagFilters) => {
   } else { localStorage.removeItem(SOURCE_SAVED_TAG_FILTERS_LOCAL_STORAGE_KEY_PREFIX + sourceId); }
 };
 
-// API
+// API // TODO
 export const doGetSourceSavedTagFilters = sourceId => convertStrValueOrDefault(
   localStorage.getItem(SOURCE_SAVED_TAG_FILTERS_LOCAL_STORAGE_KEY_PREFIX + sourceId),
   {},
@@ -158,6 +196,15 @@ export const doDeleteSource = (sourceId, localStorageSourceViewIds) => {
     }
     localStorage.removeItem(SOURCE_VIEW_ID_NAMES_LOCAL_STORAGE_KEY_PREFIX + sourceId);
     return true;
+  } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
+    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    try {
+      const { ok } = fetchWithTimeout(
+        SERVER_BASE_URL + `document?docID=${sourceId}`,
+        { method: 'DELETE', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      );
+      return ok;
+    } catch (e) { console.log(e); }
   }
   return false;
 };
@@ -168,6 +215,15 @@ export const doDeleteView = (sourceId, viewId) => {
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
     localStorage.removeItem(VIEW_CONTENT_SPEC_LOCAL_STORAGE_KEY_PREFIX + getFileIdKeyStr(sourceId, viewId));
     return true;
+  } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
+    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    try {
+      const { ok } = fetchWithTimeout(
+        SERVER_BASE_URL + `view?docID=${sourceId}&viewID=${viewId}`,
+        { method: 'DELETE', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      );
+      return ok;
+    } catch (e) { console.log(e); }
   }
   return false;
 };
@@ -176,6 +232,16 @@ export const doDeleteView = (sourceId, viewId) => {
 export const doRenameSource = (sourceId, name) => {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) { return true; }
+  else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
+    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    try {
+      const { ok } = fetchWithTimeout(
+        SERVER_BASE_URL + `rename_document?docID=${sourceId}&name=${name}`,
+        { method: 'UPDATE', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      );
+      return ok;
+    } catch (e) { console.log(e); }
+  }
   return false;
 };
 
@@ -183,5 +249,15 @@ export const doRenameSource = (sourceId, name) => {
 export const doRenameView = (sourceId, viewId, name) => {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) { return true; }
+  else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
+    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    try {
+      const { ok } = fetchWithTimeout(
+        SERVER_BASE_URL + `rename_view?docID=${sourceId}&viewID=${viewId}&name=${name}`,
+        { method: 'UPDATE', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      );
+      return ok;
+    } catch (e) { console.log(e); }
+  }
   return false;
 };

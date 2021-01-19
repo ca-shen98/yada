@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import {SERVER_BASE_URL} from '../util/FetchWithTimeout';
+import {SERVER_BASE_URL, fetchWithTimeout} from '../util/FetchWithTimeout';
 
 export const BACKEND_MODE_SIGNED_IN_STATUS = {
   USER_SIGNED_IN: 'USER_SIGNED_IN',
@@ -26,8 +26,19 @@ export const loginBackend = (name, email, token) => {
 
 export const INITIAL_LOCAL_STORAGE_BACKEND_MODE_LOCAL_STORAGE_KEY = 'initialLocalStorageBackendMode';
 
-export const getUserSignedInStatus = () => Cookies.get(ACCESS_TOKEN_COOKIE_KEY)
-  ? BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN : BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT;
+export const getUserSignedInStatus = () => {
+  const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+  if (token) {
+    try {
+      const { ok } = fetchWithTimeout(
+        SERVER_BASE_URL + `auth`,
+        { headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      );
+      if (ok) { return BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN; }
+    } catch (e) { console.log(e); }
+  }
+  return BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT;
+};
 
 const SET_BACKEND_MODE_SIGNED_IN_STATUS_ACTION_TYPE = 'backendModeSignedInStatus/set';
 export const setBackendModeSignedInStatusAction =
