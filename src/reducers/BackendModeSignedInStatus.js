@@ -1,6 +1,9 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import {SERVER_BASE_URL, fetchWithTimeout} from '../util/FetchWithTimeout';
+// import {fetchWithTimeout} from '../util/FetchWithTimeout';
+
+export const SERVER_BASE_URL = process.env.NODE_ENV === 'development'
+  ? "http://localhost:5000/" : "https://yaas.azurewebsites.net/";
 
 export const BACKEND_MODE_SIGNED_IN_STATUS = {
   USER_SIGNED_IN: 'USER_SIGNED_IN',
@@ -10,18 +13,17 @@ export const BACKEND_MODE_SIGNED_IN_STATUS = {
 
 export const ACCESS_TOKEN_COOKIE_KEY = 'access_token';
 
-export const loginBackend = (name, email, token) => {
-  return Promise.resolve(
-    axios.post(
-      SERVER_BASE_URL + "register_user",
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Set-Cookie': `token=${token}` },
-        body: JSON.stringify({ name, email, token })
-      },
-      { withCredentials: true },
-    ).then(() => { return true; })
+export async function loginBackend(name, email, token) {
+  await axios.post(
+    SERVER_BASE_URL + "register_user",
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Set-Cookie': `token=${token}` },
+      body: JSON.stringify({ name, email, token })
+    },
+    { withCredentials: true },
   );
+  return true;
 };
 
 export const INITIAL_LOCAL_STORAGE_BACKEND_MODE_LOCAL_STORAGE_KEY = 'initialLocalStorageBackendMode';
@@ -29,13 +31,15 @@ export const INITIAL_LOCAL_STORAGE_BACKEND_MODE_LOCAL_STORAGE_KEY = 'initialLoca
 export const getUserSignedInStatus = () => {
   const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
   if (token) {
-    try {
-      const { ok } = fetchWithTimeout(
-        SERVER_BASE_URL + `auth`,
-        { headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
-      );
-      if (ok) { return BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN; }
-    } catch (e) { console.log(e); }
+    return BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN;
+    // TODO
+    // try {
+    //   const { ok } = fetchWithTimeout(
+    //     SERVER_BASE_URL + `auth`,
+    //     { headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+    //   );
+    //   if (ok) { return BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN; }
+    // } catch (e) { console.log(e); }
   }
   return BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT;
 };

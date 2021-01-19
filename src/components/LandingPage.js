@@ -44,6 +44,12 @@ class LandingPage extends React.Component {
           responseType="code,token"
         />
       </Section>
+      <button
+        onClick={() => {
+          this.props.dispatchSetBackendModeSignedInStatusAction(BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE);
+        }}>
+        Use local storage
+      </button>
     </Hero>;
 }
 

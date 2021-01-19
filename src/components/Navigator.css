@@ -41,7 +41,7 @@
 }
 
 #filtered_files_placeholder {
-  padding-top: 6px;
+  margin-top: 0;
 }
 
 #create_source_name_input_row {

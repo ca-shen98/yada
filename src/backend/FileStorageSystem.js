@@ -1,9 +1,9 @@
 import Cookies from 'js-cookie';
 import store from '../store';
-import {SERVER_BASE_URL, fetchWithTimeout} from '../util/FetchWithTimeout';
+import {fetchWithTimeout} from '../util/FetchWithTimeout';
 import convertStrValueOrDefault from '../util/ConvertStrValueOrDefault';
 import {getFileIdKeyStr} from '../util/FileIdAndTypeUtils';
-import {BACKEND_MODE_SIGNED_IN_STATUS, ACCESS_TOKEN_COOKIE_KEY} from '../reducers/BackendModeSignedInStatus';
+import {BACKEND_MODE_SIGNED_IN_STATUS, ACCESS_TOKEN_COOKIE_KEY, SERVER_BASE_URL} from '../reducers/BackendModeSignedInStatus';
 
 const SOURCE_ID_NAMES_LOCAL_STORAGE_KEY = 'sourceIdNames';
 
@@ -34,7 +34,7 @@ export const convertFilesListStateToFileIdNamesList = filesListState => Object.f
 );
 
 // API
-export const doGetFilesList = () => {
+export async function doGetFilesList() {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
     return Object.fromEntries(Object.entries(doGetLocalStorageSourceIdNames()).map(
@@ -46,11 +46,24 @@ export const doGetFilesList = () => {
   } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
-      const response = fetchWithTimeout(
+      const response = await fetchWithTimeout(
         SERVER_BASE_URL + `documents`,
         { headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
       );
-      if (response.ok) { return JSON.parse(Promise.resolve(response.json())); }
+      if (response.ok) {
+        const responseValue = await response.json();
+        return Object.fromEntries(Object.entries(responseValue).map( // TODO just return directly if views map not list
+          ([sourceId, { name, views }]) => [
+            sourceId,
+            {
+              name,
+              viewsList: Object.fromEntries(views.map(
+                ({ id: viewId, name: viewName, type }) => [viewId, { name: viewName, type }]
+              )),
+            },
+          ]
+        ));
+      }
     } catch (e) { console.log(e); }
   }
   return null;
@@ -81,10 +94,10 @@ const VIEW_CONTENT_SPEC_LOCAL_STORAGE_KEY_PREFIX = 'viewContentSpec_';
 
 const SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX = 'sourceContent_';
 
-const EMPTY_SOURCE_CONTENT = { type: 'doc', content: [] };
+const EMPTY_SOURCE_CONTENT = { type: 'doc', content: [{ type: 'paragraph', attrs: { tags: {} } }] };
 
 // API
-export const doSaveSourceContent = (value, sourceId, createSourceName) => {
+export async function doSaveSourceContent(value, sourceId, createSourceName) {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) { return null; }
   const saveValue = value
@@ -105,16 +118,16 @@ export const doSaveSourceContent = (value, sourceId, createSourceName) => {
   } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
-      const response = sourceIdfetchWithTimeout(
+      const response = await fetchWithTimeout(
         SERVER_BASE_URL + 'document' + (sourceId ? `?docID=${sourceId}` : ''),
         {
           method: 'PUT',
-          body: saveValue,
+          body: JSON.stringify({ doc: JSON.parse(saveValue), selection: {} }), // TODO pass stringified doc directly
           headers: new Headers({ 'Content-Type': 'application/json', 'Set-Cookie': `token=${token}` }),
         },
       );
       if (response.ok) {
-        const { docID, name } = JSON.parse(Promise.resolve(response.json()));
+        const { docID, name } = await response.json();
         return { id: docID, ...(createSourceName ? { name } : null) };
       };
     } catch (e) { console.log(e); }
@@ -123,12 +136,12 @@ export const doSaveSourceContent = (value, sourceId, createSourceName) => {
 };
 
 // API
-export const doGetSourceContent = sourceId => {
+export async function doGetSourceContent(sourceId) {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
     return convertStrValueOrDefault(
       localStorage.getItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId),
-      '',
+      null,
       'invalid sourceContent',
       valueStr => {
         JSON.parse(valueStr);
@@ -138,14 +151,14 @@ export const doGetSourceContent = sourceId => {
   } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
-      const response = fetchWithTimeout(
+      const response = await fetchWithTimeout(
         SERVER_BASE_URL + `document?docID=${sourceId}`,
         { headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
       );
       if (response.ok) {
-        const responseValue = Promise.resolve(response.json());
-        return strValue ? responseValue : JSON.parse(responseValue);
-      };
+        const responseValue = await response.json(); 
+        return JSON.stringify(responseValue.doc); // TODO just return stringified doc directly via response.text()
+      }
     } catch (e) { console.log(e); }
   }
   return null;
@@ -182,11 +195,11 @@ export const calculateLocalStorageNextNewFileIds = filesList => ({
   )),
 });
 
-// API // TODO
-export const doCreateNewSource = (name, localStorageNextNewSourceId) => {
+// API
+export async function doCreateNewSource(name, localStorageNextNewSourceId) {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if(backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) { return null; }
-  return doSaveSourceContent(
+  return await doSaveSourceContent(
     null,
     backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE ? localStorageNextNewSourceId : null,
     name,
@@ -194,7 +207,7 @@ export const doCreateNewSource = (name, localStorageNextNewSourceId) => {
 };
 
 // API
-export const doDeleteSource = (sourceId, localStorageSourceViewIds) => {
+export async function doDeleteSource(sourceId, localStorageSourceViewIds) {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
     localStorage.removeItem(SOURCE_SAVED_TAG_FILTERS_LOCAL_STORAGE_KEY_PREFIX + sourceId);
@@ -202,12 +215,12 @@ export const doDeleteSource = (sourceId, localStorageSourceViewIds) => {
     for (const viewId of localStorageSourceViewIds) {
       localStorage.removeItem(VIEW_CONTENT_SPEC_LOCAL_STORAGE_KEY_PREFIX + getFileIdKeyStr(sourceId, viewId));
     }
-    localStorage.removeItem(SOURCE_VIEW_ID_NAMES_LOCAL_STORAGE_KEY_PREFIX + sourceId);
+    localStorage.removeItem(SOURCE_VIEWS_LIST_LOCAL_STORAGE_KEY_PREFIX + sourceId);
     return true;
   } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
-      const { ok } = fetchWithTimeout(
+      const { ok } = await fetchWithTimeout(
         SERVER_BASE_URL + `document?docID=${sourceId}`,
         { method: 'DELETE', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
       );
@@ -218,7 +231,7 @@ export const doDeleteSource = (sourceId, localStorageSourceViewIds) => {
 };
 
 // API
-export const doDeleteView = (sourceId, viewId) => {
+export async function doDeleteView(sourceId, viewId) {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
     localStorage.removeItem(VIEW_CONTENT_SPEC_LOCAL_STORAGE_KEY_PREFIX + getFileIdKeyStr(sourceId, viewId));
@@ -226,7 +239,7 @@ export const doDeleteView = (sourceId, viewId) => {
   } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
-      const { ok } = fetchWithTimeout(
+      const { ok } = await fetchWithTimeout(
         SERVER_BASE_URL + `view?docID=${sourceId}&viewID=${viewId}`,
         { method: 'DELETE', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
       );
@@ -237,13 +250,13 @@ export const doDeleteView = (sourceId, viewId) => {
 };
 
 // API
-export const doRenameSource = (sourceId, name) => {
+export async function doRenameSource(sourceId, name) {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) { return true; }
   else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
-      const { ok } = fetchWithTimeout(
+      const { ok } = await fetchWithTimeout(
         SERVER_BASE_URL + `rename_document?docID=${sourceId}&name=${name}`,
         { method: 'UPDATE', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
       );
@@ -254,13 +267,13 @@ export const doRenameSource = (sourceId, name) => {
 };
 
 // API
-export const doRenameView = (sourceId, viewId, name) => {
+export async function doRenameView(sourceId, viewId, name) {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) { return true; }
   else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
-      const { ok } = fetchWithTimeout(
+      const { ok } = await fetchWithTimeout(
         SERVER_BASE_URL + `rename_view?docID=${sourceId}&viewID=${viewId}&name=${name}`,
         { method: 'UPDATE', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
       );

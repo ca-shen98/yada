@@ -10,6 +10,7 @@ import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   NO_OPEN_FILE_ID,
   setCurrentOpenFileIdAction,
+  setSelectNodeAction,
 } from '../reducers/CurrentOpenFileState';
 import {
   NO_RENAMING_INPUT_STATE,
@@ -41,16 +42,19 @@ import {
 const INITIAL_FILE_ID_LOCAL_STORAGE_KEY = 'initialFileId';
 
 export const handleSetCurrentOpenFileId = fileId => {
-  if (!validateFileIdObj(fileId)) { return; }
+  if (!validateFileIdObj(fileId)) { return false; }
   const currentOpenFileId = store.getState().currentOpenFileId;
-  if (fileId.sourceId !== currentOpenFileId.sourceId || fileId.viewId !== currentOpenFileId.viewId) {
-    if (store.getState().saveDirtyFlag && !window.confirm('confirm discard unsaved changes')) { return; }
+  if (fileId.sourceId === currentOpenFileId.sourceId && fileId.viewId === currentOpenFileId.viewId) { return true; }
+  if (!store.getState().saveDirtyFlag || window.confirm('confirm discard unsaved changes')) {
     batch(() => {
       store.dispatch(setCurrentOpenFileIdAction(fileId));
       store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+      store.dispatch(setSelectNodeAction(null));
     });
     localStorage.setItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY, JSON.stringify(fileId));
+    return true;
   }
+  return false;
 };
 
 const FILE_LIST_ID = 'file_list';
@@ -71,26 +75,18 @@ const getRenameInputIdFunctions = {
   [RENAME_INPUT_TYPES.VIEW_LIST_ITEM]: fileId => RENAME_VIEW_LIST_ITEM_INPUT_ID_PREFIX + getFileIdKeyStr(fileId),
 };
 
+const DEFAULT_STATE = {
+  [SEARCH_FILE_NAMES_INPUT_ID]: '',
+  [CREATE_SOURCE_NAME_INPUT_ID]: '',
+  filesList: {},
+  nextNewFileIds: null,
+};
+
 class Navigator extends React.Component {
   
-  state = {
-    [SEARCH_FILE_NAMES_INPUT_ID]: '',
-    [CREATE_SOURCE_NAME_INPUT_ID]: '',
-    filesList: null,
-    nextNewFileIds: null,
-  };
+  state = DEFAULT_STATE;
 
-  constructor(props) {
-    super(props);
-    this.state.filesList = doGetFilesList();
-    if (!this.state.filesList) {
-      alert('failed to retrieve files list');
-      this.state.filesList = {};
-    }
-    if (props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
-      this.state.nextNewFileIds = calculateLocalStorageNextNewFileIds(this.state.filesList);
-    }
-  };
+  resetState = () => { this.setState(DEFAULT_STATE); }
 
   getSourceName = fileId => validateFileIdObj(fileId) && this.state.filesList.hasOwnProperty(fileId.sourceId)
       ? this.state.filesList[fileId.sourceId].name : '';
@@ -103,6 +99,23 @@ class Navigator extends React.Component {
   getFileName = fileId => getFileType(fileId) === FILE_TYPE.VIEW
     ? this.getViewName(fileId) : this.getSourceName(fileId);
 
+  getRenameInputValueFunctions = {
+    [RENAME_INPUT_TYPES.CURRENT_SOURCE]: this.getSourceName,
+    [RENAME_INPUT_TYPES.CURRENT_VIEW]: this.getViewName,
+    [RENAME_INPUT_TYPES.SOURCE_LIST_ITEM]: this.getFileName,
+    [RENAME_INPUT_TYPES.VIEW_LIST_ITEM]: this.getFileName,
+  };
+
+  handleSwitchBackendModeSignedInStatus = status => {
+    if (status === this.props.backendModeSignedInStatus) { return true; }
+    if (handleSetCurrentOpenFileId(NO_OPEN_FILE_ID)) {
+      this.resetState();
+      this.props.dispatchSetBackendModeSignedInStatusAction(status);
+      return true;
+    }
+    return false;
+  };
+
   handleClearInputState = inputId => {
     document.getElementById(inputId).value = '';
     this.setState({ [inputId]: '' });
@@ -111,7 +124,7 @@ class Navigator extends React.Component {
   handleResetRenameInput = (inputType, fileId) => {
     if (!validateFileIdObj(fileId)) { return; }
     const input = document.getElementById(getRenameInputIdFunctions[inputType](fileId));
-    input.value = this.getFileName(fileId);
+    input.value = this.getRenameInputValueFunctions[inputType](fileId);
     input.setSelectionRange(0, 0);
     if (
       this.props.renamingInputState.inputType === inputType &&
@@ -134,12 +147,12 @@ class Navigator extends React.Component {
     this.setState({ [SEARCH_FILE_NAMES_INPUT_ID]: document.getElementById(SEARCH_FILE_NAMES_INPUT_ID).value.trim() });
   };
 
-  handleCreateNewSource = () => {
+  async handleCreateNewSource() {
     if (!this.state[CREATE_SOURCE_NAME_INPUT_ID]) { return false; }
     const nextNewSourceId = this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
       ? this.state.nextNewFileIds.source : null;
     const newFilesList = {...this.state.filesList};
-    const newSource = doCreateNewSource(this.state[CREATE_SOURCE_NAME_INPUT_ID], nextNewSourceId);
+    const newSource = await doCreateNewSource(this.state[CREATE_SOURCE_NAME_INPUT_ID], nextNewSourceId);
     if (!newSource) {
       alert('failed to create new source');
       return false;
@@ -159,7 +172,7 @@ class Navigator extends React.Component {
     return true;
   };
 
-  handleDeleteFile = fileId => {
+  async handleDeleteFile(fileId) {
     const fileType = getFileType(fileId);
     if (!fileType) { return false; }
     if (
@@ -168,7 +181,8 @@ class Navigator extends React.Component {
     ) { handleSetCurrentOpenFileId(NO_OPEN_FILE_ID); }
     const newFilesList = {...this.state.filesList};
     if (fileType !== FILE_TYPE.SOURCE) {
-      if (!doDeleteView(fileId.sourceId, fileId.viewId)) {
+      const success = await doDeleteView(fileId.sourceId, fileId.viewId);
+      if (!success) {
         alert('failed to delete view');
         return false;
       }
@@ -179,7 +193,8 @@ class Navigator extends React.Component {
         doSetLocalStorageSourceViewsList(fileId.sourceId, newSourceViewsList);
       }
     } else {
-      if (!doDeleteSource(fileId.sourceId, Object.keys(newFilesList[fileId.sourceId].viewsList))) {
+      const success = await doDeleteSource(fileId.sourceId, Object.keys(newFilesList[fileId.sourceId].viewsList));
+      if (!success) {
         alert('failed to delete source');
         return false;
       }
@@ -198,9 +213,9 @@ class Navigator extends React.Component {
     }
     this.setState({ filesList: newFilesList });
     return true;
-  }
+  };
 
-  handleRenameFile = (inputType, fileId) => {
+  async handleRenameFile(inputType, fileId) {
     const fileType = getFileType(fileId);
     if (!fileType) { return false; }
     const input = document.getElementById(getRenameInputIdFunctions[inputType](fileId));
@@ -210,7 +225,8 @@ class Navigator extends React.Component {
     if (newName !== this.getFileName(fileId)) {
       const newFilesList = {...this.state.filesList};
       if (fileType !== FILE_TYPE.SOURCE) {
-        if (!doRenameView(fileId.sourceId, fileId.viewId, newName)) {
+        const success = await doRenameView(fileId.sourceId, fileId.viewId, newName);
+        if (!success) {
           alert('failed to rename view');
           return false;
         }
@@ -221,7 +237,8 @@ class Navigator extends React.Component {
           doSetLocalStorageSourceViewsList(fileId.sourceId, newSourceViewsList);
         }
       } else {
-        if (!doRenameSource(fileId.sourceId, newName)) {
+        const success = await doRenameSource(fileId.sourceId, newName);
+        if (!success) {
           alert('failed to rename source');
           return false;
         }
@@ -233,7 +250,7 @@ class Navigator extends React.Component {
       this.setState({ filesList: newFilesList });
     }
     return true;
-  }
+  };
 
   componentDidMount = () => {
     const storedInitialFileId = convertStrValueOrDefault(
@@ -246,13 +263,31 @@ class Navigator extends React.Component {
         ? storedInitialFileId.sourceId : NO_OPEN_FILE_ID.sourceId,
       viewId: storedInitialFileId.hasOwnProperty('viewId') ? storedInitialFileId.viewId : NO_OPEN_FILE_ID.viewId,
     }
-    if (
-      initialFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
-      initialFileId.viewId !== this.props.currentOpenFileId.viewId
-    ) { handleSetCurrentOpenFileId(initialFileId); }
+    doGetFilesList().then(filesList => {
+      if (!filesList) { alert('failed to retrieve files list'); }
+      else { this.setState({ filesList }); }
+      if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+        this.setState({ nextNewFileIds: calculateLocalStorageNextNewFileIds(this.state.filesList) });
+      }
+      if (
+        initialFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
+        initialFileId.viewId !== this.props.currentOpenFileId.viewId
+      ) { handleSetCurrentOpenFileId(initialFileId); }
+    });
   };
 
   componentDidUpdate = prevProps => {
+    if (prevProps.backendModeSignedInStatus !== this.props.backendModeSignedInStatus) {
+      doGetFilesList().then(filesListValue => filesListValue ?? {}).then(filesList => {
+        this.setState({
+          [SEARCH_FILE_NAMES_INPUT_ID]: '',
+          [CREATE_SOURCE_NAME_INPUT_ID]: '',
+          filesList,
+          nextNewFileIds: this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
+            ? calculateLocalStorageNextNewFileIds(filesList) : null,
+        });
+      });
+    }
     if (
       prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
       prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
@@ -265,7 +300,7 @@ class Navigator extends React.Component {
   renameInput = ({ inputType, fileId, ...remainingProps }) => {
     const fileType = getFileType(fileId);
     const inputId = getRenameInputIdFunctions[inputType](fileId);
-    const value = this.getFileName(fileId);
+    const value = this.getRenameInputValueFunctions[inputType](fileId);
     return (
       <input
         id={inputId}
@@ -276,9 +311,8 @@ class Navigator extends React.Component {
           this.props.renamingInputState.fileId.sourceId !== fileId.sourceId ||
           this.props.renamingInputState.fileId.viewId !== fileId.viewId
         }
-        onBlur={event => {
-          if (this.handleRenameFile(inputType, fileId)) { this.handleResetRenameInput(inputType, fileId); }
-          else { event.target.focus(); }
+        onBlur={() => {
+          this.handleRenameFile(inputType, fileId).then(() => { this.handleResetRenameInput(inputType, fileId); });
         }}
         onKeyDown={event => { if (event.key === 'Escape') { this.handleResetRenameInput(inputType, fileId); } }}
         onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
@@ -453,9 +487,13 @@ class Navigator extends React.Component {
               placeholder="new source name"
               onChange={event => { this.setState({ [CREATE_SOURCE_NAME_INPUT_ID]: event.target.value }); }}
               onKeyPress={event => {
-                if (event.key === 'Enter' && this.handleCreateNewSource()) {
-                  this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
-                  this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID);
+                if (event.key === 'Enter') {
+                  this.handleCreateNewSource().then(success => {
+                    if (success) {
+                      this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
+                      this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID);
+                    }
+                  });
                 }
               }}
               onKeyDown={event => {
@@ -470,19 +508,35 @@ class Navigator extends React.Component {
               title="create"
               disabled={!this.state[CREATE_SOURCE_NAME_INPUT_ID]}
               onClick={() => {
-                if (this.handleCreateNewSource()) {
-                  this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
-                  this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID);
-                }
+                this.handleCreateNewSource().then(success => {
+                  if (success) {
+                    this.handleClearInputState(CREATE_SOURCE_NAME_INPUT_ID);
+                    this.handleClearInputState(SEARCH_FILE_NAMES_INPUT_ID);
+                  }
+                });
               }}>
               {'+'}
             </button>
           </div>
         </div>
         <div id="user_controls_container">
+          {
+            this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN
+              ? <button
+                  onClick={() => {
+                    if (
+                      this.props.dispatchSetBackendModeSignedInStatusAction(
+                        BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
+                      )
+                    ) { Cookies.remove(ACCESS_TOKEN_COOKIE_KEY); }
+                  }}>
+                  Sign out
+                </button>
+              : null
+          }
           <button
             onClick={() => {
-              this.dispatchSetBackendModeAction(
+              this.handleSwitchBackendModeSignedInStatus(
                 this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
                   ? getUserSignedInStatus() : BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
               );
@@ -495,19 +549,6 @@ class Navigator extends React.Component {
               ) + ' storage'
             }
           </button>
-          {
-            this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN
-              ? <button
-                  onClick={() => {
-                    Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
-                    this.props.dispatchSetBackendModeSignedInStatusAction(
-                      BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
-                    );
-                  }}>
-                  Sign out
-                </button>
-              : null
-          }
         </div>
       </div>
     );
