@@ -17,16 +17,16 @@ const doGetLocalStorageSourceIdNames = () => convertStrValueOrDefault(
   'invalid sourceIdNames',
 );
 
-const SOURCE_VIEW_ID_NAMES_LOCAL_STORAGE_KEY_PREFIX = 'sourceViewIdNames_';
+const SOURCE_VIEWS_LIST_LOCAL_STORAGE_KEY_PREFIX = 'sourceViewsList';
 
 // API-ish
-export const doSetLocalStorageSourceViewIdNames = (sourceId, sourceViewIdNames) =>
-  localStorage.setItem(SOURCE_VIEW_ID_NAMES_LOCAL_STORAGE_KEY_PREFIX + sourceId, JSON.stringify(sourceViewIdNames));
+export const doSetLocalStorageSourceViewsList = (sourceId, sourceViewsList) =>
+  localStorage.setItem(SOURCE_VIEWS_LIST_LOCAL_STORAGE_KEY_PREFIX + sourceId, JSON.stringify(sourceViewsList));
 
-const doGetLocalStorageSourceViewIdNames = sourceId => convertStrValueOrDefault(
-  localStorage.getItem(SOURCE_VIEW_ID_NAMES_LOCAL_STORAGE_KEY_PREFIX + sourceId),
+const doGetLocalStorageSourceViewsList = sourceId => convertStrValueOrDefault(
+  localStorage.getItem(SOURCE_VIEWS_LIST_LOCAL_STORAGE_KEY_PREFIX + sourceId),
   {},
-  'invalid sourceViewIdNames',
+  'invalid sourceViewsList',
 );
 
 export const convertFilesListStateToFileIdNamesList = filesListState => Object.fromEntries(
@@ -40,7 +40,7 @@ export const doGetFilesList = () => {
     return Object.fromEntries(Object.entries(doGetLocalStorageSourceIdNames()).map(
       ([sourceId, sourceName]) => [
         sourceId,
-        { name: sourceName, viewIdNames: doGetLocalStorageSourceViewIdNames(sourceId) },
+        { name: sourceName, viewsList: doGetLocalStorageSourceViewsList(sourceId) },
       ]
     ));
   } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
@@ -50,9 +50,7 @@ export const doGetFilesList = () => {
         SERVER_BASE_URL + `documents`,
         { headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
       );
-      if (response.ok) {
-        return JSON.parse(Promise.resolve(response.json()));
-      };
+      if (response.ok) { return JSON.parse(Promise.resolve(response.json())); }
     } catch (e) { console.log(e); }
   }
   return null;
@@ -60,74 +58,81 @@ export const doGetFilesList = () => {
 
 // API-ish
 export const doFileNamesSearch = (filesList, search) => Object.fromEntries(
-  Object.entries(filesList).map(([sourceId, { name: sourceName, viewIdNames }]) => [
+  Object.entries(filesList).map(([sourceId, { name: sourceName, viewsList }]) => [
     sourceId,
     {
       name: sourceName,
-      viewIdNames: search
-        ? Object.fromEntries(Object.entries(viewIdNames).filter(
-            ([_viewId, { viewName }]) => viewName.includes(search)
+      viewsList: search
+        ? Object.fromEntries(Object.entries(viewsList).filter(
+            ([_viewId, { name: viewName }]) => viewName.includes(search)
           ))
-        : viewIdNames,
+        : viewsList,
     },
   ]).filter(
-    ([_sourceId, { name: sourceName, viewIdNames }]) => !search ||
-      Object.keys(viewIdNames).length > 0 || sourceName.includes(search)
+    ([_sourceId, { name: sourceName, viewsList }]) => !search ||
+      Object.keys(viewsList).length > 0 || sourceName.includes(search)
   )
 );
 
 export const countNumFiles = filesList => Object.entries(filesList)
-  .reduce((count, [_sourceId, { viewIdNames }]) => count + 1 + viewIdNames.length, 0);
+  .reduce((count, [_sourceId, { viewsList }]) => count + 1 + Object.keys(viewsList).length, 0);
 
 const VIEW_CONTENT_SPEC_LOCAL_STORAGE_KEY_PREFIX = 'viewContentSpec_';
 
 const SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX = 'sourceContent_';
 
+const EMPTY_SOURCE_CONTENT = { type: 'doc', content: [] };
+
 // API
-export const doSaveSourceContent = (sourceId, value) => {
+export const doSaveSourceContent = (value, sourceId, createSourceName) => {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
-  if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) { return false; }
-  const saveValue = convertStrValueOrDefault(
-    value,
-    null,
-    'invalid sourceContent value',
-    valueStr => {
-      JSON.parse(valueStr);
-      return valueStr;
-    },
-  );
-  if (!saveValue) { return false; }
+  if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) { return null; }
+  const saveValue = value
+    ? convertStrValueOrDefault(
+        value,
+        null,
+        'invalid sourceContent value',
+        valueStr => {
+          JSON.parse(valueStr);
+          return valueStr;
+        },
+      )
+    : JSON.stringify(EMPTY_SOURCE_CONTENT);
+  if (!saveValue) { return null; }
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
     localStorage.setItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId, saveValue);
-    return true;
+    return { id: sourceId, ...(createSourceName ? { name: createSourceName } : null) };
   } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
-      const { ok } = fetchWithTimeout(
-        SERVER_BASE_URL + `document?docID=${sourceId}`,
+      const response = sourceIdfetchWithTimeout(
+        SERVER_BASE_URL + 'document' + (sourceId ? `?docID=${sourceId}` : ''),
         {
           method: 'PUT',
           body: saveValue,
           headers: new Headers({ 'Content-Type': 'application/json', 'Set-Cookie': `token=${token}` }),
         },
       );
-      return ok;
+      if (response.ok) {
+        const { docID, name } = JSON.parse(Promise.resolve(response.json()));
+        return { id: docID, ...(createSourceName ? { name } : null) };
+      };
     } catch (e) { console.log(e); }
   }
-  return false;
+  return null;
 };
 
 // API
-export const doGetSourceContent = (sourceId, strValue = true) => {
+export const doGetSourceContent = sourceId => {
   const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
   if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
     return convertStrValueOrDefault(
       localStorage.getItem(SOURCE_CONTENT_LOCAL_STORAGE_KEY_PREFIX + sourceId),
-      strValue ? '' : { type: 'doc', content: [] },
+      '',
       'invalid sourceContent',
       valueStr => {
-        const sourceContentDoc = JSON.parse(valueStr);
-        return strValue ? valueStr : sourceContentDoc;
+        JSON.parse(valueStr);
+        return valueStr;
       },
     );
   } else if (backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN) {
@@ -173,16 +178,19 @@ export const calculateLocalStorageNextNewId = (existingIdsDict, candidate) => {
 export const calculateLocalStorageNextNewFileIds = filesList => ({
   source: calculateLocalStorageNextNewId(filesList, 0),
   nextNewViewIdsForSourceIds: Object.fromEntries(Object.entries(filesList).map(
-    ([sourceId, { viewIdNames }]) => [sourceId, calculateLocalStorageNextNewId(viewIdNames, 0)]
+    ([sourceId, { viewsList }]) => [sourceId, calculateLocalStorageNextNewId(viewsList, 0)]
   )),
 });
 
 // API // TODO
 export const doCreateNewSource = (name, localStorageNextNewSourceId) => {
-  if (store.getState().backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
-    return { id: localStorageNextNewSourceId, name };
-  }
-  return null;
+  const backendModeSignedInStatus = store.getState().backendModeSignedInStatus;
+  if(backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) { return null; }
+  return doSaveSourceContent(
+    null,
+    backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE ? localStorageNextNewSourceId : null,
+    name,
+  );
 };
 
 // API

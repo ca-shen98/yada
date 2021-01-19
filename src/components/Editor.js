@@ -28,7 +28,7 @@ import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
 export const handleSaveCurrentFileEditorContent = () => {
   const currentOpenFileId = store.getState().currentOpenFileId;
   if (getFileType(this.props.currentOpenFileId) === FILE_TYPE.SOURCE && store.getState().saveDirtyFlag) {
-    if (doSaveSourceContent(currentOpenFileId.sourceId, BlockTaggingEditorExtension.editor.value(true))) {
+    if (doSaveSourceContent(BlockTaggingEditorExtension.editor.value(true), currentOpenFileId.sourceId)) {
       store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
     } else { alert('failed to save source content'); }
   }

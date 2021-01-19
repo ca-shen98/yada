@@ -24,7 +24,7 @@ import {
 } from '../reducers/BackendModeSignedInStatus';
 import {
   doSetLocalStorageSourceIdNames,
-  doSetLocalStorageSourceViewIdNames,
+  doSetLocalStorageSourceViewsList,
   convertFilesListStateToFileIdNamesList,
   doGetFilesList,
   doFileNamesSearch,
@@ -97,8 +97,8 @@ class Navigator extends React.Component {
   
   getViewName = fileId => getFileType(fileId) === FILE_TYPE.VIEW &&
     this.state.filesList.hasOwnProperty(fileId.sourceId) &&
-    this.state.filesList[fileId.sourceId].viewIdNames.hasOwnProperty(fileId.viewId)
-      ? this.state.filesList[fileId.sourceId].viewIdNames[fileId.viewId] : '';
+    this.state.filesList[fileId.sourceId].viewsList.hasOwnProperty(fileId.viewId)
+      ? this.state.filesList[fileId.sourceId].viewsList[fileId.viewId].name : '';
 
   getFileName = fileId => getFileType(fileId) === FILE_TYPE.VIEW
     ? this.getViewName(fileId) : this.getSourceName(fileId);
@@ -144,7 +144,7 @@ class Navigator extends React.Component {
       alert('failed to create new source');
       return false;
     }
-    newFilesList[newSource.id] = { name: newSource.name, viewIdNames: {} };
+    newFilesList[newSource.id] = { name: newSource.name, viewsList: {} };
     this.setState({ filesList: newFilesList });
     if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
       doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
@@ -172,14 +172,14 @@ class Navigator extends React.Component {
         alert('failed to delete view');
         return false;
       }
-      const newSourceViewIdNames = {...newFilesList[fileId.sourceId].viewIdNames}
-      delete newSourceViewIdNames[fileId.viewId];
-      newFilesList[fileId.sourceId] = { name: newFilesList[fileId.sourceId].name, viewIdNames: newSourceViewIdNames };
+      const newSourceViewsList = {...newFilesList[fileId.sourceId].viewsList}
+      delete newSourceViewsList[fileId.viewId];
+      newFilesList[fileId.sourceId] = { name: newFilesList[fileId.sourceId].name, viewsList: newSourceViewsList };
       if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
-        doSetLocalStorageSourceViewIdNames(fileId.sourceId, newSourceViewIdNames);
+        doSetLocalStorageSourceViewsList(fileId.sourceId, newSourceViewsList);
       }
     } else {
-      if (!doDeleteSource(fileId.sourceId, Object.keys(newFilesList[fileId.sourceId].viewIdNames))) {
+      if (!doDeleteSource(fileId.sourceId, Object.keys(newFilesList[fileId.sourceId].viewsList))) {
         alert('failed to delete source');
         return false;
       }
@@ -214,19 +214,18 @@ class Navigator extends React.Component {
           alert('failed to rename view');
           return false;
         }
-        const newSourceViewIdNames = {...newFilesList[fileId.sourceId].viewIdNames}
-        newSourceViewIdNames[fileId.viewId] = newName;
-        newFilesList[fileId.sourceId] =
-          { name: newFilesList[fileId.sourceId].name, viewIdNames: newSourceViewIdNames };
+        const newSourceViewsList = {...newFilesList[fileId.sourceId].viewsList}
+        newSourceViewsList[fileId.viewId] = { ...newSourceViewsList[fileId.viewId], name: newName };
+        newFilesList[fileId.sourceId] = { name: newFilesList[fileId.sourceId].name, viewsList: newSourceViewsList };
         if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
-          doSetLocalStorageSourceViewIdNames(fileId.sourceId, newSourceViewIdNames);
+          doSetLocalStorageSourceViewsList(fileId.sourceId, newSourceViewsList);
         }
       } else {
         if (!doRenameSource(fileId.sourceId, newName)) {
           alert('failed to rename source');
           return false;
         }
-        newFilesList[fileId.sourceId] = { name: newName, viewIdNames: newFilesList[fileId.sourceId].viewIdNames };
+        newFilesList[fileId.sourceId] = { name: newName, viewsList: newFilesList[fileId.sourceId].viewsList };
         if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
           doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
         }
@@ -408,17 +407,17 @@ class Navigator extends React.Component {
             Object.keys(filteredFilesList).length > 0
               ? <ul id={FILE_LIST_ID}>
                   {
-                    Object.entries(filteredFilesList).map(([sourceId, { viewIdNames }]) =>
+                    Object.entries(filteredFilesList).map(([sourceId, { viewsList }]) =>
                       <li key={sourceId}>
                         <this.fileListItemButtonRow
                           inputType={RENAME_INPUT_TYPES.SOURCE_LIST_ITEM}
                           fileId={{ sourceId, viewId: 0 }}
                         />
                         {
-                          Object.keys(viewIdNames).length > 0
+                          Object.keys(viewsList).length > 0
                             ? <ul>
                                 {
-                                  Object.keys(viewIdNames).map(viewId => {
+                                  Object.keys(viewsList).map(viewId => {
                                     const fileId = { sourceId, viewId };
                                     return (
                                       <li key={getFileIdKeyStr(fileId)}>
