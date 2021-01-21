@@ -154,9 +154,8 @@ class TagMenu extends React.Component {
                             placeholder={tag}
                             disabled={this.state.modifying !== tag}
                             onBlur={event => {
-                              if (this.handleModifyTagValue(tag)) {
-                                if (this.state.modifying === tag) { this.setState({ modifying: '' }); }
-                              } else { event.target.focus(); }
+                              this.handleModifyTagValue(tag);
+                              if (this.state.modifying === tag) { this.setState({ modifying: '' }); }
                             }}
                             onKeyDown={event => {
                               if (event.key === 'Escape') {

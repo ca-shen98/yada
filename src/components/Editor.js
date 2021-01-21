@@ -27,9 +27,11 @@ import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
 
 export const handleSaveCurrentFileEditorContent = () => {
   const currentOpenFileId = store.getState().currentOpenFileId;
-  if (getFileType(this.props.currentOpenFileId) === FILE_TYPE.SOURCE && store.getState().saveDirtyFlag) {
-    doSaveSourceContent(currentOpenFileId.sourceId, BlockTaggingEditorExtension.editor.value(true));
-    store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+  if (getFileType(store.getState().currentOpenFileId) === FILE_TYPE.SOURCE && store.getState().saveDirtyFlag) {
+    doSaveSourceContent(BlockTaggingEditorExtension.editor.value(true), currentOpenFileId.sourceId).then(success => {
+      if (success) { store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE }); }
+      else { alert('failed to save source content'); }
+    });
   }
 };
 
@@ -40,6 +42,8 @@ const SAVED_TAG_FILTERS_DATALIST_ID = 'saved_tag_filters_datalist';
 class Editor extends React.Component {
 
   state = {
+    editorKey: '',
+    setEditorValue: '',
     modifyingTagFilters: false,
     currentTagFiltersStr: '',
     currentParsedTagFiltersStr: null,
@@ -117,22 +121,27 @@ class Editor extends React.Component {
       prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
     ) {
       const fileType = getFileType(this.props.currentOpenFileId);
+      document.getElementById(TAG_FILTERS_INPUT_ID).value = '';
+      if (fileType) { this.handleApplyTagFilters(); }
+      const fileIdKeyStr = getFileIdKeyStr(this.props.currentOpenFileId);
+      if (fileType === FILE_TYPE.SOURCE) {
+        doGetSourceContent(this.props.currentOpenFileId.sourceId).then(value => {
+          if (!value) { alert('failed to retrieve source content'); }
+          this.setState({ editorKey: fileIdKeyStr, setEditorValue: value ?? '' });
+          BlockTaggingEditorExtension.editor.focusAtStart();
+        });
+      } else { this.setState({ editorKey: fileIdKeyStr, setEditorValue: '' }); }
       this.setState({
         sourceSavedTagFilters: fileType === FILE_TYPE.SOURCE
           ? doGetSourceSavedTagFilters(this.props.currentOpenFileId.sourceId) : {}
       });
-      document.getElementById(TAG_FILTERS_INPUT_ID).value = '';
-      if (fileType) { this.handleApplyTagFilters(); }
-      if (fileType === FILE_TYPE.SOURCE) { BlockTaggingEditorExtension.editor.focusAtStart(); }
     }
   };
 
   render = () => {
-    const fileIdKeyStr = getFileIdKeyStr(this.props.currentOpenFileId);
     const fileType = getFileType(this.props.currentOpenFileId);
     const currentTagFiltersSaved =
       this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentParsedTagFiltersStr);
-    const value = fileType === FILE_TYPE.SOURCE ? doGetSourceContent(this.props.currentOpenFileId.sourceId) : '';
     return (
       <div className="MainPane">
         <div id="editor_container">
@@ -211,9 +220,9 @@ class Editor extends React.Component {
           <div id="editor" hidden={!fileType}>
             <RichMarkdownEditor
               extensions={[BlockTaggingEditorExtension]}
-              key={fileIdKeyStr}
-              defaultValue={value}
-              jsonStrValue={!(!value)}
+              key={this.state.editorKey}
+              defaultValue={this.state.setEditorValue}
+              jsonStrValue={!(!this.state.setEditorValue)}
               onSave={handleSaveCurrentFileEditorContent}
               onKeyDown={event => {
                 if (event.key === 'Escape') {
