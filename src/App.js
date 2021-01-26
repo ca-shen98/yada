@@ -1,6 +1,7 @@
 import './App.css';
 import React from 'react';
 import {connect} from 'react-redux';
+import {checkSourceFileId} from './util/FileIdAndTypeUtils';
 import {
   BACKEND_MODE_SIGNED_IN_STATUS,
   getUserSignedInStatus,
@@ -8,7 +9,8 @@ import {
 } from './reducers/BackendModeSignedInStatus';
 import LandingPage from './components/LandingPage';
 import Navigator from './components/Navigator';
-import Editor, {handleSaveCurrentFileEditorContent} from './components/Editor';
+import {handleSaveCurrentFileEditorContent} from './components/Editor';
+import SourceEditorWithTagFilters from './components/SourceEditorWithTagFiltersInput';
 
 class App extends React.Component {
 
@@ -18,7 +20,7 @@ class App extends React.Component {
     if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey) && event.keyCode === 83) {
       event.preventDefault();
       if (this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) {
-        handleSaveCurrentFileEditorContent();
+        if (checkSourceFileId(this.props.currentOpenFileId)) { handleSaveCurrentFileEditorContent(); }
       }
     }
   }
@@ -48,7 +50,7 @@ class App extends React.Component {
                       </span>
                     </div>
                     <Navigator />
-                    <Editor />
+                    <SourceEditorWithTagFilters />
                   </div>
                 : <LandingPage />
             )
@@ -61,7 +63,10 @@ class App extends React.Component {
 };
 
 export default connect(
-  state => ({ backendModeSignedInStatus: state.backendModeSignedInStatus }),
+  state => ({
+    backendModeSignedInStatus: state.backendModeSignedInStatus,
+    currentOpenFileId: state.currentOpenFileId,
+  }),
   dispatch => ({
     dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
   }),

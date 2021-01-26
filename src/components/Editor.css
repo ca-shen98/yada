@@ -13,7 +13,11 @@
   right: 16px;
 }
 
-#tag_filters_input_row {
+#current_open_file_controls>div {
+  flex: auto;
+}
+
+#current_open_file_controls>.InputRow {
   flex-grow: 4;
   min-width: 0;
 }
