@@ -1,10 +1,22 @@
-import {validateHasFileIdObj} from '../util/FileIdAndTypeUtils';
+import {convertStrValueOrDefault} from '../util/ConvertStrValueOrDefault';
+import {NO_OPEN_FILE_ID, validateHasFileIdObj} from '../util/FileIdAndTypeUtils';
 
-export const NO_OPEN_FILE_ID = { sourceId: 0, viewId: 0 };
+export const INITIAL_FILE_ID_LOCAL_STORAGE_KEY = 'initialFileId';
+
+const storedInitialFileId = convertStrValueOrDefault(
+  localStorage.getItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY),
+  {},
+  'invalid initialFileId',
+);
+const initialFileId = {
+  sourceId: storedInitialFileId.hasOwnProperty('sourceId')
+    ? storedInitialFileId.sourceId : NO_OPEN_FILE_ID.sourceId,
+  viewId: storedInitialFileId.hasOwnProperty('viewId') ? storedInitialFileId.viewId : NO_OPEN_FILE_ID.viewId,
+}
 
 const SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE = 'currentOpenFileId/set';
 export const setCurrentOpenFileIdAction = fileId => ({ type: SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE, fileId });
-export const currentOpenFileIdReducer = (state = NO_OPEN_FILE_ID, action) =>
+export const currentOpenFileIdReducer = (state = initialFileId, action) =>
   action.type !== SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE || !validateHasFileIdObj(action)
     ? state : action.fileId;
 
