@@ -1,14 +1,10 @@
 import {Plugin, PluginKey} from 'prosemirror-state';
 import {Decoration, DecorationSet} from 'prosemirror-view';
-import store from '../../store';
-import {FILE_TYPE, getFileType} from '../../util/FileIdAndTypeUtils';
 import {setSelectNodeAction} from '../../reducers/CurrentOpenFileState';
-import {TagFilteringPluginKey} from './TagFiltering';
+import store from '../../store';
 
 const SELECT_NODE_PLUGIN_NAME = 'select-node';
 export const SelectNodePluginKey = new PluginKey(SELECT_NODE_PLUGIN_NAME);
-
-const checkEnterStepType = step => step.stepType === 'replace' && step.from === step.to && step.structure;
 
 export default new Plugin({
   key: SelectNodePluginKey,
@@ -26,11 +22,6 @@ export default new Plugin({
       ) { store.dispatch(setSelectNodeAction(newState ? { pos: newState.pos } : null)); }
       return newState;
     },
-  },
-  filterTransaction: (tr, state) => {
-    const currentOpenFileId = store.getState().currentOpenFileId;
-    return (getFileType(currentOpenFileId) === FILE_TYPE.SOURCE && !TagFilteringPluginKey.getState(state)) ||
-      tr.steps.every(step => !checkEnterStepType(step.toJSON()));
   },
   props: {
     decorations: state => {
