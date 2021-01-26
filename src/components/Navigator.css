@@ -1,7 +1,7 @@
 #current_file_container {
   padding: 0 4px 6px;
   margin: 0 8px;
-  border-bottom: 3px solid darkslategray;
+  border-bottom: 3px solid slategray;
 }
 
 #current_file_container>.InputRow {
@@ -12,8 +12,40 @@
   margin-top: 0;
 }
 
+#create_file_buttons_row {
+  padding: 6px 4px;
+  margin: 0 12px;
+  border-bottom: 3px solid darkgray;
+  display: flex;
+}
+
+#create_view_dropdown_button {
+  position: relative;
+  margin-left: 5px;
+}
+
+#create_view_dropdown_button>div>button {
+  margin-top: 1px;
+}
+
+#create_view_dropdown_button>div, #create_view_dropdown_button>button[disabled], #create_view_dropdown_button:hover>button:first-child {
+  display: none;
+}
+
+#create_view_dropdown_button:hover>button[disabled] {
+  display: block;
+}
+
+#create_view_dropdown_button:hover>div {
+  position: absolute;
+  left: 0;
+  right: -36px;
+  display: flex;
+  flex-direction: column;
+}
+
 #file_list_container {
-  padding: 9px 8px;
+  padding: 6px 8px;
   flex: auto;
   overflow: auto;
   display: flex;
@@ -21,13 +53,13 @@
 }
 
 #search_file_names_input_row {
-  padding: 0 4px;
+  padding: 0 8px;
 }
 
 #file_list, #no_files_placeholder, #filtered_files_placeholder {
   overflow: auto;
   padding: 0 12px;
-  margin: 9px 0;
+  margin: 6px 0;
   list-style: none;
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -42,6 +74,7 @@
 
 #filtered_files_placeholder {
   margin-top: 0;
+  font-size: 0.75em;
 }
 
 #create_source_name_input_row {
