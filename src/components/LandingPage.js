@@ -2,11 +2,13 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {Hero, Section} from 'react-landing-page';
 import {GoogleLogin} from 'react-google-login';
+import axios from 'axios';
 import Cookies from 'js-cookie'
+import {fetchWithTimeout} from '../util/FetchWithTimeout';
 import {
   BACKEND_MODE_SIGNED_IN_STATUS,
+  SERVER_BASE_URL,
   ACCESS_TOKEN_COOKIE_KEY,
-  loginBackend,
   setBackendModeSignedInStatusAction,
 } from '../reducers/BackendModeSignedInStatus';
 
@@ -14,18 +16,28 @@ const CLIENT_ID = '709358329925-gic89ini15sgaenfrta1gshej1ik72jg.apps.googleuser
 
 class LandingPage extends React.Component {
 
-  handleLoginSuccess = response => {
-    if (response.tokenObj) {
-      loginBackend(response.profileObj.name, response.profileObj.email, response.tokenObj.id_token).then(ok => {
-        if (ok) {
-          Cookies.set(
-            ACCESS_TOKEN_COOKIE_KEY,
-            response.tokenObj.id_token,
-            { expires: new Date(response.tokenObj.expires_at) },
-          );
-          this.props.dispatchSetBackendModeSignedInStatusAction(BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN);
-        }
-      });
+  handleLoginSuccess = async ({ profileObj: { name, email }, tokenObj: { id_token: token, expiresAt: expiry } }) => {
+    let response = null;
+    try {
+      response = await fetchWithTimeout(
+        SERVER_BASE_URL + 'auth',
+        { method: 'GET', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      );
+      if (!response.ok) {
+        response = await axios.post(
+          SERVER_BASE_URL + 'register_user',
+          {
+            method: 'POST',
+            body: JSON.stringify({ name, email, token }),
+            headers: { 'Content-Type': 'application/json', 'Set-Cookie': `token=${token}` },
+          },
+          { withCredentials: true },
+        );
+      }
+    } catch(e) { console.log(e); }
+    if (response && response.status === 201) {
+      Cookies.set(ACCESS_TOKEN_COOKIE_KEY, token, { expires: new Date(expiry) });
+      this.props.dispatchSetBackendModeSignedInStatusAction(BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN);
     }
   };
 	
@@ -38,7 +50,7 @@ class LandingPage extends React.Component {
         <GoogleLogin
           clientId={CLIENT_ID}
           buttonText="Sign in with Google to get started"
-          onSuccess={this.handleLoginSuccess}
+          onSuccess={response => { this.handleLoginSuccess(response); }}
           onFailure={response => { console.log(response); }}
           cookiePolicy="single_host_origin"
           responseType="code,token"
@@ -54,8 +66,8 @@ class LandingPage extends React.Component {
 }
 
 export default connect(
-  null,
+  state => ({ backendModeSignedInStatus: state.backendModeSignedInStatus }),
   dispatch => ({
     dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
-}),
+  }),
 )(LandingPage);

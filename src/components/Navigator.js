@@ -526,10 +526,11 @@ class Navigator extends React.Component {
           }
           <button
             onClick={() => {
-              this.handleSwitchBackendModeSignedInStatus(
-                this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
-                  ? getUserSignedInStatus() : BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
-              );
+              if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+                getUserSignedInStatus().then(backendModeSignedInStatus => {
+                  this.handleSwitchBackendModeSignedInStatus(backendModeSignedInStatus);
+                });
+              } else { this.handleSwitchBackendModeSignedInStatus(BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE); }
             }}>
             {
               'Switch to ' +
