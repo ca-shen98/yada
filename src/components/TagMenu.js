@@ -27,8 +27,7 @@ class TagMenu extends React.Component {
       alert('tag value "' + tag + '" already exists');
       return false;
     }
-    const newSelectNodeAttrs = {...this.state.selectNodeAttrs};
-    if (!newSelectNodeAttrs['tags']) { newSelectNodeAttrs['tags'] = {}; }
+    const newSelectNodeAttrs = { ...this.state.selectNodeAttrs, tags: {...this.state.selectNodeAttrs.tags} };
     newSelectNodeAttrs.tags[tag] = uuidv4();
     BlockTaggingEditorExtension.editor.view.dispatch(
       BlockTaggingEditorExtension.editor.view.state.tr.setNodeMarkup(
@@ -37,6 +36,7 @@ class TagMenu extends React.Component {
         newSelectNodeAttrs,
       )
     );
+    this.setState({ selectNodeAttrs: newSelectNodeAttrs });
     this.props.dispatchSetSaveDirtyFlagAction();
     return true;
   };
@@ -46,7 +46,7 @@ class TagMenu extends React.Component {
       !this.props.selectNode || !this.state.selectNodeAttrs.hasOwnProperty('tags') ||
       !this.state.selectNodeAttrs.tags.hasOwnProperty(tag)
     ) { return false; }
-    const newSelectNodeAttrs = {...this.state.selectNodeAttrs};
+    const newSelectNodeAttrs = { ...this.state.selectNodeAttrs, tags: {...this.state.selectNodeAttrs.tags} };
     delete newSelectNodeAttrs.tags[tag];
     BlockTaggingEditorExtension.editor.view.dispatch(
       BlockTaggingEditorExtension.editor.view.state.tr.setNodeMarkup(
@@ -55,6 +55,7 @@ class TagMenu extends React.Component {
         newSelectNodeAttrs,
       )
     );
+    this.setState({ selectNodeAttrs: newSelectNodeAttrs });
     this.props.dispatchSetSaveDirtyFlagAction();
     return true;
   };
@@ -71,7 +72,7 @@ class TagMenu extends React.Component {
       alert('tag value "' + newTagValue + '" already exists');
       return false;
     }
-    const newSelectNodeAttrs = {...this.state.selectNodeAttrs};
+    const newSelectNodeAttrs = { ...this.state.selectNodeAttrs, tags: {...this.state.selectNodeAttrs.tags} };
     newSelectNodeAttrs.tags[newTagValue] = newSelectNodeAttrs.tags[oldTagValue];
     delete newSelectNodeAttrs.tags[oldTagValue];
     BlockTaggingEditorExtension.editor.view.dispatch(
@@ -81,8 +82,16 @@ class TagMenu extends React.Component {
         newSelectNodeAttrs,
       )
     );
+    this.setState({ selectNodeAttrs: newSelectNodeAttrs });
     this.props.dispatchSetSaveDirtyFlagAction();
     return true;
+  };
+
+  handleCancelModifyTagValue = tag => {
+    const input = MODIFY_TAG_INPUT_ID_PREFIX + tag;
+    input.value = tag;
+    input.setSelectionRange(0, 0);
+    if (this.state.modifying === tag) { this.setState({ modifying: '' }); }
   };
 
   handleStartModifyingTagValue = (tag) => {
@@ -102,12 +111,12 @@ class TagMenu extends React.Component {
       (prevProps.selectNode && this.props.selectNode && prevProps.selectNode.pos !== this.props.selectNode.pos)
     ) {
       document.getElementById(ADD_TAG_INPUT_ID).value = '';
-      let selectNodeAttrs = {};
-      if (this.props.selectNode) {
-        const node = BlockTaggingEditorExtension.editor.view.state.doc.nodeAt(this.props.selectNode.pos);
-        if (node && node.hasOwnProperty('attrs')) { selectNodeAttrs = {...node.attrs}; }
-      }
-      this.setState({ selectNodeAttrs });
+      defer(() => {
+        if (this.props.selectNode) {
+          const node = BlockTaggingEditorExtension.editor.view.state.doc.nodeAt(this.props.selectNode.pos);
+          this.setState({ selectNodeAttrs: {...(node && node.hasOwnProperty('attrs') ? node.attrs : null)} });
+        } else { this.setState({ selectNodeAttrs: {} }); }
+      });
     }
   };
 
@@ -148,27 +157,27 @@ class TagMenu extends React.Component {
                     Object.keys(this.state.selectNodeAttrs.tags).map(tag =>
                       <li key={tag}>
                         <div className="ButtonRow">
-                          <input
-                            id={MODIFY_TAG_INPUT_ID_PREFIX + tag}
-                            defaultValue={tag}
-                            placeholder={tag}
-                            disabled={this.state.modifying !== tag}
-                            onBlur={event => {
-                              this.handleModifyTagValue(tag);
-                              if (this.state.modifying === tag) { this.setState({ modifying: '' }); }
-                            }}
-                            onKeyDown={event => {
-                              if (event.key === 'Escape') {
-                                event.target.value = tag;
-                                event.target.setSelectionRange(0, 0);
-                                if (this.state.modifying === tag) { this.setState({ modifying: '' }); }
-                              }
-                            }}
-                            onKeyPress={event => {
-                              if (event.key === 'Enter') { event.target.blur(); }
-                              if (!TAG_VALUE_REGEX.test(event.key)) { event.preventDefault(); }
-                            }}
-                          />
+                          {
+                            this.state.modifying !== tag
+                              ? <button disabled>{tag}</button>
+                              :  <input
+                                  id={MODIFY_TAG_INPUT_ID_PREFIX + tag}
+                                  defaultValue={tag}
+                                  placeholder={tag}
+                                  disabled={this.state.modifying !== tag}
+                                  onBlur={event => {
+                                    this.handleModifyTagValue(tag);
+                                    if (this.state.modifying === tag) { this.setState({ modifying: '' }); }
+                                  }}
+                                  onKeyDown={event => {
+                                    if (event.key === 'Escape') { this.handleCancelModifyTagValue(tag); }
+                                  }}
+                                  onKeyPress={event => {
+                                    if (event.key === 'Enter') { event.target.blur(); }
+                                    if (!TAG_VALUE_REGEX.test(event.key)) { event.preventDefault(); }
+                                  }}
+                                />
+                          }
                           <button
                             className="MonospaceCharButton"
                             title="modify"
