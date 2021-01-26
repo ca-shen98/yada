@@ -13,5 +13,9 @@ export const checkNoOpenFileId = fileId => validateFileIdObj(fileId) && !fileId.
 export const checkSourceFileId = fileId => validateFileIdObj(fileId) && fileId.sourceId && !fileId.viewId;
 export const checkViewFileId = fileId => validateFileIdObj(fileId) && fileId.sourceId && fileId.viewId;
 
+export const checkNoOpenFileId = fileId => validateFileIdObj(fileId) && !fileId.sourceId && !fileId.viewId;
+export const checkSourceFileId = fileId => validateFileIdObj(fileId) && fileId.sourceId && !fileId.viewId;
+export const checkViewFileId = fileId => validateFileIdObj(fileId) && fileId.sourceId && fileId.viewId;
+
 export const getFileIdKeyStr = fileId => validateFileIdObj(fileId)
   ? (fileId.sourceId + (fileId.viewId ? '#' + fileId.viewId : '')) : '';
