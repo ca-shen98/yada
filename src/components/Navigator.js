@@ -18,11 +18,6 @@ import {
   setSelectNodeAction,
 } from '../reducers/CurrentOpenFileState';
 import {
-  NO_RENAMING_INPUT_STATE,
-  RENAME_INPUT_TYPES,
-  setRenamingInputStateAction,
-} from '../reducers/RenamingInputState';
-import {
   ACCESS_TOKEN_COOKIE_KEY,
   BACKEND_MODE_SIGNED_IN_STATUS,
   getUserSignedInStatus,
@@ -72,6 +67,13 @@ const CURRENT_VIEW_NAME_INPUT_ID = 'current_view_name_input';
 const RENAME_SOURCE_LIST_ITEM_INPUT_ID_PREFIX = 'rename_source_list_item_input_';
 const RENAME_VIEW_LIST_ITEM_INPUT_ID_PREFIX = 'rename_view_list_item_input_';
 
+const RENAME_INPUT_TYPES = {
+  CURRENT_SOURCE: 'CURRENT_SOURCE',
+  CURRENT_VIEW: 'CURRENT_VIEW',
+  SOURCE_LIST_ITEM: 'SOURCE_LIST_ITEM',
+  VIEW_LIST_ITEM: 'VIEW_LIST_ITEM',
+};
+
 const getRenameInputIdFunctions = {
   [RENAME_INPUT_TYPES.CURRENT_SOURCE]: () => CURRENT_SOURCE_NAME_INPUT_ID,
   [RENAME_INPUT_TYPES.CURRENT_VIEW]: () => CURRENT_VIEW_NAME_INPUT_ID,
@@ -79,9 +81,12 @@ const getRenameInputIdFunctions = {
   [RENAME_INPUT_TYPES.VIEW_LIST_ITEM]: fileId => RENAME_VIEW_LIST_ITEM_INPUT_ID_PREFIX + getFileIdKeyStr(fileId),
 };
 
+const NO_RENAMING_STATE = { inputType: null, fileId: NO_OPEN_FILE_ID };
+
 const DEFAULT_STATE = {
   [SEARCH_FILE_NAMES_INPUT_ID]: '',
   [CREATE_SOURCE_NAME_INPUT_ID]: '',
+  renaming: NO_RENAMING_STATE,
   filesList: {},
   nextNewFileIds: null,
 };
@@ -125,20 +130,15 @@ class Navigator extends React.Component {
     this.setState({ [inputId]: '' });
   };
 
-  handleResetRenameInput = (inputType, fileId) => {
-    if (!validateFileIdObj(fileId)) { return; }
+  handleCancelRenaming = (inputType, fileId) => {
     const input = document.getElementById(getRenameInputIdFunctions[inputType](fileId));
     input.value = this.getRenameInputValueFunctions[inputType](fileId);
     input.setSelectionRange(0, 0);
-    if (
-      this.props.renamingInputState.inputType === inputType &&
-      this.props.renamingInputState.fileId.sourceId === fileId.sourceId &&
-      this.props.renamingInputState.fileId.viewId === fileId.viewId
-    ) { this.props.dispatchSetRenamingInputStateAction(NO_RENAMING_INPUT_STATE); }
+    this.setState({ renaming: NO_RENAMING_STATE });
   };
 
   handleStartRenaming = (inputType, fileId) => {
-    this.props.dispatchSetRenamingInputStateAction({ inputType, fileId });
+    this.setState({ renaming: { inputType, fileId } });
     const inputId = getRenameInputIdFunctions[inputType](fileId);
     defer(() => {
       const input = document.getElementById(inputId);
@@ -297,38 +297,38 @@ class Navigator extends React.Component {
         defaultValue={value}
         placeholder={value}
         disabled={
-          !fileType || this.props.renamingInputState.inputType !== inputType ||
-          this.props.renamingInputState.fileId.sourceId !== fileId.sourceId ||
-          this.props.renamingInputState.fileId.viewId !== fileId.viewId
+          !fileType || this.state.renaming.inputType !== inputType ||
+          this.state.renaming.fileId.sourceId !== fileId.sourceId ||
+          this.state.renaming.fileId.viewId !== fileId.viewId
         }
         onBlur={() => {
-          this.handleRenameFile(inputType, fileId).then(() => { this.handleResetRenameInput(inputType, fileId); });
+          this.handleRenameFile(inputType, fileId).then(() => {
+            if (
+              this.state.renaming.inputType === inputType && this.state.renaming.fileId.sourceId === fileId.sourceId &&
+              this.state.renaming.fileId.viewId === fileId.viewId
+            ) { this.handleCancelRenaming(inputType, fileId); }
+          });
         }}
-        onKeyDown={event => { if (event.key === 'Escape') { this.handleResetRenameInput(inputType, fileId); } }}
+        onKeyDown={event => { if (event.key === 'Escape') { this.handleCancelRenaming(inputType, fileId); } }}
         onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
         {...remainingProps}
       />
     );
   };
 
-  renameButton = ({ inputType, fileId, ...remainingProps }) => {
-    const fileType = getFileType(fileId);
-    return (
-      <button
-        className="MonospaceCharButton"
-        title="rename"
-        hidden={
-          this.props.renamingInputState.inputType === inputType &&
-          this.props.renamingInputState.fileId.sourceId === fileId.sourceId &&
-          this.props.renamingInputState.fileId.viewId === fileId.viewId
-        }
-        disabled={!fileType}
-        onClick={() => { this.handleStartRenaming(inputType, fileId); }}
-        {...remainingProps}>
-        {'*'}
-      </button>
-    );
-  };
+  renameButton = ({ inputType, fileId, ...remainingProps }) =>
+    <button
+      className="MonospaceCharButton"
+      title="rename"
+      hidden={
+        this.state.renaming.inputType === inputType && this.state.renaming.fileId.sourceId === fileId.sourceId &&
+        this.state.renaming.fileId.viewId === fileId.viewId
+      }
+      disabled=(!getFileType(fileId)}
+      onClick={() => { this.handleStartRenaming(inputType, fileId); }}
+      {...remainingProps}>
+      {'*'}
+    </button>;
 
   fileListItemButtonRow = ({ inputType, fileId }) => {
     const fileName = this.getFileName(fileId);
@@ -338,9 +338,9 @@ class Navigator extends React.Component {
     return (
       <div className="ButtonRow">
         {
-          this.props.renamingInputState.inputType !== inputType ||
-          this.props.renamingInputState.fileId.sourceId !== fileId.sourceId ||
-          this.props.renamingInputState.fileId.viewId !== fileId.viewId
+          this.state.renaming.inputType !== inputType ||
+          this.state.renaming.fileId.sourceId !== fileId.sourceId ||
+          this.state.renaming.fileId.viewId !== fileId.viewId
             ? <button
                 title={(currentlyOpen ? 'currently ' : '') + 'open'}
                 disabled={currentlyOpen}
@@ -549,12 +549,9 @@ class Navigator extends React.Component {
 export default connect(
   state => ({
     currentOpenFileId: state.currentOpenFileId,
-    renamingInputState: state.renamingInputState,
     backendModeSignedInStatus: state.backendModeSignedInStatus,
   }),
   dispatch => ({
-    dispatchSetRenamingInputStateAction:
-      renamingInputState => dispatch(setRenamingInputStateAction(renamingInputState)),
     dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
   }),
 )(Navigator);
