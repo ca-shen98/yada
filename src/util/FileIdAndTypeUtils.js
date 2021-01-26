@@ -3,6 +3,8 @@ export const FILE_TYPE = {
   VIEW: 'VIEW',
 };
 
+export const NO_OPEN_FILE_ID = { sourceId: 0, viewId: 0 };
+
 export const validateFileIdObj = fileId => fileId.hasOwnProperty('sourceId') && fileId.hasOwnProperty('viewId');
 export const validateHasFileIdObj = state => state.hasOwnProperty('fileId') && validateFileIdObj(state.fileId);
 

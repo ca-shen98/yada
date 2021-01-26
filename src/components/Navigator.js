@@ -3,12 +3,17 @@ import {debounce, defer} from 'lodash';
 import Cookies from 'js-cookie';
 import React from 'react';
 import {batch, connect} from 'react-redux';
-import convertStrValueOrDefault from '../util/ConvertStrValueOrDefault';
-import {FILE_TYPE, getFileType, validateFileIdObj, getFileIdKeyStr} from '../util/FileIdAndTypeUtils';
 import store from '../store';
 import {
-  CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
+  FILE_TYPE,
   NO_OPEN_FILE_ID,
+  validateFileIdObj,
+  getFileType,
+  getFileIdKeyStr,
+} from '../util/FileIdAndTypeUtils';
+import {
+  CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
+  INITIAL_FILE_ID_LOCAL_STORAGE_KEY,
   setCurrentOpenFileIdAction,
   setSelectNodeAction,
 } from '../reducers/CurrentOpenFileState';
@@ -39,7 +44,6 @@ import {
   doRenameView,
 } from '../backend/FileStorageSystem';
 
-const INITIAL_FILE_ID_LOCAL_STORAGE_KEY = 'initialFileId';
 
 export const handleSetCurrentOpenFileId = fileId => {
   if (!validateFileIdObj(fileId)) { return false; }
@@ -253,26 +257,12 @@ class Navigator extends React.Component {
   };
 
   componentDidMount = () => {
-    const storedInitialFileId = convertStrValueOrDefault(
-      localStorage.getItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY),
-      {},
-      'invalid initialFileId',
-    );
-    const initialFileId = {
-      sourceId: storedInitialFileId.hasOwnProperty('sourceId')
-        ? storedInitialFileId.sourceId : NO_OPEN_FILE_ID.sourceId,
-      viewId: storedInitialFileId.hasOwnProperty('viewId') ? storedInitialFileId.viewId : NO_OPEN_FILE_ID.viewId,
-    }
     doGetFilesList().then(filesList => {
       if (!filesList) { alert('failed to retrieve files list'); }
       else { this.setState({ filesList }); }
       if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
         this.setState({ nextNewFileIds: calculateLocalStorageNextNewFileIds(this.state.filesList) });
       }
-      if (
-        initialFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
-        initialFileId.viewId !== this.props.currentOpenFileId.viewId
-      ) { handleSetCurrentOpenFileId(initialFileId); }
     });
   };
 
