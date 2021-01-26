@@ -27,7 +27,7 @@ import {
 } from '../reducers/BackendModeSignedInStatus';
 import {
   doSetLocalStorageSourceIdNames,
-  doSetLocalStorageSourceViewsList,
+  doSetLocalStorageSourceViews,
   calculateLocalStorageNextNewId,
   calculateLocalStorageNextNewFileIds,
 } from '../backend/LocalFileStorageSystemClient';
@@ -57,7 +57,7 @@ const convertFilesListStateToFileIdNamesList = filesListState => Object.fromEntr
 );
 
 const countNumFiles = filesList => Object.entries(filesList)
-  .reduce((count, [_sourceId, { viewsList }]) => count + 1 + Object.keys(viewsList).length, 0);
+  .reduce((count, [_sourceId, { views }]) => count + 1 + Object.keys(views).length, 0);
 
 const FILE_LIST_ID = 'file_list';
 
@@ -102,8 +102,8 @@ class Navigator extends React.Component {
       ? this.state.filesList[fileId.sourceId].name : '';
   
   getViewName = fileId => checkViewFileId(fileId) && this.state.filesList.hasOwnProperty(fileId.sourceId) &&
-    this.state.filesList[fileId.sourceId].viewsList.hasOwnProperty(fileId.viewId)
-      ? this.state.filesList[fileId.sourceId].viewsList[fileId.viewId].name : '';
+    this.state.filesList[fileId.sourceId].views.hasOwnProperty(fileId.viewId)
+      ? this.state.filesList[fileId.sourceId].views[fileId.viewId].name : '';
 
   getFileName = fileId => checkViewFileId(fileId) ? this.getViewName(fileId) : this.getSourceName(fileId);
 
@@ -151,19 +151,19 @@ class Navigator extends React.Component {
   };
 
   handleDoFileNamesSearch = () => Object.fromEntries(
-    Object.entries(this.state.filesList).map(([sourceId, { name: sourceName, viewsList }]) => [
+    Object.entries(this.state.filesList).map(([sourceId, { name: sourceName, views }]) => [
       sourceId,
       {
         name: sourceName,
-        viewsList: this.state.searching
-          ? Object.fromEntries(Object.entries(viewsList).filter(
+        views: this.state.searching
+          ? Object.fromEntries(Object.entries(views).filter(
               ([_viewId, { name: viewName }]) => viewName.includes(this.state.searching)
             ))
-          : viewsList,
+          : views,
       },
     ]).filter(
-      ([_sourceId, { name: sourceName, viewsList }]) => !this.state.searching ||
-        Object.keys(viewsList).length > 0 || sourceName.includes(this.state.searching)
+      ([_sourceId, { name: sourceName, views }]) => !this.state.searching ||
+        Object.keys(views).length > 0 || sourceName.includes(this.state.searching)
     )
   );
 
@@ -202,11 +202,11 @@ class Navigator extends React.Component {
       ...this.state.filesList,
       [updatedSourceId]: {
         name: sourceFileType ? newFile.name : this.state.filesList[updatedSourceId].name,
-        viewsList: {
+        views: {
           ...(
             !sourceFileType
               ? {
-                  ...this.state.filesList[updatedSourceId].viewsList,
+                  ...this.state.filesList[updatedSourceId].views,
                   [newFile.id]: { name: newFile.name, type: newFile.type },
                 }
               : null
@@ -225,7 +225,7 @@ class Navigator extends React.Component {
     });
     if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
       if (sourceFileType) { doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList)); }
-      else { doSetLocalStorageSourceViewsList(updatedSourceId, newFilesList[updatedSourceId].viewsList); }
+      else { doSetLocalStorageSourceViews(updatedSourceId, newFilesList[updatedSourceId].views); }
       this.setState({
         nextNewFileIds: {
           source: sourceFileType
@@ -237,7 +237,7 @@ class Navigator extends React.Component {
               !sourceFileType
                 ? {
                     [updatedSourceId]:
-                      calculateLocalStorageNextNewId(newFilesList[updatedSourceId].viewsList, parseInt(newFile.id)),
+                      calculateLocalStorageNextNewId(newFilesList[updatedSourceId].views, parseInt(newFile.id)),
                   }
                 : null
             ),
@@ -258,7 +258,7 @@ class Navigator extends React.Component {
     const deleteFilePromise = sourceFileIdCheck
       ? FileStorageSystemClient.doDeleteSource(
           fileId.sourceId,
-          Object.keys(this.state.filesList[fileId.sourceId].viewsList),
+          Object.keys(this.state.filesList[fileId.sourceId].views),
         )
       : FileStorageSystemClient.doDeleteView(fileId.sourceId, fileId.viewId);
     const success = await deleteFilePromise;
@@ -269,9 +269,9 @@ class Navigator extends React.Component {
     const newFilesList = {...this.state.filesList};
     if (sourceFileIdCheck) { delete newFilesList[fileId.sourceId]; }
     else {
-      const newSourceViewsList = {...newFilesList[fileId.sourceId].viewsList};
-      delete newSourceViewsList[fileId.viewId];
-      newFilesList[fileId.sourceId] = { name: newFilesList[fileId.sourceId].name, viewsList: newSourceViewsList };
+      const newSourceViews = {...newFilesList[fileId.sourceId].views};
+      delete newSourceViews[fileId.viewId];
+      newFilesList[fileId.sourceId] = { name: newFilesList[fileId.sourceId].name, views: newSourceViews };
     }
     this.setState({ filesList: newFilesList });
     if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
@@ -285,7 +285,7 @@ class Navigator extends React.Component {
             nextNewViewIdsForSourceIds: newNextNewViewIdsForSourceIds,
           },
         });
-      } else { doSetLocalStorageSourceViewsList(fileId.sourceId, newFilesList[fileId.sourceId].viewsList); }
+      } else { doSetLocalStorageSourceViews(fileId.sourceId, newFilesList[fileId.sourceId].views); }
     }
   };
 
@@ -306,18 +306,18 @@ class Navigator extends React.Component {
     }
     const newFilesList = {...this.state.filesList};
     if (sourceFileIdCheck) {
-      newFilesList[fileId.sourceId] = { name: newName, viewsList: newFilesList[fileId.sourceId].viewsList };
+      newFilesList[fileId.sourceId] = { name: newName, views: newFilesList[fileId.sourceId].views };
     } else {
-      const newSourceViewsList = {
-        ...newFilesList[fileId.sourceId].viewsList,
-        [fileId.viewId]: { ...newFilesList[fileId.sourceId].viewsList[fileId.viewId], name: newName },
+      const newSourceViews = {
+        ...newFilesList[fileId.sourceId].views,
+        [fileId.viewId]: { ...newFilesList[fileId.sourceId].views[fileId.viewId], name: newName },
       };
-      newFilesList[fileId.sourceId] = { name: newFilesList[fileId.sourceId].name, viewsList: newSourceViewsList };
+      newFilesList[fileId.sourceId] = { name: newFilesList[fileId.sourceId].name, views: newSourceViews };
     }
     this.setState({ filesList: newFilesList });
     if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
       if (sourceFileIdCheck) { doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList)); }
-      else { doSetLocalStorageSourceViewsList(fileId.sourceId, newFilesList[fileId.sourceId].viewsList); }
+      else { doSetLocalStorageSourceViews(fileId.sourceId, newFilesList[fileId.sourceId].views); }
     }
   };
 
@@ -511,17 +511,17 @@ class Navigator extends React.Component {
             Object.keys(filteredFilesList).length > 0
               ? <ul id={FILE_LIST_ID}>
                   {
-                    Object.entries(filteredFilesList).map(([sourceId, { viewsList }]) =>
+                    Object.entries(filteredFilesList).map(([sourceId, { views }]) =>
                       <li key={sourceId}>
                         <this.fileListItemButtonRow
                           inputType={RENAME_INPUT_TYPES.SOURCE_LIST_ITEM}
                           fileId={{ sourceId, viewId: 0 }}
                         />
                         {
-                          Object.keys(viewsList).length > 0
+                          Object.keys(views).length > 0
                             ? <ul>
                                 {
-                                  Object.keys(viewsList).map(viewId => {
+                                  Object.keys(views).map(viewId => {
                                     const fileId = { sourceId, viewId };
                                     return (
                                       <li key={getFileIdKeyStr(fileId)}>
