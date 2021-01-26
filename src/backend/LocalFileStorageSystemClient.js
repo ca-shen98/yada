@@ -1,16 +1,16 @@
 import {convertStrValueOrDefault, convertStrValueOrDefaultIfFalsy} from '../util/ConvertStrValueOrDefault';
 import {getFileIdKeyStr} from '../util/FileIdAndTypeUtils';
 
-const SOURCE_VIEWS_LIST_LOCAL_STORAGE_KEY_PREFIX = 'sourceViewsList_';
+const SOURCE_VIEWS_LOCAL_STORAGE_KEY_PREFIX = 'sourceViews_';
 
 // API-ish
-export const doSetLocalStorageSourceViewsList = (sourceId, sourceViewsList) =>
-  localStorage.setItem(SOURCE_VIEWS_LIST_LOCAL_STORAGE_KEY_PREFIX + sourceId, JSON.stringify(sourceViewsList));
+export const doSetLocalStorageSourceViews = (sourceId, sourceViews) =>
+  localStorage.setItem(SOURCE_VIEWS_LOCAL_STORAGE_KEY_PREFIX + sourceId, JSON.stringify(sourceViews));
 
-const doGetLocalStorageSourceViewsList = sourceId => convertStrValueOrDefaultIfFalsy(
-  localStorage.getItem(SOURCE_VIEWS_LIST_LOCAL_STORAGE_KEY_PREFIX + sourceId),
+const doGetLocalStorageSourceViews = sourceId => convertStrValueOrDefaultIfFalsy(
+  localStorage.getItem(SOURCE_VIEWS_LOCAL_STORAGE_KEY_PREFIX + sourceId),
   {},
-  'invalid sourceViewsList',
+  'invalid sourceViews',
 );
 
 const SOURCE_ID_NAMES_LOCAL_STORAGE_KEY = 'sourceIdNames';
@@ -33,7 +33,7 @@ export const calculateLocalStorageNextNewId = (existingIdsDict, candidate) => {
 export const calculateLocalStorageNextNewFileIds = filesList => ({
   source: calculateLocalStorageNextNewId(filesList, 0),
   nextNewViewIdsForSourceIds: Object.fromEntries(Object.entries(filesList).map(
-    ([sourceId, { viewsList }]) => [sourceId, calculateLocalStorageNextNewId(viewsList, 0)]
+    ([sourceId, { views }]) => [sourceId, calculateLocalStorageNextNewId(views, 0)]
   )),
 });
 
@@ -52,9 +52,9 @@ export default {
     if (!sourceIdNames) { return null; }
     const filesList = {};
     for (const [sourceId, sourceName] of Object.entries(sourceIdNames)) {
-      const viewsList = doGetLocalStorageSourceViewsList(sourceId);
-      if (!viewsList) { return null; }
-      filesList[sourceId] = { name: sourceName, viewsList };
+      const sourceViews = doGetLocalStorageSourceViews(sourceId);
+      if (!sourceViews) { return null; }
+      filesList[sourceId] = { name: sourceName, views: sourceViews };
     }
     return filesList;
   },
@@ -134,7 +134,7 @@ export default {
     for (const viewId of localStorageSourceViewIds) {
       localStorage.removeItem(VIEW_SPEC_LOCAL_STORAGE_KEY_PREFIX + getFileIdKeyStr(sourceId, viewId));
     }
-    localStorage.removeItem(SOURCE_VIEWS_LIST_LOCAL_STORAGE_KEY_PREFIX + sourceId);
+    localStorage.removeItem(SOURCE_VIEWS_LOCAL_STORAGE_KEY_PREFIX + sourceId);
     return true;
   },
   doRenameView: async () => true,
