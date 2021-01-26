@@ -549,17 +549,17 @@ class Navigator extends React.Component {
   handleFileListClick = (fileId) => {
     if (fileId == this.state.selectedFileId) {
       this.setState({
-        selectedViewId: '',
+        selectedViewId: null,
         selectedFileOpen: !(this.state.selectedFileOpen)
       });
     }else{
-      console.log("Executing new File List Click");
-      this.setState({
-        selectedFileId: fileId,
-        selectedViewId: '',
-        selectedFileOpen: true
-      });
-      handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0 });
+      if(handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0 })){
+        this.setState({
+          selectedFileId: fileId,
+          selectedViewId: null,
+          selectedFileOpen: true
+        });
+      }
     }
     
   };
@@ -580,6 +580,25 @@ class Navigator extends React.Component {
     this.setState({
       editMenuAnchorElement: null
     })
+  }
+
+  handleDeleteMenuClick = () => {
+    this.handleEditMenuClose();
+    const fileId = { sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId === null) ? 0 : this.state.selectedViewId}
+    const fileType = getFileType(fileId);
+    this.handleDeleteFile(fileId).then(success => {
+      if (fileType !== FILE_TYPE.SOURCE) {
+        this.setState({
+          selectedViewId: null,
+        });
+      }else{
+        this.setState({
+          selectedFileId: null,
+          selectedViewId: null,
+          selectedFileOpen: false
+        });
+      }
+    });
   }
 
   render = () => {
@@ -786,7 +805,7 @@ class Navigator extends React.Component {
                 </ListItemIcon>
                 <ListItemText primary="Rename" />
               </MenuItem>
-              <MenuItem>
+              <MenuItem onClick={() => this.handleDeleteMenuClick()}>
                 <ListItemIcon>
                   <DeleteIcon fontSize="small" />
                 </ListItemIcon>
