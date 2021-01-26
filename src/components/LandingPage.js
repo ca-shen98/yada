@@ -19,21 +19,15 @@ class LandingPage extends React.Component {
   handleLoginSuccess = async ({ profileObj: { name, email }, tokenObj: { id_token: token, expiresAt: expiry } }) => {
     let response = null;
     try {
-      response = await fetchWithTimeout(
-        SERVER_BASE_URL + 'auth',
-        { method: 'GET', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      response = await axios.post(
+        SERVER_BASE_URL + 'register_user',
+        {
+          method: 'POST',
+          body: JSON.stringify({ name, email, token }),
+          headers: { 'Content-Type': 'application/json', 'Set-Cookie': `token=${token}` },
+        },
+        { withCredentials: true },
       );
-      if (!response.ok) {
-        response = await axios.post(
-          SERVER_BASE_URL + 'register_user',
-          {
-            method: 'POST',
-            body: JSON.stringify({ name, email, token }),
-            headers: { 'Content-Type': 'application/json', 'Set-Cookie': `token=${token}` },
-          },
-          { withCredentials: true },
-        );
-      }
     } catch(e) { console.log(e); }
     if (response && response.status === 201) {
       Cookies.set(ACCESS_TOKEN_COOKIE_KEY, token, { expires: new Date(expiry) });
