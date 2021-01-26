@@ -1,7 +1,6 @@
 #current_file_container {
   padding: 0 4px 6px;
   margin: 0 8px;
-  border-bottom: 3px solid slategray;
 }
 
 #current_file_container>.InputRow {
@@ -56,6 +55,10 @@
   padding: 0 8px;
 }
 
+#new_document_button {
+  margin-bottom: 10px;
+}
+
 #file_list, #no_files_placeholder, #filtered_files_placeholder {
   overflow: auto;
   padding: 0 12px;
@@ -95,4 +98,16 @@
 
 #user_controls_container>button:first-child {
   margin-top: 0;
+}
+
+.file_list_item {
+  padding: '2px 4px';
+  display: 'flex';
+  align-items: 'center';
+  width: 400;
+}
+
+.file_list_input {
+  margin-left: 1;
+  flex: 1;
 }

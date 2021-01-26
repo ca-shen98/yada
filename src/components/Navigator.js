@@ -31,13 +31,52 @@ import {
   calculateLocalStorageNextNewId,
   calculateLocalStorageNextNewFileIds,
 } from '../backend/LocalFileStorageSystemClient';
+import { doCreateNewSource,
+  doDeleteSource,
+  doDeleteView,
+  doRenameSource,
+  doRenameView,
+} from '../backend/FileStorageSystem';
+import Button from '@material-ui/core/Button';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import Input from '@material-ui/core/Input';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import SearchIcon from '@material-ui/icons/Search';
+import Divider from '@material-ui/core/Divider';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Collapse from '@material-ui/core/Collapse';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+import DraftsIcon from '@material-ui/icons/Drafts';
+import SendIcon from '@material-ui/icons/Send';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import StarBorder from '@material-ui/icons/StarBorder';
+import Paper from '@material-ui/core/Paper';
+import InputBase from '@material-ui/core/InputBase';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import DirectionsIcon from '@material-ui/icons/Directions';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { makeStyles } from '@material-ui/core/styles';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import EditIcon from '@material-ui/icons/Edit';
 
 import store from '../store';
 import FileStorageSystemClient from '../backend/FileStorageSystemClient';
 
 export const handleSetCurrentOpenFileId = fileId => {
+  console.log("Getting Here")
   if (!validateFileIdObj(fileId)) { return false; }
   const currentOpenFileId = store.getState().currentOpenFileId;
+  console.log(currentOpenFileId)
   if (fileId.sourceId === currentOpenFileId.sourceId && fileId.viewId === currentOpenFileId.viewId) { return true; }
   if (!store.getState().saveDirtyFlag || window.confirm('confirm discard unsaved changes')) {
     batch(() => {
@@ -90,6 +129,10 @@ const DEFAULT_STATE = {
   renaming: NO_RENAMING_STATE,
   filesList: {},
   nextNewFileIds: null,
+  selectedFileId: '',
+  selectedViewId: '',
+  selectedFileOpen: false,
+  editMenuAnchorElement: null
 };
 
 class Navigator extends React.Component {
@@ -399,6 +442,7 @@ class Navigator extends React.Component {
     const currentlyOpen = fileId.sourceId === this.props.currentOpenFileId.sourceId &&
       fileId.viewId === this.props.currentOpenFileId.viewId;
     const renameComponentProps = { inputType, fileId };
+    console.log(this.props.renamingInputState)
     return (
       <div className="ButtonRow">
         {
@@ -440,6 +484,104 @@ class Navigator extends React.Component {
     );
   };
 
+  fileListItem = ({ fileId, selected, open, handleEditMenuClick }) => {
+    const useStyles = makeStyles((theme) => ({
+      root: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: 400,
+      },
+      viewRoot: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: 200,
+      },
+      input: {
+        marginLeft: theme.spacing(1),
+        flex: 1,
+      },
+      iconButton: {
+        padding: 5,
+      },
+      divider: {
+        height: 28,
+        margin: 4,
+      },
+    }));
+    const classes = useStyles();
+    const fileName = this.getFileName(fileId);
+    if(getFileType(fileId) === FILE_TYPE.VIEW){
+      console.log("rendering View");
+      console.log(fileName);
+      return (
+        <Paper className={classes.viewRoot} style={(selected) ? {backgroundColor: 'rgba(0, 0, 0, 0.08)'} : {} } component="form" elevation={0}>
+          <InputBase 
+            value={fileName}
+            class="file_list_input"
+            disabled={true}
+          />
+          <Divider className={classes.divider} orientation="vertical" />
+          <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
+            <MoreVertIcon fontSize="small" color="disabled"/>
+          </IconButton>
+        </Paper>
+      );
+    }else{
+      return (
+        <Paper className={classes.root} style={(selected) ? {backgroundColor: '#a3d2f7', border:"solid #3f51b5 thin"} : {} } component="form" elevation={0}>
+          <InputBase 
+            value={fileName}
+            class="file_list_input"
+            disabled={true}
+          />
+          {open ? <ExpandLess /> : <ExpandMore />}
+          <Divider className={classes.divider} orientation="vertical" />
+          <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
+            <MoreVertIcon fontSize="small" color="disabled"/>
+          </IconButton>
+        </Paper>
+      );
+    }
+  };
+
+  handleFileListClick = (fileId) => {
+    if (fileId == this.state.selectedFileId) {
+      this.setState({
+        selectedViewId: '',
+        selectedFileOpen: !(this.state.selectedFileOpen)
+      });
+    }else{
+      console.log("Executing new File List Click");
+      this.setState({
+        selectedFileId: fileId,
+        selectedViewId: '',
+        selectedFileOpen: true
+      });
+      handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0 });
+    }
+    
+  };
+
+  handleViewListClick = (viewId) => {
+    this.setState({
+      selectedViewId: viewId,
+    });
+  };
+
+  handleEditMenuClick = (event) => {
+    this.setState({
+      editMenuAnchorElement: event.currentTarget
+    })
+  }
+
+  handleEditMenuClose = () => {
+    this.setState({
+      editMenuAnchorElement: null
+    })
+  }
+
   render = () => {
     const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
     const currentSourceRenameComponentProps = {
@@ -453,6 +595,7 @@ class Navigator extends React.Component {
     const numFiles = countNumFiles(this.state.filesList);
     const filteredFilesList = this.state.searching ? this.handleDoFileNamesSearch() : this.state.filesList;
     const numFilteredFiles = countNumFiles(filteredFilesList);
+
     return (
       <div className="SidePane">
         <div id="current_file_container">
@@ -468,7 +611,7 @@ class Navigator extends React.Component {
             <this.renameInput {...currentViewRenameComponentProps} title="current open view" />
           </div>
         </div>
-        <div id="create_file_buttons_row">
+        {/* <div id="create_file_buttons_row">
           <button onClick={() => { this.handleCreateNewFile(FILE_TYPE.SOURCE); }}>
             <span className="MonospaceCharButton">{'+'}</span> source
           </button>
@@ -488,26 +631,36 @@ class Navigator extends React.Component {
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
+        <Divider variant="middle" />
         <div id="file_list_container">
+            <Button
+              variant="outlined"
+              color="primary"
+              endIcon={<AddCircleIcon />}
+              disableElevation
+              id="new_document_button"
+            >
+              New Document
+            </Button>
           <div className="InputRow" id="search_file_names_input_row">
-            <input
+            <Input
+              variant="outlined"
               id={SEARCH_FILE_NAMES_INPUT_ID}
-              title="search file names"
-              placeholder="search file names"
-              onChange={debounce(this.handleChangeSearchingInput, 150)}
+              startAdornment={
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              }
+              style={{"width":"100%"}}
+              title="Search File Names"
+              placeholder="Search File Names"
+              onChange={debounce(this.handleUpdateSearchInputState, 150)}
               onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
               onKeyDown={event => { if (event.key === 'Escape') { event.target.blur(); } }}
             />
-            <button
-              className="MonospaceCharButton"
-              title="clear"
-              disabled={!this.state.searching}
-              onClick={this.handleClearSearchingInput}>
-              {'✕'}
-            </button>
           </div>
-          {
+          {/* {
             Object.keys(filteredFilesList).length > 0
               ? <ul id={FILE_LIST_ID}>
                   {
@@ -543,7 +696,103 @@ class Navigator extends React.Component {
               : <div className="PlaceholderDivWithText" id="no_files_placeholder">
                   no files
                 </div>
+          } */}
+          {
+            Object.keys(filteredFilesList).length > 0
+              ?  <List
+                    component="nav"
+                    aria-labelledby="nested-list-subheader"
+                    subheader={
+                      <ListSubheader component="div" id="nested-list-subheader">
+                        Source Files
+                      </ListSubheader>
+                    }
+                    id={FILE_LIST_ID}
+                    style={{"maxWidth" : 360, "width" : '100%'}}
+                  >
+                  {
+                    Object.entries(filteredFilesList).map(([sourceId, { viewsList }]) =>
+                    <div>
+                      <ListItem button 
+                      key={sourceId} 
+                      disableGutters={true}
+                      divider={true}
+                      selected={true}
+                      style={{"padding":"0px"}}
+                      onClick={() => {this.handleFileListClick(sourceId)}}
+                      >
+                        <this.fileListItem
+                          fileId={{ sourceId, viewId: 0 }}
+                          selected={sourceId === this.state.selectedFileId}
+                          open={sourceId === this.state.selectedFileId && this.state.selectedFileOpen}
+                          handleEditMenuClick={this.handleEditMenuClick}
+                        />
+                      </ListItem>
+                        {
+                          Object.keys(viewsList).length > 0
+                            ? <Collapse in={sourceId === this.state.selectedFileId && this.state.selectedFileOpen} timeout="auto" unmountOnExit>
+                                <List component="div" disablePadding style={{"borderStyle": "none solid solid solid", "borderColor" :"#3f51b5", "borderWidth": "thin", "borderRadius": "4px"}}>
+                                {
+                                  Object.keys(viewsList).map(viewId => {
+                                    const fileId = { sourceId, viewId };
+                                    return (
+                                      <ListItem button 
+                                      key={getFileIdKeyStr(fileId)} 
+                                      disableGutters={true}
+                                      divider={true}
+                                      selected={true}
+                                      style={{"paddingLeft": "32px", "paddingTop": "0px", "paddingBottom": "0px", "backgroundColor": "transparent"}}
+                                      onClick={() => {this.handleViewListClick(viewId)}}
+                                      >
+                                      <this.fileListItem
+                                          fileId={fileId}
+                                          open={viewId === this.state.selectedViewId}
+                                          handleEditMenuClick={this.handleEditMenuClick}
+                                        />
+                                      </ListItem>
+                                    );
+                                  })
+                                }
+                                </List>
+                              </Collapse>
+                            : null
+                          }
+                          </div>   
+                    )
+                  }
+                </List>
+              : <div className="PlaceholderDivWithText" id="no_files_placeholder">
+                  No Files
+                </div>
           }
+          <Menu
+            id="edit_menu"
+            anchorEl={this.state.editMenuAnchorElement}
+            keepMounted
+            open={Boolean(this.state.editMenuAnchorElement)}
+            onClose={() => this.handleEditMenuClose()}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+              <MenuItem >
+                <ListItemIcon>
+                  <EditIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Rename" />
+              </MenuItem>
+              <MenuItem>
+                <ListItemIcon>
+                  <DeleteIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Delete" />
+              </MenuItem>
+          </Menu>
           <div
             className="PlaceholderDivWithText"
             id="filtered_files_placeholder"
