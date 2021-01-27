@@ -66,6 +66,9 @@ import Popover from '@material-ui/core/Popover';
 import store from '../store';
 import FileStorageSystemClient from '../backend/FileStorageSystemClient';
 import CheckIcon from '@material-ui/icons/Check';
+import AddIcon from '@material-ui/icons/Add';
+import TextFieldsIcon from '@material-ui/icons/TextFields';
+import AmpStoriesIcon from '@material-ui/icons/AmpStories';
 
 export const handleSetCurrentOpenFileId = fileId => {
   console.log("Getting Here")
@@ -128,7 +131,8 @@ const DEFAULT_STATE = {
   selectedViewId: '',
   selectedFileOpen: false,
   editMenuAnchorElement: null,
-  renameSelected: false
+  renameSelected: false,
+  newViewAnchorElement: null
 };
 
 class Navigator extends React.Component {
@@ -610,6 +614,19 @@ class Navigator extends React.Component {
     })
   }
 
+  handleViewMenuOpen = (event) => {
+    this.setState({
+      newViewAnchorElement : this.state.editMenuAnchorElement
+    })
+  }
+
+  handleViewMenuClose = () => {
+    this.setState({
+      newViewAnchorElement : null,
+      editMenuAnchorElement: null
+    })
+  }
+
   render = () => {
     const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
     const currentSourceRenameComponentProps = {
@@ -667,6 +684,7 @@ class Navigator extends React.Component {
               endIcon={<AddCircleIcon />}
               disableElevation
               id="new_document_button"
+              onClick={() => { this.handleCreateNewFile(FILE_TYPE.SOURCE); }}
             >
               New Document
             </Button>
@@ -807,6 +825,16 @@ class Navigator extends React.Component {
               horizontal: 'right',
             }}
           >
+            {
+              (this.state.selectedViewId === null) ? 
+              <MenuItem onClick={() => this.handleViewMenuOpen()}>
+                <ListItemIcon>
+                  <AddIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="New View" />
+              </MenuItem>
+              : null
+            }
               <MenuItem onClick={() => this.handleRenameMenuClick()}>
                 <ListItemIcon>
                   <EditIcon fontSize="small" />
@@ -818,6 +846,42 @@ class Navigator extends React.Component {
                   <DeleteIcon fontSize="small" />
                 </ListItemIcon>
                 <ListItemText primary="Delete" />
+              </MenuItem>
+          </Menu>
+          <Menu 
+            id="viewMenu"
+            anchorEl={this.state.newViewAnchorElement}
+            keepMounted
+            open={Boolean(this.state.newViewAnchorElement)}
+            onClose={() => this.handleViewMenuClose()}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+          >
+              <MenuItem 
+                  onClick={() => {
+                    this.handleViewMenuClose();
+                    this.handleCreateNewFile(FILE_TYPE.TEXT_VIEW);}}
+              >
+                <ListItemIcon>
+                  <TextFieldsIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Text View" />
+              </MenuItem>
+              <MenuItem
+              onClick={() => {
+                this.handleViewMenuClose();
+                this.handleCreateNewFile(FILE_TYPE.CARD_VIEW);}}
+              >
+                <ListItemIcon>
+                  <AmpStoriesIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Card View" />
               </MenuItem>
           </Menu>
           <Popover
@@ -861,7 +925,7 @@ class Navigator extends React.Component {
               }
               disableUnderline={true}
               fullWidth={true}
-              style={{height:"50px"}}
+              style={{height:"50px", "paddingLeft": "10px"}}
             />
           </Popover>
           <div

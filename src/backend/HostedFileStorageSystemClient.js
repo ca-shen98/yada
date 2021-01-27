@@ -79,8 +79,8 @@ export default {
         },
       );
       if (response.ok) {
-        const { docID, name } = await response.json();
-        return { id: docID, ...(createNew ? { name } : null) };
+        const { id, name } = await response.json();
+        return { id: id, ...(createNew ? { name } : null) };
       };
     } catch (e) { console.log(e); }
     return null;
