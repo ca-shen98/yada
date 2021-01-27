@@ -64,7 +64,7 @@ export default {
     else { localStorage.removeItem(viewSpecLocalStorageKey); }
     return { id: viewId, sourceId, ...(createNew ? { name: DEFAULT_VIEW_NAME, type } : null) };
   },
-  doGetViewSpec: async (sourceId, viewId) => convertStrValueOrDefaultIfFalsy(
+  doGetView: async (sourceId, viewId) => convertStrValueOrDefaultIfFalsy(
     localStorage.getItem(VIEW_SPEC_LOCAL_STORAGE_KEY_PREFIX + getFileIdKeyStr(sourceId, viewId)),
     [],
     'invalid viewSpec',

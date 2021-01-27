@@ -10,7 +10,7 @@ const getFileStorageSystemClient = () =>
 const clientInterface = {
   doGetFilesList: () => { throw new Error('not implemented'); },
   doSaveViewSpec: () => { throw new Error('not implemented'); },
-  doGetViewSpec: () => { throw new Error('not implemented'); },
+  doGetView: () => { throw new Error('not implemented'); },
   doGetSourceTaggedBlocks: () => { throw new Error('not implemented'); },
   doSaveSourceContent: () => { throw new Error('not implemented'); },
   doGetSourceContent: () => { throw new Error('not implemented'); },

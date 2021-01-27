@@ -66,6 +66,7 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 
 export const handleSetCurrentOpenFileId = fileId => {
+  console.log(fileId);
   if (!validateFileIdObj(fileId)) { return false; }
   const currentOpenFileId = store.getState().currentOpenFileId;
   if (fileId.sourceId === currentOpenFileId.sourceId && fileId.viewId === currentOpenFileId.viewId) { return true; }
