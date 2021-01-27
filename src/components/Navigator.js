@@ -62,9 +62,10 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import EditIcon from '@material-ui/icons/Edit';
-
+import Popover from '@material-ui/core/Popover';
 import store from '../store';
 import FileStorageSystemClient from '../backend/FileStorageSystemClient';
+import CheckIcon from '@material-ui/icons/Check';
 
 export const handleSetCurrentOpenFileId = fileId => {
   console.log("Getting Here")
@@ -126,7 +127,8 @@ const DEFAULT_STATE = {
   selectedFileId: '',
   selectedViewId: '',
   selectedFileOpen: false,
-  editMenuAnchorElement: null
+  editMenuAnchorElement: null,
+  renameSelected: false
 };
 
 class Navigator extends React.Component {
@@ -326,9 +328,9 @@ class Navigator extends React.Component {
     }
   };
 
-  handleRenameFile = async (inputType, fileId) => {
+  handleRenameFile = async (fileId) => {
     if (checkNoOpenFileId(fileId)) { return; }
-    const input = document.getElementById(getRenameInputIdFunctions[inputType](fileId));
+    const input = document.getElementById("rename_field");
     if (!input) { return; }
     const newName = input.value.trim();
     if (!newName || newName === this.getFileName(fileId)) { return; }
@@ -515,7 +517,7 @@ class Navigator extends React.Component {
           <InputBase 
             value={fileName}
             class="file_list_input"
-            disabled={true}
+            disabled={!(selected && this.state.renameSelected)}
           />
           <Divider className={classes.divider} orientation="vertical" />
           <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
@@ -529,7 +531,7 @@ class Navigator extends React.Component {
           <InputBase 
             value={fileName}
             class="file_list_input"
-            disabled={true}
+            disabled={!(selected && this.state.renameSelected)}
           />
           {open ? <ExpandLess /> : <ExpandMore />}
           <Divider className={classes.divider} orientation="vertical" />
@@ -593,6 +595,19 @@ class Navigator extends React.Component {
         });
       }
     });
+  }
+
+  handleRenameMenuClick = (event) => {
+    this.setState({
+      renamePopoverElement: this.state.editMenuAnchorElement,
+      editMenuAnchorElement: null
+    })
+  }
+
+  handleRenamePopoverClose = () => {
+    this.setState({
+      renamePopoverElement: null
+    })
   }
 
   render = () => {
@@ -792,7 +807,7 @@ class Navigator extends React.Component {
               horizontal: 'right',
             }}
           >
-              <MenuItem >
+              <MenuItem onClick={() => this.handleRenameMenuClick()}>
                 <ListItemIcon>
                   <EditIcon fontSize="small" />
                 </ListItemIcon>
@@ -805,6 +820,50 @@ class Navigator extends React.Component {
                 <ListItemText primary="Delete" />
               </MenuItem>
           </Menu>
+          <Popover
+            open={Boolean(this.state.renamePopoverElement)}
+            anchorEl={this.state.renamePopoverElement}
+            anchorOrigin={{
+              vertical:'top',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical:'top',
+              horizontal: 'right'
+            }}
+            id="rename_popover"
+          >
+            <Input
+              id="rename_field"
+              defaultValue={this.getFileName({sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId == null) ? 0 : this.state.selectedViewId})}
+              onKeyPress={event => {
+                if(event.key === 'Enter') {
+                    this.handleRenameFile({sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId == null) ? 0 : this.state.selectedViewId})
+                    this.handleRenamePopoverClose();
+                }   
+              }}
+              onKeyDown={event => {
+                if(event.key === 'Escape') {
+                    this.handleRenamePopoverClose();
+                }   
+              }}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton 
+                    onClick= {() => {
+                      this.handleRenameFile({sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId == null) ? 0 : this.state.selectedViewId})
+                      this.handleRenamePopoverClose();
+                    }}
+                  >
+                      <CheckIcon/>
+                  </IconButton>
+                </InputAdornment>
+              }
+              disableUnderline={true}
+              fullWidth={true}
+              style={{height:"50px"}}
+            />
+          </Popover>
           <div
             className="PlaceholderDivWithText"
             id="filtered_files_placeholder"

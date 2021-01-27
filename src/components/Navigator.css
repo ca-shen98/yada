@@ -111,3 +111,7 @@
   margin-left: 1;
   flex: 1;
 }
+
+.MuiPopover-paper {
+  overflow: hidden;
+}
