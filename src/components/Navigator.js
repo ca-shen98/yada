@@ -31,12 +31,6 @@ import {
   calculateLocalStorageNextNewId,
   calculateLocalStorageNextNewFileIds,
 } from '../backend/LocalFileStorageSystemClient';
-import { doCreateNewSource,
-  doDeleteSource,
-  doDeleteView,
-  doRenameSource,
-  doRenameView,
-} from '../backend/FileStorageSystem';
 import Button from '@material-ui/core/Button';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import Input from '@material-ui/core/Input';
@@ -366,6 +360,7 @@ class Navigator extends React.Component {
 
   componentDidMount = () => {
     FileStorageSystemClient.doGetFilesList().then(filesList => {
+      console.log(filesList);
       if (!filesList) { alert('failed to retrieve files list'); }
       else { this.setState({ filesList }); }
       if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
@@ -512,7 +507,7 @@ class Navigator extends React.Component {
     }));
     const classes = useStyles();
     const fileName = this.getFileName(fileId);
-    if(getFileType(fileId) === FILE_TYPE.VIEW){
+    if(fileId.viewId !== 0){
       console.log("rendering View");
       console.log(fileName);
       return (
@@ -585,9 +580,8 @@ class Navigator extends React.Component {
   handleDeleteMenuClick = () => {
     this.handleEditMenuClose();
     const fileId = { sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId === null) ? 0 : this.state.selectedViewId}
-    const fileType = getFileType(fileId);
     this.handleDeleteFile(fileId).then(success => {
-      if (fileType !== FILE_TYPE.SOURCE) {
+      if (fileId.viewId === 0) {
         this.setState({
           selectedViewId: null,
         });
@@ -614,7 +608,6 @@ class Navigator extends React.Component {
     const numFiles = countNumFiles(this.state.filesList);
     const filteredFilesList = this.state.searching ? this.handleDoFileNamesSearch() : this.state.filesList;
     const numFilteredFiles = countNumFiles(filteredFilesList);
-
     return (
       <div className="SidePane">
         <div id="current_file_container">
@@ -674,7 +667,7 @@ class Navigator extends React.Component {
               style={{"width":"100%"}}
               title="Search File Names"
               placeholder="Search File Names"
-              onChange={debounce(this.handleUpdateSearchInputState, 150)}
+              onChange={debounce(this.handleChangeSearchingInput, 150)}
               onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
               onKeyDown={event => { if (event.key === 'Escape') { event.target.blur(); } }}
             />
@@ -730,7 +723,7 @@ class Navigator extends React.Component {
                     style={{"maxWidth" : 360, "width" : '100%'}}
                   >
                   {
-                    Object.entries(filteredFilesList).map(([sourceId, { viewsList }]) =>
+                    Object.entries(filteredFilesList).map(([sourceId, { views }]) =>
                     <div>
                       <ListItem button 
                       key={sourceId} 
@@ -748,11 +741,11 @@ class Navigator extends React.Component {
                         />
                       </ListItem>
                         {
-                          Object.keys(viewsList).length > 0
+                          Object.keys(views).length > 0
                             ? <Collapse in={sourceId === this.state.selectedFileId && this.state.selectedFileOpen} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding style={{"borderStyle": "none solid solid solid", "borderColor" :"#3f51b5", "borderWidth": "thin", "borderRadius": "4px"}}>
                                 {
-                                  Object.keys(viewsList).map(viewId => {
+                                  Object.keys(views).map(viewId => {
                                     const fileId = { sourceId, viewId };
                                     return (
                                       <ListItem button 
