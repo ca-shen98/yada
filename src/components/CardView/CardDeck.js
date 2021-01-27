@@ -1,5 +1,5 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../containers/CardDeck.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+import './CardDeck.css';
 import React from 'react';
 import {connect} from 'react-redux';
 import Container from 'react-bootstrap/Container'

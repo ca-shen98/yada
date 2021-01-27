@@ -113,7 +113,9 @@ class SourceEditorWithTagFiltersInput extends React.Component {
   changeFile = async () => {
     console.log("Change FILE");
     if (!checkNoOpenFileId(this.props.currentOpenFileId)) {
-      defer(() => { BlockTaggingEditorExtension.editor.focusAtStart(); });
+      defer(() => {
+        BlockTaggingEditorExtension.editor.focusAtStart();
+      });
     }
     const fileIdKeyStr = getFileIdKeyStr(this.props.currentOpenFileId);
     console.log(this.props.currentOpenFileId);
@@ -123,31 +125,20 @@ class SourceEditorWithTagFiltersInput extends React.Component {
           alert('failed to retrieve source content');
           handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
         } else {
-          this.setState({ fileIdKeyStr, fileContent: value ?? '' });
+          this.setState({fileIdKeyStr, fileContent: value ?? ''});
           FileStorageSystemClient.doGetSourceSavedTagFilters(this.props.currentOpenFileId.sourceId)
-            .then(sourceSavedTagFilters => {
-               if (!sourceSavedTagFilters) { alert('failed to retrieve source saved tag filters'); }
-              else { this.setState({ sourceSavedTagFilters }); }
-            });
+              .then(sourceSavedTagFilters => {
+                if (!sourceSavedTagFilters) {
+                  alert('failed to retrieve source saved tag filters');
+                } else {
+                  this.setState({sourceSavedTagFilters});
+                }
+              });
         }
       });
-    } else if (checkViewFileId(this.props.currentOpenFileId)) {
-      FileStorageSystemClient.doGetView(this.props.currentOpenFileId.sourceId, this.props.currentOpenFileId.viewId).then(value => {
-        if (value === null) {
-          alert('failed to retrieve view');
-          handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
-        } else {
-          console.log("VIEWS");
-          console.log(value);
-          // this.setState({ fileIdKeyStr, fileContent: value ?? '' });
-          // FileStorageSystemClient.doGetSourceSavedTagFilters(this.props.currentOpenFileId.sourceId)
-          //     .then(sourceSavedTagFilters => {
-          //       if (!sourceSavedTagFilters) { alert('failed to retrieve source saved tag filters'); }
-          //       else { this.setState({ sourceSavedTagFilters }); }
-          //     });
-        }
-      });
-    } else { this.setState({ fileIdKeyStr, fileContent: '' }); }
+    } else {
+      this.setState({fileIdKeyStr, fileContent: ''});
+    }
   };
 
   componentDidMount = () => {

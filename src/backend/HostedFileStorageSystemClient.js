@@ -35,21 +35,21 @@ export default {
     } catch (e) { console.log(e); }
     return null;
   },
-  doGetView: async (sourceId, viewId) => {
+  doGetView: async (fileId) => {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
       const viewResponse = await fetchWithTimeout(
-        SERVER_BASE_URL + `view?docID=${sourceId}&viewID=${viewId}`,
+        SERVER_BASE_URL + `view?docID=${fileId.sourceId}&viewID=${fileId.viewId}`,
         { method: 'GET', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
       );
       const tagResponse = await fetchWithTimeout(
-          SERVER_BASE_URL + `tags?docID=${sourceId}`,
+          SERVER_BASE_URL + `tags?docID=${fileId.sourceId}`,
           { method: 'GET', headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
       );
       if (!viewResponse.ok || !tagResponse.ok) { return null; }
       const view_json = await viewResponse.json();
       const tags_json = await tagResponse.json();
-      return {"view": view_json, "tags": tags_json};
+      return {"view": view_json, "tags": tags_json, "type": fileId.viewType};
     } catch (e) { console.log(e); }
     return null;
   },

@@ -466,7 +466,7 @@ class Navigator extends React.Component {
   };
 
   handleFileListClick = (fileId) => {
-    if (fileId == this.state.selectedFileId) {
+    if (fileId === this.state.selectedFileId) {
       this.setState({
         selectedViewId: null,
         selectedFileOpen: !(this.state.selectedFileOpen)
@@ -483,9 +483,10 @@ class Navigator extends React.Component {
     
   };
 
-  handleViewListClick = (viewId) => {
+  handleViewListClick = (fileId) => {
+    handleSetCurrentOpenFileId(fileId);
     this.setState({
-      selectedViewId: viewId,
+      selectedViewId: fileId.viewId,
     });
   };
 
@@ -645,7 +646,7 @@ class Navigator extends React.Component {
                                 <List component="div" disablePadding style={{"borderStyle": "none solid solid solid", "borderColor" :"#3f51b5", "borderWidth": "thin", "borderRadius": "4px"}}>
                                 {
                                   Object.keys(views).map(viewId => {
-                                    const fileId = { sourceId, viewId };
+                                    const fileId = { sourceId, viewId, "viewType": views[viewId].type };
                                     return (
                                       <ListItem button 
                                       key={getFileIdKeyStr(fileId)} 
@@ -653,7 +654,7 @@ class Navigator extends React.Component {
                                       divider={true}
                                       selected={true}
                                       style={{ "paddingTop": "0px", "paddingBottom": "0px", "backgroundColor": "transparent"}}
-                                      onClick={() => {this.handleViewListClick(viewId)}}
+                                      onClick={() => {this.handleViewListClick(fileId)}}
                                       >
                                       <this.fileListItem
                                           fileId={fileId}
