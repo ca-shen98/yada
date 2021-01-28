@@ -29,8 +29,8 @@ export default {
         },
       );
       if (response.ok) {
-        const { viewID, docID, name, type } = await response.json();
-        return { id: viewID, sourceId: docID, ...(createNew ? { name, type } : null) };
+        const { viewID } = await response.json();
+        return { id: viewID, sourceId: sourceId, ...(createNew ? { name:"Untitled", type } : null) };
       };
     } catch (e) { console.log(e); }
     return null;
