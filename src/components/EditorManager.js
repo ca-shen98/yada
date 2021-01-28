@@ -14,6 +14,7 @@ import BlockTaggingEditorExtension from "../editor_extension/BlockTagging";
 import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import {handleSetCurrentOpenFileId} from "./Navigator";
 import CardDeck from "./CardView/CardDeck";
+import ViewEditor from "./ViewEditor";
 
 const DEFAULT_STATE = {
 	fileType: FILE_TYPE.EMPTY,
@@ -50,12 +51,13 @@ class EditorManager extends React.Component {
 	};
 	
 	render = () => {
+		if (this.state.fileType === FILE_TYPE.EMPTY) {
+			return <h1>Click/create a document!</h1>;
+		}
 		if (this.state.fileType === FILE_TYPE.SOURCE) {
 			return <SourceEditorWithTagFilters />;
-		} else if (this.state.fileType === FILE_TYPE.CARD_VIEW) {
-			return <CardDeck/>;
 		}
-		return <h1>Click/create a document!</h1>;
+		return <ViewEditor/>;
 	};
 };
 

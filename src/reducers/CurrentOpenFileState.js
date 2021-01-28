@@ -12,6 +12,7 @@ const initialFileId = {
   sourceId: storedInitialFileId.hasOwnProperty('sourceId')
     ? storedInitialFileId.sourceId : NO_OPEN_FILE_ID.sourceId,
   viewId: storedInitialFileId.hasOwnProperty('viewId') ? storedInitialFileId.viewId : NO_OPEN_FILE_ID.viewId,
+  viewType: storedInitialFileId.hasOwnProperty('viewType') ? storedInitialFileId.viewType : NO_OPEN_FILE_ID.viewId,
 }
 
 const SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE = 'currentOpenFileId/set';

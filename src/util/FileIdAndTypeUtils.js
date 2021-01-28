@@ -5,7 +5,7 @@ export const FILE_TYPE = {
   EMPTY: 'NON_EXISTENT',
 };
 
-export const NO_OPEN_FILE_ID = { sourceId: 0, viewId: 0, viewType: "" };
+export const NO_OPEN_FILE_ID = { sourceId: 0, viewId: 0, viewType: FILE_TYPE.EMPTY };
 
 export const validateFileIdObj = fileId => fileId.hasOwnProperty('sourceId') && fileId.hasOwnProperty('viewId');
 export const validateHasFileIdObj = state => state.hasOwnProperty('fileId') && validateFileIdObj(state.fileId);
