@@ -225,6 +225,6 @@ class SourceEditorWithTagFiltersInput extends React.Component {
       </Editor>
     );
   };
-};
+}
 
 export default connect(state => ({ currentOpenFileId: state.currentOpenFileId }))(SourceEditorWithTagFiltersInput);
