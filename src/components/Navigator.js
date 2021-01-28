@@ -31,9 +31,39 @@ import {
   calculateLocalStorageNextNewId,
   calculateLocalStorageNextNewFileIds,
 } from '../backend/LocalFileStorageSystemClient';
-
+import Button from '@material-ui/core/Button';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import Input from '@material-ui/core/Input';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import SearchIcon from '@material-ui/icons/Search';
+import Divider from '@material-ui/core/Divider';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import Paper from '@material-ui/core/Paper';
+import InputBase from '@material-ui/core/InputBase';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { makeStyles } from '@material-ui/core/styles';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import EditIcon from '@material-ui/icons/Edit';
+import Popover from '@material-ui/core/Popover';
 import store from '../store';
 import FileStorageSystemClient from '../backend/FileStorageSystemClient';
+import CheckIcon from '@material-ui/icons/Check';
+import AddIcon from '@material-ui/icons/Add';
+import TextFieldsIcon from '@material-ui/icons/TextFields';
+import AmpStoriesIcon from '@material-ui/icons/AmpStories';
+import DescriptionIcon from '@material-ui/icons/Description';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 
 export const handleSetCurrentOpenFileId = fileId => {
   if (!validateFileIdObj(fileId)) { return false; }
@@ -90,6 +120,12 @@ const DEFAULT_STATE = {
   renaming: NO_RENAMING_STATE,
   filesList: {},
   nextNewFileIds: null,
+  selectedFileId: null,
+  selectedViewId: null,
+  selectedFileOpen: false,
+  editMenuAnchorElement: null,
+  renameSelected: false,
+  newViewAnchorElement: null
 };
 
 class Navigator extends React.Component {
@@ -129,16 +165,6 @@ class Navigator extends React.Component {
     input.value = this.getRenameInputValueFunctions[inputType](fileId);
     input.setSelectionRange(0, 0);
     this.setState({ renaming: NO_RENAMING_STATE });
-  };
-
-  handleStartRenaming = (inputType, fileId) => {
-    this.setState({ renaming: { inputType, fileId } });
-    const inputId = getRenameInputIdFunctions[inputType](fileId);
-    defer(() => {
-      const input = document.getElementById(inputId);
-      input.focus();
-      input.setSelectionRange(0, input.value.length);
-    });
   };
 
   handleClearSearchingInput = () => {
@@ -197,7 +223,7 @@ class Navigator extends React.Component {
       alert('failed to create new file');
       return;
     }
-    const updatedSourceId = sourceFileType ? newFile.id : this.props.currentOpenFileId.sourceId;
+    const updatedSourceId = sourceFileType ? newFile.id : this.state.selectedFileId;
     const newFilesList = {
       ...this.state.filesList,
       [updatedSourceId]: {
@@ -218,10 +244,6 @@ class Navigator extends React.Component {
     defer(() => {
       const fileId = { sourceId: updatedSourceId, viewId: !sourceFileType ? newFile.id : 0 };
       handleSetCurrentOpenFileId(fileId);
-      this.handleStartRenaming(
-        sourceFileType ? RENAME_INPUT_TYPES.CURRENT_SOURCE : RENAME_INPUT_TYPES.CURRENT_VIEW,
-        fileId,
-      );
     });
     if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
       if (sourceFileType) { doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList)); }
@@ -289,9 +311,9 @@ class Navigator extends React.Component {
     }
   };
 
-  handleRenameFile = async (inputType, fileId) => {
+  handleRenameFile = async (fileId) => {
     if (checkNoOpenFileId(fileId)) { return; }
-    const input = document.getElementById(getRenameInputIdFunctions[inputType](fileId));
+    const input = document.getElementById("rename_field");
     if (!input) { return; }
     const newName = input.value.trim();
     if (!newName || newName === this.getFileName(fileId)) { return; }
@@ -342,14 +364,6 @@ class Navigator extends React.Component {
         });
       });
     }
-    if (
-      prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
-      prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId ||
-      prevState.filesList !== this.state.filesList
-    ) {
-      document.getElementById(CURRENT_SOURCE_NAME_INPUT_ID).value = this.getSourceName(this.props.currentOpenFileId);
-      document.getElementById(CURRENT_VIEW_NAME_INPUT_ID).value = this.getViewName(this.props.currentOpenFileId);
-    }
   };
   
   renameInput = ({ inputType, fileId, ...remainingProps }) => {
@@ -380,65 +394,155 @@ class Navigator extends React.Component {
     );
   };
 
-  renameButton = ({ inputType, fileId, ...remainingProps }) =>
-    <button
-      className="MonospaceCharButton"
-      title="rename"
-      hidden={
-        this.state.renaming.inputType === inputType && this.state.renaming.fileId.sourceId === fileId.sourceId &&
-        this.state.renaming.fileId.viewId === fileId.viewId
-      }
-      disabled={checkNoOpenFileId(fileId)}
-      onClick={() => { this.handleStartRenaming(inputType, fileId); }}
-      {...remainingProps}>
-      {'*'}
-    </button>;
-
-  fileListItemButtonRow = ({ inputType, fileId }) => {
+  fileListItem = ({ fileId, selected, open, handleEditMenuClick, childViewsExist }) => {
+    const useStyles = makeStyles((theme) => ({
+      root: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: 400,
+      },
+      viewRoot: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        width: 200,
+      },
+      input: {
+        marginLeft: theme.spacing(1),
+        flex: 1,
+      },
+      iconButton: {
+        padding: 5,
+      },
+      divider: {
+        height: 28,
+        margin: 4,
+      },
+    }));
+    const classes = useStyles();
     const fileName = this.getFileName(fileId);
-    const currentlyOpen = fileId.sourceId === this.props.currentOpenFileId.sourceId &&
-      fileId.viewId === this.props.currentOpenFileId.viewId;
-    const renameComponentProps = { inputType, fileId };
-    return (
-      <div className="ButtonRow">
-        {
-          this.state.renaming.inputType !== inputType ||
-          this.state.renaming.fileId.sourceId !== fileId.sourceId ||
-          this.state.renaming.fileId.viewId !== fileId.viewId
-            ? <button
-                title={(currentlyOpen ? 'currently ' : '') + 'open'}
-                disabled={currentlyOpen}
-                onClick={() => { handleSetCurrentOpenFileId(fileId); }}>
-                <span style={{ fontStyle: currentlyOpen ? 'italic' : 'normal' }}>
-                  {
-                    this.state.searching
-                      ? <React.Fragment>
-                          {
-                            fileName.split(this.state.searching).reduce(
-                              (partial, substring, idx) => partial.concat([
-                                ...(idx > 0 ? [<b key={idx}>{this.state.searching}</b>] : []),
-                                substring,
-                              ]),
-                              [],
-                            )
-                          }
-                        </React.Fragment>
-                      : fileName
-                  }
-                </span>
-              </button>
-            : <this.renameInput {...renameComponentProps} />
-        }
-        <this.renameButton {...renameComponentProps} />
-        <button
-          className="MonospaceCharButton"
-          title="delete"
-          onClick={() => { if (window.confirm('confirm delete file')) { this.handleDeleteFile(fileId); } }}>
-          {'-'}
-        </button>
-      </div>
-    );
+    if(fileId.viewId !== 0){
+      const viewType = this.state.filesList[fileId.sourceId].views[fileId.viewId].type;
+      return (
+        <Paper className={classes.viewRoot} style={(selected) ? {backgroundColor: 'rgba(0, 0, 0, 0.08)'} : {} } component="form" elevation={0}>
+          <IconButton>
+            {
+              (viewType === FILE_TYPE.CARD_VIEW) ? 
+              <AmpStoriesIcon/>:
+              (viewType === FILE_TYPE.TEXT_VIEW) ?
+             <TextFieldsIcon /> :
+              null
+            }
+          </IconButton>
+          <InputBase 
+            value={fileName}
+            className="file_list_input"
+            disabled={!(selected && this.state.renameSelected)}
+          />
+          <Divider className={classes.divider} orientation="vertical" />
+          <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
+            <MoreVertIcon fontSize="small" color="disabled"/>
+          </IconButton>
+        </Paper>
+      );
+    }else{
+      return (
+        <Paper className={classes.root} style={(selected) ? {backgroundColor: '#a3d2f7', border:"solid #3f51b5 thin"} : {} } component="form" elevation={0}>
+          <InputBase 
+            value={fileName}
+            className="file_list_input"
+            disabled={!(selected && this.state.renameSelected)}
+          />
+          {childViewsExist ? (open ? <ExpandLess /> : <ExpandMore />) : null}
+          <Divider className={classes.divider} orientation="vertical" />
+          <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
+            <MoreVertIcon fontSize="small" color="disabled"/>
+          </IconButton>
+        </Paper>
+      );
+    }
   };
+
+  handleFileListClick = (fileId) => {
+    if (fileId == this.state.selectedFileId) {
+      this.setState({
+        selectedViewId: null,
+        selectedFileOpen: !(this.state.selectedFileOpen)
+      });
+    }else{
+      if(handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0 })){
+        this.setState({
+          selectedFileId: fileId,
+          selectedViewId: null,
+          selectedFileOpen: true
+        });
+      }
+    }
+    
+  };
+
+  handleViewListClick = (viewId) => {
+    this.setState({
+      selectedViewId: viewId,
+    });
+  };
+
+  handleEditMenuClick = (event) => {
+    this.setState({
+      editMenuAnchorElement: event.currentTarget
+    })
+  }
+
+  handleEditMenuClose = () => {
+    this.setState({
+      editMenuAnchorElement: null
+    })
+  }
+
+  handleDeleteMenuClick = () => {
+    this.handleEditMenuClose();
+    const fileId = { sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId === null) ? 0 : this.state.selectedViewId}
+    this.handleDeleteFile(fileId).then(success => {
+      if (fileId.viewId !== 0) {
+        this.setState({
+          selectedViewId: null,
+        });
+      }else{
+        this.setState({
+          selectedFileId: null,
+          selectedViewId: null,
+          selectedFileOpen: false
+        });
+      }
+    });
+  }
+
+  handleRenameMenuClick = (event) => {
+    this.setState({
+      renamePopoverElement: this.state.editMenuAnchorElement,
+      editMenuAnchorElement: null
+    })
+  }
+
+  handleRenamePopoverClose = () => {
+    this.setState({
+      renamePopoverElement: null
+    })
+  }
+
+  handleViewMenuOpen = (event) => {
+    this.setState({
+      newViewAnchorElement : this.state.editMenuAnchorElement
+    })
+  }
+
+  handleViewMenuClose = () => {
+    this.setState({
+      newViewAnchorElement : null,
+      editMenuAnchorElement: null
+    })
+  }
 
   render = () => {
     const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
@@ -455,95 +559,240 @@ class Navigator extends React.Component {
     const numFilteredFiles = countNumFiles(filteredFilesList);
     return (
       <div className="SidePane">
-        <div id="current_file_container">
-          <div className="InputRow">
-            {!noOpenFileIdCheck ? <this.renameButton {...currentSourceRenameComponentProps} /> : null}
-            <this.renameInput {...currentSourceRenameComponentProps} title="current open source" />
-          </div>
-          <div className="InputRow">
-            {
-              checkViewFileId(this.props.currentOpenFileId)
-                ? <this.renameButton {...currentViewRenameComponentProps} /> : null
-            }
-            <this.renameInput {...currentViewRenameComponentProps} title="current open view" />
-          </div>
-        </div>
-        <div id="create_file_buttons_row">
-          <button onClick={() => { this.handleCreateNewFile(FILE_TYPE.SOURCE); }}>
-            <span className="MonospaceCharButton">{'+'}</span> source
-          </button>
-          <div id="create_view_dropdown_button" hidden={noOpenFileIdCheck}>
-            <button>
-              <span className="MonospaceCharButton">{'+'}</span> view
-            </button>
-            <button disabled>
-              <span className="MonospaceCharButton">{'+'}</span> view
-            </button>
-            <div>
-              <button onClick={() => { this.handleCreateNewFile(FILE_TYPE.TEXT_VIEW); }}>
-                <span className="MonospaceCharButton">{'+'}</span> text view
-              </button>
-              <button onClick={() => { this.handleCreateNewFile(FILE_TYPE.CARD_VIEW); }}>
-                <span className="MonospaceCharButton">{'+'}</span> card view
-              </button>
-            </div>
-          </div>
-        </div>
+        { (this.state.selectedFileId === null) ? null :
+              <div>
+                <div id="current_file_container">
+                  <Grid container spacing={3} alignItems="center">
+                    <Grid item xs={3}>
+                    <IconButton>
+                    <DescriptionIcon   />
+                    </IconButton>
+                    </Grid>
+                    <Grid item xs={9}>
+                      <Typography variant="h6" color="inherit" id={CURRENT_SOURCE_NAME_INPUT_ID}>
+                          {this.getFileName({sourceId: this.state.selectedFileId, viewId: 0})}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </div>
+                <Divider variant="middle" />
+              </div>
+        }
         <div id="file_list_container">
+            <Button
+              variant="outlined"
+              color="primary"
+              endIcon={<AddCircleIcon />}
+              disableElevation
+              id="new_document_button"
+              onClick={() => { this.handleCreateNewFile(FILE_TYPE.SOURCE); }}
+            >
+              New Document
+            </Button>
           <div className="InputRow" id="search_file_names_input_row">
-            <input
+            <Input
+              variant="outlined"
               id={SEARCH_FILE_NAMES_INPUT_ID}
-              title="search file names"
-              placeholder="search file names"
+              startAdornment={
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              }
+              style={{"width":"100%"}}
+              title="Search File Names"
+              placeholder="Search File Names"
               onChange={debounce(this.handleChangeSearchingInput, 150)}
               onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
               onKeyDown={event => { if (event.key === 'Escape') { event.target.blur(); } }}
             />
-            <button
-              className="MonospaceCharButton"
-              title="clear"
-              disabled={!this.state.searching}
-              onClick={this.handleClearSearchingInput}>
-              {'✕'}
-            </button>
           </div>
           {
             Object.keys(filteredFilesList).length > 0
-              ? <ul id={FILE_LIST_ID}>
+              ?  <List
+                    component="nav"
+                    aria-labelledby="nested-list-subheader"
+                    subheader={
+                      <ListSubheader component="div" id="nested-list-subheader">
+                        Source Files
+                      </ListSubheader>
+                    }
+                    id={FILE_LIST_ID}
+                    style={{"maxWidth" : 360, "width" : '100%'}}
+                  >
                   {
                     Object.entries(filteredFilesList).map(([sourceId, { views }]) =>
-                      <li key={sourceId}>
-                        <this.fileListItemButtonRow
-                          inputType={RENAME_INPUT_TYPES.SOURCE_LIST_ITEM}
+                    <div>
+                      <ListItem button 
+                      key={sourceId} 
+                      disableGutters={true}
+                      divider={true}
+                      selected={true}
+                      style={{"padding":"0px"}}
+                      onClick={() => {this.handleFileListClick(sourceId)}}
+                      >
+                        <this.fileListItem
                           fileId={{ sourceId, viewId: 0 }}
+                          selected={sourceId === this.state.selectedFileId}
+                          open={sourceId === this.state.selectedFileId && this.state.selectedFileOpen}
+                          handleEditMenuClick={this.handleEditMenuClick}
+                          childViewsExist={Object.keys(views).length > 0}
                         />
+                      </ListItem>
                         {
                           Object.keys(views).length > 0
-                            ? <ul>
+                            ? <Collapse in={sourceId === this.state.selectedFileId && this.state.selectedFileOpen} timeout="auto" unmountOnExit>
+                                <List component="div" disablePadding style={{"borderStyle": "none solid solid solid", "borderColor" :"#3f51b5", "borderWidth": "thin", "borderRadius": "4px"}}>
                                 {
                                   Object.keys(views).map(viewId => {
                                     const fileId = { sourceId, viewId };
                                     return (
-                                      <li key={getFileIdKeyStr(fileId)}>
-                                        <this.fileListItemButtonRow
-                                          inputType={RENAME_INPUT_TYPES.VIEW_LIST_ITEM}
+                                      <ListItem button 
+                                      key={getFileIdKeyStr(fileId)} 
+                                      disableGutters={true}
+                                      divider={true}
+                                      selected={true}
+                                      style={{ "paddingTop": "0px", "paddingBottom": "0px", "backgroundColor": "transparent"}}
+                                      onClick={() => {this.handleViewListClick(viewId)}}
+                                      >
+                                      <this.fileListItem
                                           fileId={fileId}
+                                          open={viewId === this.state.selectedViewId}
+                                          handleEditMenuClick={this.handleEditMenuClick}
                                         />
-                                      </li>
+                                      </ListItem>
                                     );
                                   })
                                 }
-                              </ul>
+                                </List>
+                              </Collapse>
                             : null
-                        }
-                      </li>
+                          }
+                          </div>   
                     )
                   }
-                </ul>
+                </List>
               : <div className="PlaceholderDivWithText" id="no_files_placeholder">
-                  no files
+                  No Files
                 </div>
           }
+          <Menu
+            id="edit_menu"
+            anchorEl={this.state.editMenuAnchorElement}
+            keepMounted
+            open={Boolean(this.state.editMenuAnchorElement)}
+            onClose={() => this.handleEditMenuClose()}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+            {
+              (this.state.selectedViewId === null) ? 
+              <MenuItem onClick={() => this.handleViewMenuOpen()}>
+                <ListItemIcon>
+                  <AddIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="New View" />
+              </MenuItem>
+              : null
+            }
+              <MenuItem onClick={() => this.handleRenameMenuClick()}>
+                <ListItemIcon>
+                  <EditIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Rename" />
+              </MenuItem>
+              <MenuItem onClick={() => this.handleDeleteMenuClick()}>
+                <ListItemIcon>
+                  <DeleteIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Delete" />
+              </MenuItem>
+          </Menu>
+          <Menu 
+            id="viewMenu"
+            anchorEl={this.state.newViewAnchorElement}
+            keepMounted
+            open={Boolean(this.state.newViewAnchorElement)}
+            onClose={() => this.handleViewMenuClose()}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+          >
+              <MenuItem 
+                  onClick={() => {
+                    this.handleViewMenuClose();
+                    this.handleCreateNewFile(FILE_TYPE.TEXT_VIEW);}}
+              >
+                <ListItemIcon>
+                  <TextFieldsIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Text View" />
+              </MenuItem>
+              <MenuItem
+              onClick={() => {
+                this.handleViewMenuClose();
+                this.handleCreateNewFile(FILE_TYPE.CARD_VIEW);}}
+              >
+                <ListItemIcon>
+                  <AmpStoriesIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Card View" />
+              </MenuItem>
+          </Menu>
+          <Popover
+            open={Boolean(this.state.renamePopoverElement)}
+            anchorEl={this.state.renamePopoverElement}
+            anchorOrigin={{
+              vertical:'top',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical:'top',
+              horizontal: 'right'
+            }}
+            id="rename_popover"
+          >
+            <Input
+              id="rename_field"
+              defaultValue={this.getFileName({sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId == null) ? 0 : this.state.selectedViewId})}
+              onKeyPress={event => {
+                if(event.key === 'Enter') {
+                    this.handleRenameFile({sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId == null) ? 0 : this.state.selectedViewId})
+                    this.handleRenamePopoverClose();
+                }   
+              }}
+              onKeyDown={event => {
+                if(event.key === 'Escape') {
+                    this.handleRenamePopoverClose();
+                }   
+              }}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton 
+                    onClick= {() => {
+                      this.handleRenameFile({sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId == null) ? 0 : this.state.selectedViewId})
+                      this.handleRenamePopoverClose();
+                    }}
+                  >
+                      <CheckIcon/>
+                  </IconButton>
+                </InputAdornment>
+              }
+              disableUnderline={true}
+              fullWidth={true}
+              style={{height:"50px", "paddingLeft": "10px"}}
+            />
+          </Popover>
           <div
             className="PlaceholderDivWithText"
             id="filtered_files_placeholder"
@@ -554,7 +803,8 @@ class Navigator extends React.Component {
         <div id="user_controls_container">
           {
             this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN
-              ? <button
+              ? <Button
+                  variant="outlined"
                   onClick={() => {
                     if (
                       this.props.dispatchSetBackendModeSignedInStatusAction(
@@ -563,10 +813,11 @@ class Navigator extends React.Component {
                     ) { Cookies.remove(ACCESS_TOKEN_COOKIE_KEY); }
                   }}>
                   Sign out
-                </button>
+                </Button>
               : null
           }
-          <button
+          <Button
+            variant="outlined"
             onClick={() => {
               if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
                 getUserSignedInStatus().then(backendModeSignedInStatus => {
@@ -581,7 +832,7 @@ class Navigator extends React.Component {
                   ? 'cloud' : 'local'
               ) + ' storage'
             }
-          </button>
+          </Button>
         </div>
       </div>
     );

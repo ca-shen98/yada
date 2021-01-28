@@ -21,7 +21,7 @@ export default {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
       const response = await fetchWithTimeout(
-        SERVER_BASE_URL + `view?docID=${sourceId}` + (!createNew ? `&viewID=${viewId}&type=${type}` : ''),
+        SERVER_BASE_URL + `view?docID=${sourceId}&viewType=${type}` + (!createNew ? `&viewID=${viewId}` : ''),
         {
           method: 'PUT',
           body: JSON.stringify({ tags: tagsList }),
@@ -29,8 +29,8 @@ export default {
         },
       );
       if (response.ok) {
-        const { viewID, docID, name, type } = await response.json();
-        return { id: viewID, sourceId: docID, ...(createNew ? { name, type } : null) };
+        const { viewID } = await response.json();
+        return { id: viewID, sourceId: sourceId, ...(createNew ? { name:"Untitled", type } : null) };
       };
     } catch (e) { console.log(e); }
     return null;
@@ -79,8 +79,8 @@ export default {
         },
       );
       if (response.ok) {
-        const { docID, name } = await response.json();
-        return { id: docID, ...(createNew ? { name } : null) };
+        const { id, name } = await response.json();
+        return { id: id, ...(createNew ? { name } : null) };
       };
     } catch (e) { console.log(e); }
     return null;
