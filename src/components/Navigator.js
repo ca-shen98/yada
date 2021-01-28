@@ -437,7 +437,7 @@ class Navigator extends React.Component {
           </IconButton>
           <InputBase 
             value={fileName}
-            class="file_list_input"
+            className="file_list_input"
             disabled={!(selected && this.state.renameSelected)}
           />
           <Divider className={classes.divider} orientation="vertical" />
@@ -451,7 +451,7 @@ class Navigator extends React.Component {
         <Paper className={classes.root} style={(selected) ? {backgroundColor: '#a3d2f7', border:"solid #3f51b5 thin"} : {} } component="form" elevation={0}>
           <InputBase 
             value={fileName}
-            class="file_list_input"
+            className="file_list_input"
             disabled={!(selected && this.state.renameSelected)}
           />
           {childViewsExist ? (open ? <ExpandLess /> : <ExpandMore />) : null}
