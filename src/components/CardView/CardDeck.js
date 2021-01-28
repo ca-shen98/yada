@@ -62,8 +62,8 @@ class CardDeck extends React.Component {
 	render = () => {
 		if (!this.state.allTagsData || this.props.tagsInView == null) {
 			return (
-				<Container>
-					<h3>Card Deck Editor</h3>
+				<Container className="viewContainer">
+					<h5>Loading Card Deck ...</h5>
 				</Container>
 			);
 		} else {
@@ -81,8 +81,7 @@ class CardDeck extends React.Component {
 				);
 			}
 			return (
-				<Container>
-					<h3>Card Deck Editor</h3>
+				<Container className="viewContainer">
 					<TagEditor allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
 					{cards}
 				</Container>

@@ -1,3 +1,4 @@
+import './ViewEditor.css';
 import React from 'react';
 import {connect} from 'react-redux';
 import {
@@ -59,7 +60,7 @@ class ViewEditor extends React.Component {
 		if (this.state.fileType === FILE_TYPE.CARD_VIEW) {
 			return <CardDeck data={this.state.data}/>;
 		}
-		return <h3>Unsupported view type</h3>;
+		return null;
 	};
 }
 
