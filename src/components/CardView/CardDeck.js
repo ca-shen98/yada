@@ -1,4 +1,4 @@
-// import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './CardDeck.css';
 import React from 'react';
 import {connect} from 'react-redux';
@@ -9,70 +9,19 @@ import Card from './Card';
 import TagEditor from './TagEditor';
 import {putCardView} from '../../backend/yaas';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
-import {
-	FILE_TYPE,
-	NO_OPEN_FILE_ID
-} from "../../util/FileIdAndTypeUtils";
-import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
-import {handleSetCurrentOpenFileId} from "../Navigator";
 
-const DEFAULT_STATE = {
-	sourceId: 0,
-	viewId: 0,
-	allTagsData: null,
-	fileType: FILE_TYPE.EMPTY
-};
 
 class CardDeck extends React.Component {
 	
-	state = DEFAULT_STATE;
-	
 	constructor(props) {
 		super(props);
-		// TODO: move this into a new file
-		// then we can pass the props and use constructor like before.
-		FileStorageSystemClient.doGetView({sourceId: 439, viewId: 1}).then(value => {
-			if (value === null) {
-				alert('failed to retrieve view');
-				handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
-			} else {
-				console.log("Card Deck");
-				this.props.setTagsInView(Object.keys(value["view"]["items"]));
-				this.state.allTagsData = value["tags"]["items"];
-				console.log(this.props);
-				// TODO: get file type from: this.props.currentOpenFileId.viewType
-				this.state = {
-					sourceId: this.props.currentOpenFileId.sourceId,
-					viewId: this.props.currentOpenFileId.viewId,
-					allTagsData: value["tags"]["items"],
-					fileType: FILE_TYPE.CARD_VIEW
-				};
-			}
-		});
+		console.log("Construct Card Deck");
+		console.log(props);
+		this.state = {
+			allTagsData: props.data.allTagsData,
+		}
+		this.props.setTagsInView(props.data.tagsInView);
 	}
-	
-	changeFile = async () => {
-		console.log("Change CardDeck File");
-		console.log(this.props.currentOpenFileId);
-		// FileStorageSystemClient.doGetView(this.props.currentOpenFileId).then(value => {
-		// 	if (value === null) {
-		// 		alert('failed to retrieve view');
-		// 		handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
-		// 	} else {
-		// 		console.log("Card Deck");
-		// 		this.props.setTagsInView(Object.keys(value["view"]["items"]));
-		// 		this.state.allTagsData = value["tags"]["items"];
-		// 		console.log(this.props);
-		// 		// TODO: get file type from: this.props.currentOpenFileId.viewType
-		// 		this.setState({
-		// 			sourceId: this.props.currentOpenFileId.sourceId,
-		// 			viewId: this.props.currentOpenFileId.viewId,
-		// 			allTagsData: value["tags"]["items"],
-		// 			fileType: FILE_TYPE.CARD_VIEW
-		// 		});
-		// 	}
-		// });
-	};
 	
 	
 	keydownHandler = (event) => {
@@ -111,14 +60,12 @@ class CardDeck extends React.Component {
 	
 	componentDidMount = () => {
 		document.addEventListener('keydown',this.keydownHandler);
-		this.changeFile().then(() => console.log("Mounted file"));
 	};
 	componentDidUpdate = prevProps => {
-		if (
-			prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
-			prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
-		) {
-			this.changeFile().then(() => console.log("Updated file"));
+		if (prevProps.tagsInView !== this.props.tagsInView) {
+			console.log("Update Card Deck");
+			console.log(this.props);
+			this.props.setTagsInView(this.props.tagsInView);
 		}
 	};
 	componentWillUnmount = () => { document.removeEventListener('keydown',this.keydownHandler); };
@@ -128,13 +75,16 @@ class CardDeck extends React.Component {
 			console.log("No content to display");
 			console.log(this.state.allTagsData);
 			console.log(this.props.tagsInView);
-			return null;
+			return (
+				<Container>
+					<h3>Card Deck Editor - Failed to load content</h3>
+				</Container>
+			);
 		} else {
 			const cards = [];
 			console.log("MAKING CARDS");
 			console.log(this.state);
-			console.log(this.props);
-			for (let i = 0; i < this.props.tagsInView.length; i+=4) {
+			for (let i = 0; i < 0; i+=4) {
 				cards.push(
 					<Row key={`row_${i%4}`} className="justify-content-md-center">
 						<Col lg="12" xl="6">
@@ -148,6 +98,7 @@ class CardDeck extends React.Component {
 			}
 			return (
 				<Container>
+					<h3>Card Deck Editor</h3>
 					<TagEditor allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
 					{cards}
 				</Container>
@@ -157,6 +108,6 @@ class CardDeck extends React.Component {
 }
 
 export default connect(
-	state => ({ tagsInView: state.tagsInView, currentOpenFileId: state.currentOpenFileId }),
+	state => ({ tagsInView: state.tagsInView }),
 	dispatch => ({ setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)) }),
 )(CardDeck);
