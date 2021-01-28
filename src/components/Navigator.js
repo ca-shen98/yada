@@ -43,21 +43,13 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import DraftsIcon from '@material-ui/icons/Drafts';
-import SendIcon from '@material-ui/icons/Send';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import StarBorder from '@material-ui/icons/StarBorder';
 import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import DirectionsIcon from '@material-ui/icons/Directions';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -177,16 +169,6 @@ class Navigator extends React.Component {
     this.setState({ renaming: NO_RENAMING_STATE });
   };
 
-  handleStartRenaming = (inputType, fileId) => {
-    this.setState({ renaming: { inputType, fileId } });
-    const inputId = getRenameInputIdFunctions[inputType](fileId);
-    defer(() => {
-      const input = document.getElementById(inputId);
-      input.focus();
-      input.setSelectionRange(0, input.value.length);
-    });
-  };
-
   handleClearSearchingInput = () => {
     document.getElementById(SEARCH_FILE_NAMES_INPUT_ID).value = '';
     this.setState({ searching: '' });
@@ -264,10 +246,6 @@ class Navigator extends React.Component {
     defer(() => {
       const fileId = { sourceId: updatedSourceId, viewId: !sourceFileType ? newFile.id : 0 };
       handleSetCurrentOpenFileId(fileId);
-      // this.handleStartRenaming(
-      //   sourceFileType ? RENAME_INPUT_TYPES.CURRENT_SOURCE : RENAME_INPUT_TYPES.CURRENT_VIEW,
-      //   fileId,
-      // );
     });
     if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
       if (sourceFileType) { doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList)); }
@@ -389,14 +367,6 @@ class Navigator extends React.Component {
         });
       });
     }
-    // if (
-    //   prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
-    //   prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId ||
-    //   prevState.filesList !== this.state.filesList
-    // ) {
-    //   document.getElementById(CURRENT_SOURCE_NAME_INPUT_ID).value = this.getSourceName(this.props.currentOpenFileId);
-    //   document.getElementById(CURRENT_VIEW_NAME_INPUT_ID).value = this.getViewName(this.props.currentOpenFileId);
-    // }
   };
   
   renameInput = ({ inputType, fileId, ...remainingProps }) => {
@@ -424,67 +394,6 @@ class Navigator extends React.Component {
         onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
         {...remainingProps}
       />
-    );
-  };
-
-  renameButton = ({ inputType, fileId, ...remainingProps }) =>
-    <button
-      className="MonospaceCharButton"
-      title="rename"
-      hidden={
-        this.state.renaming.inputType === inputType && this.state.renaming.fileId.sourceId === fileId.sourceId &&
-        this.state.renaming.fileId.viewId === fileId.viewId
-      }
-      disabled={checkNoOpenFileId(fileId)}
-      onClick={() => { this.handleStartRenaming(inputType, fileId); }}
-      {...remainingProps}>
-      {'*'}
-    </button>;
-
-  fileListItemButtonRow = ({ inputType, fileId }) => {
-    const fileName = this.getFileName(fileId);
-    const currentlyOpen = fileId.sourceId === this.props.currentOpenFileId.sourceId &&
-      fileId.viewId === this.props.currentOpenFileId.viewId;
-    const renameComponentProps = { inputType, fileId };
-    console.log(this.props.renamingInputState)
-    return (
-      <div className="ButtonRow">
-        {
-          this.state.renaming.inputType !== inputType ||
-          this.state.renaming.fileId.sourceId !== fileId.sourceId ||
-          this.state.renaming.fileId.viewId !== fileId.viewId
-            ? <button
-                title={(currentlyOpen ? 'currently ' : '') + 'open'}
-                disabled={currentlyOpen}
-                onClick={() => { handleSetCurrentOpenFileId(fileId); }}>
-                <span style={{ fontStyle: currentlyOpen ? 'italic' : 'normal' }}>
-                  {
-                    this.state.searching
-                      ? <React.Fragment>
-                          {
-                            fileName.split(this.state.searching).reduce(
-                              (partial, substring, idx) => partial.concat([
-                                ...(idx > 0 ? [<b key={idx}>{this.state.searching}</b>] : []),
-                                substring,
-                              ]),
-                              [],
-                            )
-                          }
-                        </React.Fragment>
-                      : fileName
-                  }
-                </span>
-              </button>
-            : <this.renameInput {...renameComponentProps} />
-        }
-        <this.renameButton {...renameComponentProps} />
-        <button
-          className="MonospaceCharButton"
-          title="delete"
-          onClick={() => { if (window.confirm('confirm delete file')) { this.handleDeleteFile(fileId); } }}>
-          {'-'}
-        </button>
-      </div>
     );
   };
 
@@ -661,17 +570,6 @@ class Navigator extends React.Component {
               <div>
                 <div id="current_file_container">
                   <Grid container spacing={3} alignItems="center">
-                  {/* <div className="InputRow">
-                    {!noOpenFileIdCheck ? <this.renameButton {...currentSourceRenameComponentProps} /> : null}
-                    <this.renameInput {...currentSourceRenameComponentProps} title="current open source" />
-                  </div>
-                  <div className="InputRow">
-                    {
-                      checkViewFileId(this.props.currentOpenFileId)
-                        ? <this.renameButton {...currentViewRenameComponentProps} /> : null
-                    }
-                    <this.renameInput {...currentViewRenameComponentProps} title="current open view" />
-                  </div> */}
                     <Grid item xs={3}>
                     <IconButton>
                     <DescriptionIcon   />
@@ -715,43 +613,6 @@ class Navigator extends React.Component {
               onKeyDown={event => { if (event.key === 'Escape') { event.target.blur(); } }}
             />
           </div>
-          {/* {
-            Object.keys(filteredFilesList).length > 0
-              ? <ul id={FILE_LIST_ID}>
-                  {
-                    Object.entries(filteredFilesList).map(([sourceId, { views }]) =>
-                      <li key={sourceId}>
-                        <this.fileListItemButtonRow
-                          inputType={RENAME_INPUT_TYPES.SOURCE_LIST_ITEM}
-                          fileId={{ sourceId, viewId: 0 }}
-                        />
-                        {
-                          Object.keys(views).length > 0
-                            ? <ul>
-                                {
-                                  Object.keys(views).map(viewId => {
-                                    const fileId = { sourceId, viewId };
-                                    return (
-                                      <li key={getFileIdKeyStr(fileId)}>
-                                        <this.fileListItemButtonRow
-                                          inputType={RENAME_INPUT_TYPES.VIEW_LIST_ITEM}
-                                          fileId={fileId}
-                                        />
-                                      </li>
-                                    );
-                                  })
-                                }
-                              </ul>
-                            : null
-                        }
-                      </li>
-                    )
-                  }
-                </ul>
-              : <div className="PlaceholderDivWithText" id="no_files_placeholder">
-                  no files
-                </div>
-          } */}
           {
             Object.keys(filteredFilesList).length > 0
               ?  <List
