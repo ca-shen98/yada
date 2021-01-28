@@ -25,11 +25,9 @@ class EditorManager extends React.Component {
 	state = DEFAULT_STATE;
 	
 	changeFile = () => {
-		console.log("Change FILE");
 		if (checkSourceFileId(this.props.currentOpenFileId)) {
 			this.setState({fileType: FILE_TYPE.SOURCE});
 		} else if (checkViewFileId(this.props.currentOpenFileId)) {
-			console.log(this.props.currentOpenFileId);
 			this.setState({fileType: FILE_TYPE.CARD_VIEW});
 		} else {
 			this.setState({fileType: FILE_TYPE.EMPTY});

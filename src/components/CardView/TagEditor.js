@@ -129,7 +129,6 @@ class TagEditor extends React.Component {
 							const column = this.state.columns[columnId];
 							// Generate subdict here
 							let tagDataInColumn = {};
-							console.log(column);
 							for (const tagId of column.tagIds) {
 								tagDataInColumn[tagId] = this.state.tagData[tagId];
 							}

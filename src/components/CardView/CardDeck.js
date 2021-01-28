@@ -15,8 +15,6 @@ class CardDeck extends React.Component {
 	
 	constructor(props) {
 		super(props);
-		console.log("Construct Card Deck");
-		console.log(props);
 		this.state = {
 			allTagsData: props.data.allTagsData,
 		}
@@ -27,7 +25,6 @@ class CardDeck extends React.Component {
 	keydownHandler = (event) => {
 		if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey)  && event.keyCode === 83) {
 			event.preventDefault();
-			console.log("save");
 			putCardView({"tagIds": this.props.tagsInView},this.state.sourceId,this.state.viewId)
 				.then(() => { console.log("Saved view"); })
 				.catch(() => { console.log("Failed to save view"); })
@@ -36,6 +33,7 @@ class CardDeck extends React.Component {
 	
 	constructDoc = (tagId) => {
 		const node = this.state.allTagsData[tagId]["content"];
+		console.log(node);
 		return {
 			"doc": {
 				"type": "doc",
@@ -63,28 +61,21 @@ class CardDeck extends React.Component {
 	};
 	componentDidUpdate = prevProps => {
 		if (prevProps.tagsInView !== this.props.tagsInView) {
-			console.log("Update Card Deck");
-			console.log(this.props);
 			this.props.setTagsInView(this.props.tagsInView);
 		}
 	};
 	componentWillUnmount = () => { document.removeEventListener('keydown',this.keydownHandler); };
 	
 	render = () => {
-		if (!this.state.allTagsData || this.props.tagsInView === undefined) {
-			console.log("No content to display");
-			console.log(this.state.allTagsData);
-			console.log(this.props.tagsInView);
+		if (!this.state.allTagsData || this.props.tagsInView == null) {
 			return (
 				<Container>
-					<h3>Card Deck Editor - Failed to load content</h3>
+					<h3>Card Deck Editor</h3>
 				</Container>
 			);
 		} else {
 			const cards = [];
-			console.log("MAKING CARDS");
-			console.log(this.state);
-			for (let i = 0; i < 0; i+=4) {
+			for (let i = 0; i < this.props.tagsInView.length; i+=4) {
 				cards.push(
 					<Row key={`row_${i%4}`} className="justify-content-md-center">
 						<Col lg="12" xl="6">

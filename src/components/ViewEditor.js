@@ -20,8 +20,6 @@ class ViewEditor extends React.Component {
 	state = DEFAULT_STATE;
 	
 	changeFile = async () => {
-		console.log("Change View File");
-		console.log(this.props.currentOpenFileId);
 		FileStorageSystemClient.doGetView(this.props.currentOpenFileId).then(value => {
 			if (value === null) {
 				alert('failed to retrieve view');
@@ -46,14 +44,14 @@ class ViewEditor extends React.Component {
 	};
 	
 	componentDidMount = () => {
-		this.changeFile().then(() => console.log("Mounted file"));
+		this.changeFile().then(() => console.log("Mounted view file"));
 	};
 	componentDidUpdate = prevProps => {
 		if (
 			prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
 			prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
 		) {
-			this.changeFile().then(() => console.log("Updated file"));
+			this.changeFile().then(() => console.log("Updated view file"));
 		}
 	};
 	

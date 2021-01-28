@@ -6,6 +6,7 @@ import ReactCardFlip from 'react-card-flip';
 class Card extends React.Component {
 	constructor(props) {
 		super(props);
+		console.log(this.props.content);
 		this.state = {
 			isFlipped: false,
 			key: this.props.content["index"],
@@ -21,12 +22,11 @@ class Card extends React.Component {
 		this.setState(prevState => ({ isFlipped: !prevState.isFlipped }));
 	}
 	
-	createBootstrapCard(bgMode, key, textColour, json) {
+	createBootstrapCard(key, json) {
 		return (
 			<BootstrapCard
-				bg={bgMode}
 				key={key}
-				text={textColour}
+				text="black"
 				className="BootstrapCard"
 				onClick={this.handleClick}
 			>
@@ -35,7 +35,6 @@ class Card extends React.Component {
 					<RichMarkdownEditor
 						className="Card"
 						readOnly={true}
-						dark={this.props.editorDarkMode}
 						key={`card${key}`}
 						setJSON={JSON.stringify(json)}
 					/>
@@ -45,8 +44,6 @@ class Card extends React.Component {
 	}
 	
 	render = () => {
-		const bgMode = this.props.editorDarkMode ? 'dark' : 'light';
-		const textColour = this.props.editorDarkMode ? 'white' : 'dark';
 		const content = this.props.content;
 		if (content !== undefined) {
 			const key = content["index"];
@@ -54,8 +51,8 @@ class Card extends React.Component {
 			const back = content["back"];
 			return (
 				<ReactCardFlip isFlipped={this.state.isFlipped} flipDirection="vertical">
-					{this.createBootstrapCard(bgMode, key, textColour, front)}
-					{this.createBootstrapCard(bgMode, key, textColour, back)}
+					{this.createBootstrapCard(key, front)}
+					{this.createBootstrapCard(key, back)}
 				</ReactCardFlip>
 			);
 		} else { return null; }
