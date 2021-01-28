@@ -66,10 +66,8 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 
 export const handleSetCurrentOpenFileId = fileId => {
-  console.log("Getting Here")
   if (!validateFileIdObj(fileId)) { return false; }
   const currentOpenFileId = store.getState().currentOpenFileId;
-  console.log(currentOpenFileId)
   if (fileId.sourceId === currentOpenFileId.sourceId && fileId.viewId === currentOpenFileId.viewId) { return true; }
   if (!store.getState().saveDirtyFlag || window.confirm('confirm discard unsaved changes')) {
     batch(() => {
@@ -347,7 +345,6 @@ class Navigator extends React.Component {
 
   componentDidMount = () => {
     FileStorageSystemClient.doGetFilesList().then(filesList => {
-      console.log(filesList);
       if (!filesList) { alert('failed to retrieve files list'); }
       else { this.setState({ filesList }); }
       if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
@@ -427,8 +424,6 @@ class Navigator extends React.Component {
     const fileName = this.getFileName(fileId);
     if(fileId.viewId !== 0){
       const viewType = this.state.filesList[fileId.sourceId].views[fileId.viewId].type;
-      console.log("rendering View");
-      console.log(fileName);
       return (
         <Paper className={classes.viewRoot} style={(selected) ? {backgroundColor: 'rgba(0, 0, 0, 0.08)'} : {} } component="form" elevation={0}>
           <IconButton>
@@ -508,7 +503,6 @@ class Navigator extends React.Component {
   handleDeleteMenuClick = () => {
     this.handleEditMenuClose();
     const fileId = { sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId === null) ? 0 : this.state.selectedViewId}
-    console.log(fileId)
     this.handleDeleteFile(fileId).then(success => {
       if (fileId.viewId !== 0) {
         this.setState({
@@ -562,7 +556,6 @@ class Navigator extends React.Component {
     };
     const numFiles = countNumFiles(this.state.filesList);
     const filteredFilesList = this.state.searching ? this.handleDoFileNamesSearch() : this.state.filesList;
-    console.log(filteredFilesList)
     const numFilteredFiles = countNumFiles(filteredFilesList);
     return (
       <div className="SidePane">
