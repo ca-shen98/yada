@@ -3,17 +3,10 @@ import React from 'react';
 import {connect} from 'react-redux';
 import SourceEditorWithTagFilters from "./SourceEditorWithTagFiltersInput";
 import {
-	checkNoOpenFileId,
-	checkSourceFileId, checkViewFileId,
+	checkSourceFileId,
+	checkViewFileId,
 	FILE_TYPE,
-	getFileIdKeyStr,
-	NO_OPEN_FILE_ID
 } from "../util/FileIdAndTypeUtils";
-import {defer} from "lodash";
-import BlockTaggingEditorExtension from "../editor_extension/BlockTagging";
-import FileStorageSystemClient from "../backend/FileStorageSystemClient";
-import {handleSetCurrentOpenFileId} from "./Navigator";
-import CardDeck from "./CardView/CardDeck";
 import ViewEditor from "./ViewEditor";
 
 const DEFAULT_STATE = {

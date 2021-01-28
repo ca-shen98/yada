@@ -36,7 +36,8 @@ class Card extends React.Component {
 						className="Card"
 						readOnly={true}
 						key={`card${key}`}
-						setJSON={JSON.stringify(json)}
+						defaultValue={JSON.stringify(json)}
+						jsonStrValue={true}
 					/>
 				}
 			</BootstrapCard>

@@ -35,15 +35,8 @@ class CardDeck extends React.Component {
 		const node = this.state.allTagsData[tagId]["content"];
 		console.log(node);
 		return {
-			"doc": {
-				"type": "doc",
-				"content": [node]
-			},
-			"selection": {
-				"type": "text",
-				"anchor": 0,
-				"head": 0
-			},
+			"type": "doc",
+			"content": [node]
 		};
 	};
 	
