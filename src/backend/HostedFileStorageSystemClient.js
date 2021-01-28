@@ -21,7 +21,7 @@ export default {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
     try {
       const response = await fetchWithTimeout(
-        SERVER_BASE_URL + `view?docID=${sourceId}` + (!createNew ? `&viewID=${viewId}&type=${type}` : ''),
+        SERVER_BASE_URL + `view?docID=${sourceId}&viewType=${type}` + (!createNew ? `&viewID=${viewId}` : ''),
         {
           method: 'PUT',
           body: JSON.stringify({ tags: tagsList }),
