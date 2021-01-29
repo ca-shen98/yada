@@ -4,7 +4,6 @@ import {Hero, Section} from 'react-landing-page';
 import {GoogleLogin} from 'react-google-login';
 import axios from 'axios';
 import Cookies from 'js-cookie'
-import {fetchWithTimeout} from '../util/FetchWithTimeout';
 import {
   BACKEND_MODE_SIGNED_IN_STATUS,
   SERVER_BASE_URL,

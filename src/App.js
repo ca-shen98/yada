@@ -10,7 +10,7 @@ import {
 import LandingPage from './components/LandingPage';
 import Navigator from './components/Navigator';
 import {handleSaveCurrentFileEditorContent} from './components/Editor';
-import SourceEditorWithTagFilters from './components/SourceEditorWithTagFiltersInput';
+import EditorManager from "./components/EditorManager";
 
 class App extends React.Component {
 
@@ -50,7 +50,7 @@ class App extends React.Component {
                       </span>
                     </div>
                     <Navigator />
-                    <SourceEditorWithTagFilters />
+                    <EditorManager/>
                   </div>
                 : <LandingPage />
             )

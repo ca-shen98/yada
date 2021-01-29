@@ -2,7 +2,7 @@ import './Editor.css';
 import {defer} from 'lodash';
 import React from 'react';
 import {connect} from 'react-redux';
-import {NO_OPEN_FILE_ID, checkNoOpenFileId, checkSourceFileId, getFileIdKeyStr} from '../util/FileIdAndTypeUtils';
+import {NO_OPEN_FILE_ID, checkNoOpenFileId, checkSourceFileId, checkViewFileId, getFileIdKeyStr} from '../util/FileIdAndTypeUtils';
 import {Selection, TextSelection} from 'prosemirror-state';
 import {parse as parseTagFilters} from '../lib/TagFiltersGrammar';
 import {TagFilteringPluginKey} from '../editor_extension/plugins/TagFiltering';
@@ -111,25 +111,34 @@ class SourceEditorWithTagFiltersInput extends React.Component {
   };
 
   changeFile = async () => {
+    console.log("Change FILE");
     if (!checkNoOpenFileId(this.props.currentOpenFileId)) {
-      defer(() => { BlockTaggingEditorExtension.editor.focusAtStart(); });
+      defer(() => {
+        BlockTaggingEditorExtension.editor.focusAtStart();
+      });
     }
     const fileIdKeyStr = getFileIdKeyStr(this.props.currentOpenFileId);
+    console.log(this.props.currentOpenFileId);
     if (checkSourceFileId(this.props.currentOpenFileId)) {
       FileStorageSystemClient.doGetSourceContent(this.props.currentOpenFileId.sourceId).then(value => {
         if (value === null) {
           alert('failed to retrieve source content');
           handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
         } else {
-          this.setState({ fileIdKeyStr, fileContent: value ?? '' });
+          this.setState({fileIdKeyStr, fileContent: value ?? ''});
           FileStorageSystemClient.doGetSourceSavedTagFilters(this.props.currentOpenFileId.sourceId)
-            .then(sourceSavedTagFilters => {
-               if (!sourceSavedTagFilters) { alert('failed to retrieve source saved tag filters'); }
-              else { this.setState({ sourceSavedTagFilters }); }
-            });
+              .then(sourceSavedTagFilters => {
+                if (!sourceSavedTagFilters) {
+                  alert('failed to retrieve source saved tag filters');
+                } else {
+                  this.setState({sourceSavedTagFilters});
+                }
+              });
         }
       });
-    } else { this.setState({ fileIdKeyStr, fileContent: '' }); }
+    } else {
+      this.setState({fileIdKeyStr, fileContent: ''});
+    }
   };
 
   componentDidMount = () => {
@@ -216,6 +225,6 @@ class SourceEditorWithTagFiltersInput extends React.Component {
       </Editor>
     );
   };
-};
+}
 
 export default connect(state => ({ currentOpenFileId: state.currentOpenFileId }))(SourceEditorWithTagFiltersInput);
