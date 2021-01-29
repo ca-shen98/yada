@@ -9,6 +9,8 @@ import Card from './Card';
 import TagEditor from './TagEditor';
 import {putCardView} from '../../backend/yaas';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
+import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
+import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
 
 
 class CardDeck extends React.Component {
@@ -25,15 +27,20 @@ class CardDeck extends React.Component {
 	keydownHandler = (event) => {
 		if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey)  && event.keyCode === 83) {
 			event.preventDefault();
-			putCardView({"tagIds": this.props.tagsInView},this.state.sourceId,this.state.viewId)
-				.then(() => { console.log("Saved view"); })
-				.catch(() => { console.log("Failed to save view"); })
+			FileStorageSystemClient.doSaveViewSpec(
+				this.props.tagsInView,
+				this.props.currentOpenFileId.sourceId,
+				this.props.currentOpenFileId.viewId,
+				FILE_TYPE.CARD_VIEW,
+				false,
+			)
+				.then(() => alert("Card view saved"))
+				.catch(() => alert("Failed to save card view"));
 		}
 	};
 	
 	constructDoc = (tagId) => {
 		const node = this.state.allTagsData[tagId]["content"];
-		console.log(node);
 		return {
 			"type": "doc",
 			"content": [node]
@@ -91,6 +98,6 @@ class CardDeck extends React.Component {
 }
 
 export default connect(
-	state => ({ tagsInView: state.tagsInView }),
+	state => ({ tagsInView: state.tagsInView, currentOpenFileId: state.currentOpenFileId }),
 	dispatch => ({ setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)) }),
 )(CardDeck);

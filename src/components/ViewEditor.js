@@ -26,7 +26,7 @@ class ViewEditor extends React.Component {
 				alert('failed to retrieve view');
 				handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
 			} else {
-				if (this.props.currentOpenFileId.viewType === "cards") {
+				if (this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) {
 					let fileType = FILE_TYPE.CARD_VIEW;
 					this.setState({
 						sourceId: this.props.currentOpenFileId.sourceId,

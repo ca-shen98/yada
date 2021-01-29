@@ -8,6 +8,7 @@ import {
 	FILE_TYPE,
 } from "../util/FileIdAndTypeUtils";
 import ViewEditor from "./ViewEditor";
+import Container from "react-bootstrap/Container";
 
 const DEFAULT_STATE = {
 	fileType: FILE_TYPE.EMPTY,
@@ -43,7 +44,11 @@ class EditorManager extends React.Component {
 	
 	render = () => {
 		if (this.state.fileType === FILE_TYPE.EMPTY) {
-			return <h1>Click/create a document!</h1>;
+			return (
+				<Container className="viewContainer">
+					<h5>Click/create a document!</h5>
+				</Container>
+			);
 		}
 		if (this.state.fileType === FILE_TYPE.SOURCE) {
 			return <SourceEditorWithTagFilters />;
