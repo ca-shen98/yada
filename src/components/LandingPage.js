@@ -40,42 +40,19 @@ class LandingPage extends React.Component {
   };
 
   render = () =>
-    // <Hero
-    //   color="black"
-    //   bg="white"
-    //   backgroundImage="https://source.unsplash.com/npxXWgQ33ZQ/1600x900">
-    //   <Section heading='YADA' subhead='Yet Another Docs App' width={1}>
-    //     <GoogleLogin
-    //       clientId={CLIENT_ID}
-    //       buttonText="Sign in with Google to get started"
-    //       onSuccess={response => { this.handleLoginSuccess(response); }}
-    //       onFailure={response => { console.log(response); }}
-    //       cookiePolicy="single_host_origin"
-    //       responseType="code,token"
-    //     />
-    //   </Section>
-    //   <button
-    //     onClick={() => {
-    //       this.props.dispatchSetBackendModeSignedInStatusAction(BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE);
-    //     }}>
-    //     Use local storage
-    //   </button>
-    // </Hero>;
     <div style={{display:"flex", flexFlow: "column", height: "100vh", overflow: "hidden"}}>
       <div className={"landing-root"} style={{flexGrow: "0 1 auto"}}>
       <AppBar position="static" class="custom-navbar">
         <Toolbar>
           <img className={"menuButton"} src={require('../images/logo.png')} style={{width: "50px", marginRight: "1%"}}/>
-          {/* <Typography variant="h5" className={"title"} style={{fontFamily:"Bungee", color:"#F5F0E1"}}>
-            YADA
-          </Typography> */}
         </Toolbar>
       </AppBar>
 
     </div>
     <div style={{backgroundColor: "#F5F0E1", flex: "1 1 auto"}}>
-    <Grid container spacing={3} alignItems="center">
-        <Grid item xs={6} alignItems="center" style={{marginTop: "10%"}}>
+    <Grid container spacing={3} alignItems="center" style={{height: "100%"}}>
+        <Grid item xs={1}></Grid>
+        <Grid item xs={5} alignItems="center">
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={3}>
               <img src={require('../images/darkLogo.png')} style={{width: "90%", marginLeft: "20%"}}/>
@@ -116,7 +93,7 @@ class LandingPage extends React.Component {
           </div>
         </Grid>
         <Grid item xs={6}>
-           <img src={require('../images/graphic.png')} style={{width: "70%", marginLeft: "10%", marginTop: "10%"}}/>
+           <img src={require('../images/graphic.png')} style={{width: "70%", marginLeft: "10%"}}/>
         </Grid>
     </Grid>
     </div>
