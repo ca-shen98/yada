@@ -11,6 +11,7 @@ import LandingPage from './components/LandingPage';
 import Navigator from './components/Navigator';
 import {handleSaveCurrentFileEditorContent} from './components/Editor';
 import EditorManager from "./components/EditorManager";
+import "./components/LandingPage.css"
 
 class App extends React.Component {
 

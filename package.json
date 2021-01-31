@@ -20,6 +20,7 @@
     "react-google-login": "^5.1.20",
     "react-landing-page": "^2.0.2",
     "react-redux": "^7.1.3",
+    "react-typing-effect": "^2.0.4",
     "redux": "^4.0.5",
     "rich-markdown-editor": "github:fydp-saac/rich-markdown-editor#master",
     "uuid": "^8.3.1"
