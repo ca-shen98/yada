@@ -59,7 +59,6 @@ class Editor extends React.Component {
               key={this.props.fileIdKeyStr}
               defaultValue={this.props.fileContent}
               jsonStrValue={!(!this.props.fileContent)}
-              onSave={handleSaveCurrentFileEditorContent}
               onKeyDown={event => {
                 if (event.key === 'Escape') {
                   BlockTaggingEditorExtension.editor.view.dispatch(
