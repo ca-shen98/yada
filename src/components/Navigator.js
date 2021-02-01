@@ -482,9 +482,9 @@ class Navigator extends React.Component {
           <IconButton>
             {
               (viewType === FILE_TYPE.CARD_VIEW) ? 
-              <AmpStoriesIcon/>:
+              <AmpStoriesIcon color="primary"/>:
               (viewType === FILE_TYPE.TEXT_VIEW) ?
-             <TextFieldsIcon /> :
+             <TextFieldsIcon color="primary"/> :
               null
             }
           </IconButton>
@@ -492,10 +492,11 @@ class Navigator extends React.Component {
             value={fileName}
             className="file_list_input"
             disabled={!(selected && this.state.renameSelected)}
+            style={{color: "#1E3D59"}}
           />
           <Divider className={classes.divider} orientation="vertical" />
           <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="disabled"/>
+            <MoreVertIcon fontSize="small" color="primary"/>
           </IconButton>
         </div>
       );
@@ -507,11 +508,12 @@ class Navigator extends React.Component {
             value={fileName}
             className="file_list_input"
             disabled={!(selected && this.state.renameSelected)}
+            style={{color: "#1E3D59"}}
           />
           {childViewsExist ? (open ? <ExpandLess /> : <ExpandMore />) : null}
           <Divider className={classes.divider} orientation="vertical" />
           <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="disabled"/>
+            <MoreVertIcon fontSize="small" color="primary"/>
           </IconButton>
         </div>
       );
