@@ -1,22 +1,28 @@
 {
   "files": {
-    "main.css": "/yada/static/css/main.a7d7a603.chunk.css",
-    "main.js": "/yada/static/js/main.4df158e8.chunk.js",
-    "main.js.map": "/yada/static/js/main.4df158e8.chunk.js.map",
-    "runtime-main.js": "/yada/static/js/runtime-main.15c626b3.js",
-    "runtime-main.js.map": "/yada/static/js/runtime-main.15c626b3.js.map",
-    "static/js/2.afc79034.chunk.js": "/yada/static/js/2.afc79034.chunk.js",
-    "static/js/2.afc79034.chunk.js.map": "/yada/static/js/2.afc79034.chunk.js.map",
+    "main.css": "/yada/static/css/main.5168eabd.chunk.css",
+    "main.js": "/yada/static/js/main.2f5a8b53.chunk.js",
+    "main.js.map": "/yada/static/js/main.2f5a8b53.chunk.js.map",
+    "runtime-main.js": "/yada/static/js/runtime-main.7709a3b7.js",
+    "runtime-main.js.map": "/yada/static/js/runtime-main.7709a3b7.js.map",
+    "static/css/2.8d3f7698.chunk.css": "/yada/static/css/2.8d3f7698.chunk.css",
+    "static/js/2.a481598c.chunk.js": "/yada/static/js/2.a481598c.chunk.js",
+    "static/js/2.a481598c.chunk.js.map": "/yada/static/js/2.a481598c.chunk.js.map",
     "index.html": "/yada/index.html",
-    "precache-manifest.09884c82990f2fa94ec3bac2ccee1141.js": "/yada/precache-manifest.09884c82990f2fa94ec3bac2ccee1141.js",
+    "precache-manifest.736be34bcf4db5989f84f76b0723219f.js": "/yada/precache-manifest.736be34bcf4db5989f84f76b0723219f.js",
     "service-worker.js": "/yada/service-worker.js",
-    "static/css/main.a7d7a603.chunk.css.map": "/yada/static/css/main.a7d7a603.chunk.css.map",
-    "static/js/2.afc79034.chunk.js.LICENSE.txt": "/yada/static/js/2.afc79034.chunk.js.LICENSE.txt"
+    "static/css/2.8d3f7698.chunk.css.map": "/yada/static/css/2.8d3f7698.chunk.css.map",
+    "static/css/main.5168eabd.chunk.css.map": "/yada/static/css/main.5168eabd.chunk.css.map",
+    "static/js/2.a481598c.chunk.js.LICENSE.txt": "/yada/static/js/2.a481598c.chunk.js.LICENSE.txt",
+    "static/media/darkLogo.png": "/yada/static/media/darkLogo.eccc7628.png",
+    "static/media/graphic.png": "/yada/static/media/graphic.2ab501e2.png",
+    "static/media/logo.png": "/yada/static/media/logo.e9d28ab1.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.15c626b3.js",
-    "static/js/2.afc79034.chunk.js",
-    "static/css/main.a7d7a603.chunk.css",
-    "static/js/main.4df158e8.chunk.js"
+    "static/js/runtime-main.7709a3b7.js",
+    "static/css/2.8d3f7698.chunk.css",
+    "static/js/2.a481598c.chunk.js",
+    "static/css/main.5168eabd.chunk.css",
+    "static/js/main.2f5a8b53.chunk.js"
   ]
 }
