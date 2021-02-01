@@ -7,7 +7,6 @@ import TagEditor from '../ViewComponents/TagEditor';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
 import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
 import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
-import Card from "../CardView/Card";
 import RichMarkdownEditor from "rich-markdown-editor";
 
 
@@ -34,14 +33,6 @@ class TextView extends React.Component {
 				.then(() => alert("Text view saved"))
 				.catch(() => alert("Failed to save text view"));
 		}
-	};
-	
-	constructDoc = (tagId) => {
-		const node = this.state.allTagsData[tagId]["content"];
-		return {
-			"type": "doc",
-			"content": [node]
-		};
 	};
 	
 	constructTextView = () => {
