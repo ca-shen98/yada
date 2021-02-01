@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import axios from 'axios';
 import {fetchWithTimeout} from '../util/FetchWithTimeout';
 import {convertStrValueOrDefaultIfFalsy} from '../util/ConvertStrValueOrDefault';
 import {ACCESS_TOKEN_COOKIE_KEY, SERVER_BASE_URL} from '../reducers/BackendModeSignedInStatus';
@@ -103,11 +104,34 @@ export default {
     } catch (e) { console.log(e); }
     return null;
   },
-  doSetSourceSavedTagFilters: async (sourceId, sourceSavedTagFilters) => { // TODO
-  
+  doSetSourceSavedTagFilters: async (sourceId, sourceSavedTagFilters) => {
+    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const filters = Object.keys(sourceSavedTagFilters).map(k => sourceSavedTagFilters[k]);
+    try {
+      const response = await fetchWithTimeout(
+        SERVER_BASE_URL + `filters?docID=`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ body: {"docID": sourceId, "filters": filters} }),
+          headers: new Headers({ 'Content-Type': 'application/json', 'Set-Cookie': `token=${token}` }),
+        },
+      );
+      if (response.ok) {
+        return true;
+      };
+    } catch (e) { console.log(e); }
+    return null;
   },
   doGetSourceSavedTagFilters: async sourceId => { // TODO
-  
+    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    try {
+      const response = await fetchWithTimeout(
+        SERVER_BASE_URL + `filters?docID=${sourceId}`,
+        { headers: new Headers({ 'Set-Cookie': `token=${token}` }) },
+      );
+      if (response.ok) { return await response.json(); }
+    } catch (e) { console.log(e); }
+    return null;
   },
   doDeleteSource: async sourceId => {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
