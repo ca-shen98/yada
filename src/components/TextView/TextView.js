@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-// import './CardDeck.css';
+import './TextView.css';
 import React from 'react';
 import {connect} from 'react-redux';
 import Container from 'react-bootstrap/Container'
@@ -7,6 +7,8 @@ import TagEditor from '../ViewComponents/TagEditor';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
 import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
 import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
+import Card from "../CardView/Card";
+import RichMarkdownEditor from "rich-markdown-editor";
 
 
 class TextView extends React.Component {
@@ -34,6 +36,21 @@ class TextView extends React.Component {
 		}
 	};
 	
+	constructDoc = (tagId) => {
+		const node = this.state.allTagsData[tagId]["content"];
+		return {
+			"type": "doc",
+			"content": [node]
+		};
+	};
+	
+	constructTextView = () => {
+		return {
+			"type": "doc",
+			"content": this.props.tagsInView.map(t => this.state.allTagsData[t]["content"])
+		};
+	};
+	
 	componentDidMount = () => {
 		document.addEventListener('keydown',this.keydownHandler);
 	};
@@ -45,39 +62,29 @@ class TextView extends React.Component {
 	componentWillUnmount = () => { document.removeEventListener('keydown',this.keydownHandler); };
 	
 	render = () => {
-		return (
-			<Container className="viewContainer">
-				<h5>Loading Text View ...</h5>
-			</Container>
-		);
-		
-		// if (!this.state.allTagsData || this.props.tagsInView == null) {
-		// 	return (
-		// 		<Container className="viewContainer">
-		// 			<h5>Loading Text View ...</h5>
-		// 		</Container>
-		// 	);
-		// } else {
-		// 	const cards = [];
-		// 	for (let i = 0; i < this.props.tagsInView.length; i+=4) {
-		// 		cards.push(
-		// 			<Row key={`row_${i%4}`} className="justify-content-md-center">
-		// 				<Col lg="12" xl="6">
-		// 					{this.constructCard(i)}
-		// 				</Col>
-		// 				<Col lg="12" xl="6">
-		// 					{(i + 2 < this.props.tagsInView.length) && this.constructCard(i + 2)}
-		// 				</Col>
-		// 			</Row>
-		// 		);
-		// 	}
-		// 	return (
-		// 		<Container className="viewContainer">
-		// 			<TagEditor allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
-		// 			{cards}
-		// 		</Container>
-		// 	);
-		// }
+		if (!this.state.allTagsData || this.props.tagsInView == null) {
+			return (
+				<Container className="viewContainer">
+					<h5>Loading Text View ...</h5>
+				</Container>
+			);
+		} else {
+			return (
+				<Container className="viewContainer">
+					<TagEditor allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
+					{
+						this.props.tagsInView.length > 0 &&
+						<RichMarkdownEditor
+							className="TextViewEditor"
+							readOnly={true}
+							key={"text_view"}
+							defaultValue={JSON.stringify(this.constructTextView())}
+							jsonStrValue={true}
+						/>
+					}
+				</Container>
+			);
+		}
 	};
 }
 

@@ -21,37 +21,23 @@ class ViewEditor extends React.Component {
 	
 	state = DEFAULT_STATE;
 	
+	
+	
 	changeFile = async () => {
 		FileStorageSystemClient.doGetView(this.props.currentOpenFileId).then(value => {
 			if (value === null) {
 				alert('failed to retrieve view');
 				handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
 			} else {
-				if (this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) {
-					let fileType = FILE_TYPE.CARD_VIEW;
-					this.setState({
-						sourceId: this.props.currentOpenFileId.sourceId,
-						viewId: this.props.currentOpenFileId.viewId,
-						data: {
-							tagsInView: Object.keys(value["view"]["items"]),
-							allTagsData: value["tags"]["items"]
-						},
-						fileType: fileType
-					});
-				} else if (this.props.currentOpenFileId.viewType === FILE_TYPE.TEXT_VIEW) {
-					let fileType = FILE_TYPE.TEXT_VIEW;
-					this.setState({
-						sourceId: this.props.currentOpenFileId.sourceId,
-						viewId: this.props.currentOpenFileId.viewId,
-						data: {
-							tagsInView: Object.keys(value["view"]["items"]),
-							allTagsData: value["tags"]["items"]
-						},
-						fileType: fileType
-					});
-				} else {
-					console.error("Unsupported view type");
-				}
+				this.setState({
+					sourceId: this.props.currentOpenFileId.sourceId,
+					viewId: this.props.currentOpenFileId.viewId,
+					data: {
+						tagsInView: Object.keys(value["view"]["items"]),
+						allTagsData: value["tags"]["items"]
+					},
+					fileType: this.props.currentOpenFileId.viewType
+				});
 			}
 		});
 	};

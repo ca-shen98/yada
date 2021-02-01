@@ -1,0 +1,23 @@
+/*.BootstrapCard {*/
+/*    max-width: 36em;*/
+/*    min-height: 18em;*/
+/*    margin: 10px auto;*/
+/*}*/
+
+/*.Card {*/
+/*    padding: 25px;*/
+/*}*/
+
+/*!*make rich markdown editor background transparent*!*/
+/*.TextViewEditor {*/
+/*    background: transparent;*/
+/*}*/
+
+.TextViewEditor {
+    flex: auto;
+    overflow: auto;
+    padding: 9px 8px;
+    margin: 14px;
+    border: 2px dashed lightgray;
+    border-radius: 12px;
+}
