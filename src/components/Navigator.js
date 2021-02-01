@@ -17,6 +17,7 @@ import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   INITIAL_FILE_ID_LOCAL_STORAGE_KEY,
   setCurrentOpenFileIdAction,
+  setCurrentOpenFileNameAction,
   setSelectNodeAction,
 } from '../reducers/CurrentOpenFileState';
 import {
@@ -61,18 +62,20 @@ import CheckIcon from '@material-ui/icons/Check';
 import AddIcon from '@material-ui/icons/Add';
 import TextFieldsIcon from '@material-ui/icons/TextFields';
 import AmpStoriesIcon from '@material-ui/icons/AmpStories';
-import DescriptionIcon from '@material-ui/icons/Description';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
 
-export const handleSetCurrentOpenFileId = fileId => {
-  console.log(fileId);
+export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "viewName": ''}) => {
+  console.log(fileName);
   if (!validateFileIdObj(fileId)) { return false; }
   const currentOpenFileId = store.getState().currentOpenFileId;
   if (fileId.sourceId === currentOpenFileId.sourceId && fileId.viewId === currentOpenFileId.viewId) { return true; }
   if (!store.getState().saveDirtyFlag || window.confirm('confirm discard unsaved changes')) {
     batch(() => {
       store.dispatch(setCurrentOpenFileIdAction(fileId));
+      store.dispatch(setCurrentOpenFileNameAction(fileName));
       store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
       store.dispatch(setSelectNodeAction(null));
     });
@@ -293,7 +296,8 @@ class Navigator extends React.Component {
     this.setState({ filesList: newFilesList });
     defer(() => {
       const fileId = { sourceId: updatedSourceId, viewId: !sourceFileType ? newFile.id : 0 };
-      handleSetCurrentOpenFileId(fileId);
+      const fileName = {sourceName: this.getSourceName(fileId), viewName: this.getViewName(fileId)};
+      handleSetCurrentOpenFileId(fileId, fileName);
     });
     if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
       if (sourceFileType) { doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList)); }
@@ -456,7 +460,6 @@ class Navigator extends React.Component {
         padding: '2px 4px',
         display: 'flex',
         alignItems: 'center',
-        width: 200,
       },
       input: {
         marginLeft: theme.spacing(1),
@@ -475,7 +478,7 @@ class Navigator extends React.Component {
     if(fileId.viewId !== 0){
       const viewType = this.state.filesList[fileId.sourceId].views[fileId.viewId].type;
       return (
-        <Paper className={classes.viewRoot} style={(selected) ? {backgroundColor: 'rgba(0, 0, 0, 0.08)'} : {} } component="form" elevation={0}>
+        <div className={classes.viewRoot} style={(selected) ? {backgroundColor: 'rgba(0, 0, 0, 0.08)'} : {backgroundColor: "F5F0E1"} } component="form" elevation={0}>
           <IconButton>
             {
               (viewType === FILE_TYPE.CARD_VIEW) ? 
@@ -494,11 +497,12 @@ class Navigator extends React.Component {
           <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
             <MoreVertIcon fontSize="small" color="disabled"/>
           </IconButton>
-        </Paper>
+        </div>
       );
     }else{
+      console.log(fileName + " " + selected);
       return (
-        <Paper className={classes.root} style={(selected) ? {backgroundColor: '#a3d2f7', border:"solid #3f51b5 thin"} : {} } component="form" elevation={0}>
+        <div className={classes.root} style={(selected) ? {backgroundColor: 'rgba(30, 61, 89, 0.3)', border:"solid #1E3D59 thin"} : {} } component="form" elevation={0}>
           <InputBase 
             value={fileName}
             className="file_list_input"
@@ -509,19 +513,21 @@ class Navigator extends React.Component {
           <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
             <MoreVertIcon fontSize="small" color="disabled"/>
           </IconButton>
-        </Paper>
+        </div>
       );
     }
   };
 
   handleFileListClick = (fileId) => {
+    console.log(fileId);
+    console.log(this.state.selectedFileId);
     if (fileId === this.state.selectedFileId) {
       this.setState({
         selectedViewId: null,
         selectedFileOpen: !(this.state.selectedFileOpen)
       });
     }else{
-      if(handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0 })){
+      if(handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0 }, {sourceName: this.state.filesList[fileId].name, viewName: ''})){
         this.setState({
           selectedFileId: fileId,
           selectedViewId: null,
@@ -533,7 +539,8 @@ class Navigator extends React.Component {
   };
 
   handleViewListClick = (fileId) => {
-    handleSetCurrentOpenFileId(fileId);
+    const fileName = {sourceName: this.getSourceName(fileId), viewName: this.getViewName(fileId)};
+    handleSetCurrentOpenFileId(fileId, fileName);
     this.setState({
       selectedViewId: fileId.viewId,
     });
@@ -610,7 +617,17 @@ class Navigator extends React.Component {
     const numFilteredFiles = countNumFiles(filteredFilesList);
     return (
       <div className="SidePane">
-        { (this.state.selectedFileId === null) ? null :
+        <div style={{flexGrow: "0 1 auto"}}>
+          <AppBar position="static" class="custom-navbar">
+            <Toolbar>
+              <img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "5%"}}/>
+                <Typography variant="h5" style={{fontFamily:"Bungee", color:"#F5F0E1"}}>
+                  YADA
+                </Typography>
+              </Toolbar>
+          </AppBar>
+        </div>
+        {/* { (this.state.selectedFileId === null) ? null :
               <div>
                 <div id="current_file_container">
                   <Grid container spacing={3} alignItems="center">
@@ -628,7 +645,7 @@ class Navigator extends React.Component {
                 </div>
                 <Divider variant="middle" />
               </div>
-        }
+        } */}
         <div id="file_list_container">
             <Button
               variant="outlined"

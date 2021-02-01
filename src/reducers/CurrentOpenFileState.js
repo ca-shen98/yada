@@ -1,5 +1,5 @@
 import {convertStrValueOrDefault} from '../util/ConvertStrValueOrDefault';
-import {NO_OPEN_FILE_ID, validateHasFileIdObj} from '../util/FileIdAndTypeUtils';
+import {NO_OPEN_FILE_ID, validateHasFileIdObj, validateHasFileNameObj} from '../util/FileIdAndTypeUtils';
 
 export const INITIAL_FILE_ID_LOCAL_STORAGE_KEY = 'initialFileId';
 
@@ -20,6 +20,12 @@ export const setCurrentOpenFileIdAction = fileId => ({ type: SET_CURRENT_OPEN_FI
 export const currentOpenFileIdReducer = (state = initialFileId, action) =>
   action.type !== SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE || !validateHasFileIdObj(action)
     ? state : action.fileId;
+
+const SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE = 'currentOpenFileName/set';
+export const setCurrentOpenFileNameAction = fileName => ({ type: SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE, fileName });
+export const currentOpenFileNameReducer = (state = {sourceName: '', viewName: ''}, action) =>
+  action.type !== SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE || !validateHasFileNameObj(action)
+    ? state : action.fileName;
 
 export const SET_SAVE_DIRTY_FLAG_ACTION_TYPE = 'saveDirtyFlag/set';
 export const CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE = 'saveDirtyFlag/clear';

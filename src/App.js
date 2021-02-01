@@ -12,6 +12,18 @@ import Navigator from './components/Navigator';
 import {handleSaveCurrentFileEditorContent} from './components/Editor';
 import EditorManager from "./components/EditorManager";
 import "./components/LandingPage.css"
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#1E3D59'
+    },
+    secondary: {
+      main: '#F5F0E1'
+    }
+  }
+});
 
 class App extends React.Component {
 
@@ -39,6 +51,7 @@ class App extends React.Component {
   };
   
   render = () =>
+    <MuiThemeProvider theme={theme}>
     <React.Fragment>
       {
         this.state.mounted
@@ -61,12 +74,14 @@ class App extends React.Component {
         This app doesn't support mobile screen widths.
       </div> */}
     </React.Fragment>
+    </MuiThemeProvider>
 };
 
 export default connect(
   state => ({
     backendModeSignedInStatus: state.backendModeSignedInStatus,
     currentOpenFileId: state.currentOpenFileId,
+    currentOpenFileName: state.currentOpenFileName
   }),
   dispatch => ({
     dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),

@@ -57,4 +57,4 @@ class EditorManager extends React.Component {
 	};
 };
 
-export default connect(state => ({ currentOpenFileId: state.currentOpenFileId }))(EditorManager);
+export default connect(state => ({ currentOpenFileId: state.currentOpenFileId, currentOpenFileName: state.currentOpenFileName }))(EditorManager);

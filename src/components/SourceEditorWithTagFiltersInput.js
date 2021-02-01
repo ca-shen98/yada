@@ -129,7 +129,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
           FileStorageSystemClient.doGetSourceSavedTagFilters(this.props.currentOpenFileId.sourceId)
               .then(sourceSavedTagFilters => {
                 if (!sourceSavedTagFilters) {
-                  alert('failed to retrieve source saved tag filters');
+                  //alert('failed to retrieve source saved tag filters');
                 } else {
                   this.setState({sourceSavedTagFilters});
                 }
@@ -166,6 +166,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
   };
 
   render = () => {
+    console.log(this.props.currentOpenFileName);
     const sourceFileIdCheck = checkSourceFileId(this.props.currentOpenFileId);
     const currentTagFiltersSaved =
       this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentParsedTagFiltersStr);
@@ -227,4 +228,5 @@ class SourceEditorWithTagFiltersInput extends React.Component {
   };
 }
 
-export default connect(state => ({ currentOpenFileId: state.currentOpenFileId }))(SourceEditorWithTagFiltersInput);
+export default connect(state => ({ currentOpenFileId: state.currentOpenFileId , 
+                                  currentOpenFileName: state.currentOpenFileName}))(SourceEditorWithTagFiltersInput);

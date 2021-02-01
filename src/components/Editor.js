@@ -14,6 +14,11 @@ import RichMarkdownEditor from 'rich-markdown-editor';
 import store from '../store';
 import FileStorageSystemClient from '../backend/FileStorageSystemClient';
 import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
+import SaveIcon from '@material-ui/icons/Save';
+import Button from '@material-ui/core/Button';
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import DescriptionIcon from '@material-ui/icons/Description';
+import Link from '@material-ui/core/Link';
 
 export const handleSaveCurrentFileEditorContent = () => {
   const currentOpenFileId = store.getState().currentOpenFileId;
@@ -29,27 +34,31 @@ export const handleSaveCurrentFileEditorContent = () => {
 };
 
 class Editor extends React.Component {
-
   render = () => {
     const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
     return (
       <div className="MainPane">
         <div id="editor_container">
           <div className="InputRow" id="current_open_file_controls">
-            <button
-              className="MonospaceCharButton"
-              title="close"
-              disabled={noOpenFileIdCheck}
-              onClick={() => { handleSetCurrentOpenFileId(NO_OPEN_FILE_ID); }}>
-              {'✕'}
-            </button>
-            <button
-              className="MonospaceCharButton"
+            {this.props.currentOpenFileName.sourceName == '' ? null : 
+              <Breadcrumbs aria-label="breadcrumb" style={{marginTop: "10px", marginRight: "10px"}}>
+                <Link color="inherit" style={{backgroundColor: "#1E3D59", color: "#F5F0E1", borderRadius: "10px", padding: "10px"}}> 
+                  <DescriptionIcon />
+                  {this.props.currentOpenFileName.sourceName}
+                </Link>
+              </Breadcrumbs>
+            }
+            <Button
+              variant="contained"
+              color="primary"
               title="save"
               disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
-              onClick={handleSaveCurrentFileEditorContent}>
-              {'^'}
-            </button>
+              onClick={handleSaveCurrentFileEditorContent}
+              startIcon={<SaveIcon />}
+              style= {{ borderRadius: "10px", marginTop: "3px", color: "#F5F0E1", paddingTop: "7px", paddingBottom: "7px" }}
+              >
+             Save
+            </Button>
             <div style={{ minWidth: '5px' }} />
             {this.props.children}
           </div>
@@ -91,6 +100,6 @@ class Editor extends React.Component {
 };
 
 export default connect(
-  state => ({ currentOpenFileId: state.currentOpenFileId, saveDirtyFlag: state.saveDirtyFlag }),
+  state => ({ currentOpenFileId: state.currentOpenFileId, currentOpenFileName: state.currentOpenFileName, saveDirtyFlag: state.saveDirtyFlag }),
   dispatch => ({ dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }) }),
 )(Editor);

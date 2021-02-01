@@ -27,10 +27,9 @@
 .SidePane {
   flex: none;
   width: 275px;
-  padding: 9px 0;
-  border-right: 3px solid gray;
   display: flex;
   flex-direction: column;
+  background-color: #F5F0E1
 }
 
 .MainPane {
