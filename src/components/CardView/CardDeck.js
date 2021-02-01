@@ -6,7 +6,7 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from './Card';
-import TagEditor from './TagEditor';
+import TagEditor from '../ViewComponents/TagEditor';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
 import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
 import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
@@ -21,7 +21,6 @@ class CardDeck extends React.Component {
 		}
 		this.props.setTagsInView(props.data.tagsInView);
 	}
-	
 	
 	keydownHandler = (event) => {
 		if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey)  && event.keyCode === 83) {
