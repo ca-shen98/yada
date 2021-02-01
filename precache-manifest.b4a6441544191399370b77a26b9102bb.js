@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "b58287876ba066dc37fa10b982a1a7d2",
+    "revision": "1eec22398d26007bb93bd7792eeacd90",
     "url": "/yada/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/yada/static/css/2.8d3f7698.chunk.css"
   },
   {
-    "revision": "6c4fb2c509d0cf792c15",
+    "revision": "8d03d13c85375b8e14d5",
     "url": "/yada/static/css/main.5168eabd.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/yada/static/js/2.a481598c.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "6c4fb2c509d0cf792c15",
-    "url": "/yada/static/js/main.6ce22a8c.chunk.js"
+    "revision": "8d03d13c85375b8e14d5",
+    "url": "/yada/static/js/main.eedca3ce.chunk.js"
   },
   {
     "revision": "fb07f9475817d9f2a22a",
