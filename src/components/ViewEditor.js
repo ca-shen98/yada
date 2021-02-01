@@ -27,7 +27,6 @@ class ViewEditor extends React.Component {
 				alert('failed to retrieve view');
 				handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
 			} else {
-				console.log(value["view"]);
 				this.setState({
 					sourceId: this.props.currentOpenFileId.sourceId,
 					viewId: this.props.currentOpenFileId.viewId,
