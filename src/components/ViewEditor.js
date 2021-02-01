@@ -21,8 +21,6 @@ class ViewEditor extends React.Component {
 	
 	state = DEFAULT_STATE;
 	
-	
-	
 	changeFile = async () => {
 		FileStorageSystemClient.doGetView(this.props.currentOpenFileId).then(value => {
 			if (value === null) {
