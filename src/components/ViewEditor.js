@@ -8,6 +8,7 @@ import {
 import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import {handleSetCurrentOpenFileId} from "./Navigator";
 import CardDeck from "./CardView/CardDeck";
+import TextView from "./TextView/TextView";
 
 const DEFAULT_STATE = {
 	sourceId: 0,
@@ -26,20 +27,15 @@ class ViewEditor extends React.Component {
 				alert('failed to retrieve view');
 				handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
 			} else {
-				if (this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) {
-					let fileType = FILE_TYPE.CARD_VIEW;
-					this.setState({
-						sourceId: this.props.currentOpenFileId.sourceId,
-						viewId: this.props.currentOpenFileId.viewId,
-						data: {
-							tagsInView: Object.keys(value["view"]["items"]),
-							allTagsData: value["tags"]["items"]
-						},
-						fileType: fileType
-					});
-				} else {
-					console.error("Unsupported view type");
-				}
+				this.setState({
+					sourceId: this.props.currentOpenFileId.sourceId,
+					viewId: this.props.currentOpenFileId.viewId,
+					data: {
+						tagsInView: value["view"]["order"],
+						allTagsData: value["tags"]["items"]
+					},
+					fileType: this.props.currentOpenFileId.viewType
+				});
 			}
 		});
 	};
@@ -59,6 +55,8 @@ class ViewEditor extends React.Component {
 	render = () => {
 		if (this.state.fileType === FILE_TYPE.CARD_VIEW) {
 			return <CardDeck data={this.state.data}/>;
+		} else if (this.state.fileType === FILE_TYPE.TEXT_VIEW) {
+			return <TextView data={this.state.data}/>;
 		}
 		return null;
 	};
