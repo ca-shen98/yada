@@ -78,24 +78,3 @@
   font-size: .85em;
   color: slategray;
 }
-
-.fileList-viewRoot {
-  padding: '2px 4px';
-  display: 'flex';
-  align-items: 'center';
-  width: 200;
-}
-
-.fileList-input {
-  margin-left: 10px;
-  flex: 1;
-};
-
-.fileList-iconButton {
-  padding: 5;
-};
-
-.fileList-divider {
-  height: 28;
-  margin: 4;
-}
