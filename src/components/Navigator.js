@@ -64,9 +64,6 @@ import AddIcon from '@material-ui/icons/Add';
 import TextFieldsIcon from '@material-ui/icons/TextFields';
 import AmpStoriesIcon from '@material-ui/icons/AmpStories';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 
 export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "viewName": ''}) => {
   console.log(fileName);
@@ -404,7 +401,8 @@ class Navigator extends React.Component {
   componentDidMount = () => {
     this.setState({
       selectedFileId : this.props.currentOpenFileId.sourceId,
-      selectedViewId: this.props.currentOpenFileId.viewId
+      selectedViewId: this.props.currentOpenFileId.viewId,
+      selectedFileOpen: this.props.currentOpenFileId.viewId != 0
     })
     FileStorageSystemClient.doGetFilesList().then(filesList => {
       if (!filesList) { alert('failed to retrieve files list'); }
@@ -460,12 +458,13 @@ class Navigator extends React.Component {
     console.log(fileId);
     console.log(this.state.selectedFileId);
     if (fileId === this.state.selectedFileId) {
+      handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0, viewType: FILE_TYPE.EMPTY}, {sourceName: this.state.filesList[fileId].name, viewName: ''});
       this.setState({
         selectedViewId: null,
         selectedFileOpen: !(this.state.selectedFileOpen)
       });
     }else{
-      if(handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0 }, {sourceName: this.state.filesList[fileId].name, viewName: ''})){
+      if(handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0, viewType: FILE_TYPE.EMPTY}, {sourceName: this.state.filesList[fileId].name, viewName: ''})){
         this.setState({
           selectedFileId: fileId,
           selectedViewId: null,
@@ -555,35 +554,6 @@ class Navigator extends React.Component {
     const numFilteredFiles = countNumFiles(filteredFilesList);
     return (
       <div className="SidePane">
-        <div style={{flexGrow: "0 1 auto"}}>
-          <AppBar position="static" class="custom-navbar">
-            <Toolbar>
-              <img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "5%"}}/>
-                <Typography variant="h5" style={{fontFamily:"Bungee", color:"#F5F0E1"}}>
-                  YADA
-                </Typography>
-              </Toolbar>
-          </AppBar>
-        </div>
-        {/* { (this.state.selectedFileId === null) ? null :
-              <div>
-                <div id="current_file_container">
-                  <Grid container spacing={3} alignItems="center">
-                    <Grid item xs={3}>
-                    <IconButton>
-                    <DescriptionIcon   />
-                    </IconButton>
-                    </Grid>
-                    <Grid item xs={9}>
-                      <Typography variant="h6" color="inherit" id={CURRENT_SOURCE_NAME_INPUT_ID}>
-                          {this.getFileName({sourceId: this.state.selectedFileId, viewId: 0})}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </div>
-                <Divider variant="middle" />
-              </div>
-        } */}
         <div id="file_list_container">
             <Button
               variant="outlined"
