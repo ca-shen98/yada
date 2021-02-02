@@ -2,7 +2,7 @@ import Cookies from 'js-cookie';
 import {fetchWithTimeout} from '../util/FetchWithTimeout';
 
 export const SERVER_BASE_URL = process.env.NODE_ENV === 'development'
-  ? "http://localhost:5000/" : "https://yaas.azurewebsites.net/";
+  ? "http://localhost:5000/" : "http://3.96.155.30:8080/";
 
 export const BACKEND_MODE_SIGNED_IN_STATUS = {
   USER_SIGNED_IN: 'USER_SIGNED_IN',
