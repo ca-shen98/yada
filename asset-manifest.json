@@ -1,28 +1,28 @@
 {
   "files": {
-    "main.css": "/yada/static/css/main.ce7ab009.chunk.css",
-    "main.js": "/yada/static/js/main.649bff7a.chunk.js",
-    "main.js.map": "/yada/static/js/main.649bff7a.chunk.js.map",
-    "runtime-main.js": "/yada/static/js/runtime-main.7709a3b7.js",
-    "runtime-main.js.map": "/yada/static/js/runtime-main.7709a3b7.js.map",
-    "static/css/2.8d3f7698.chunk.css": "/yada/static/css/2.8d3f7698.chunk.css",
-    "static/js/2.852aad68.chunk.js": "/yada/static/js/2.852aad68.chunk.js",
-    "static/js/2.852aad68.chunk.js.map": "/yada/static/js/2.852aad68.chunk.js.map",
-    "index.html": "/yada/index.html",
-    "precache-manifest.85ada467cc48e8ff6ca71f271f5e3202.js": "/yada/precache-manifest.85ada467cc48e8ff6ca71f271f5e3202.js",
-    "service-worker.js": "/yada/service-worker.js",
-    "static/css/2.8d3f7698.chunk.css.map": "/yada/static/css/2.8d3f7698.chunk.css.map",
-    "static/css/main.ce7ab009.chunk.css.map": "/yada/static/css/main.ce7ab009.chunk.css.map",
-    "static/js/2.852aad68.chunk.js.LICENSE.txt": "/yada/static/js/2.852aad68.chunk.js.LICENSE.txt",
-    "static/media/darkLogo.png": "/yada/static/media/darkLogo.eccc7628.png",
-    "static/media/graphic.png": "/yada/static/media/graphic.2ab501e2.png",
-    "static/media/logo.png": "/yada/static/media/logo.e9d28ab1.png"
+    "main.css": "/static/css/main.ce7ab009.chunk.css",
+    "main.js": "/static/js/main.8de2a9fc.chunk.js",
+    "main.js.map": "/static/js/main.8de2a9fc.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.01cc7cdf.js",
+    "runtime-main.js.map": "/static/js/runtime-main.01cc7cdf.js.map",
+    "static/css/2.8d3f7698.chunk.css": "/static/css/2.8d3f7698.chunk.css",
+    "static/js/2.dc6168f5.chunk.js": "/static/js/2.dc6168f5.chunk.js",
+    "static/js/2.dc6168f5.chunk.js.map": "/static/js/2.dc6168f5.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.4b5de1ade404d5622a36702fe2c1e25a.js": "/precache-manifest.4b5de1ade404d5622a36702fe2c1e25a.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/2.8d3f7698.chunk.css.map": "/static/css/2.8d3f7698.chunk.css.map",
+    "static/css/main.ce7ab009.chunk.css.map": "/static/css/main.ce7ab009.chunk.css.map",
+    "static/js/2.dc6168f5.chunk.js.LICENSE.txt": "/static/js/2.dc6168f5.chunk.js.LICENSE.txt",
+    "static/media/darkLogo.png": "/static/media/darkLogo.eccc7628.png",
+    "static/media/graphic.png": "/static/media/graphic.2ab501e2.png",
+    "static/media/logo.png": "/static/media/logo.e9d28ab1.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.7709a3b7.js",
+    "static/js/runtime-main.01cc7cdf.js",
     "static/css/2.8d3f7698.chunk.css",
-    "static/js/2.852aad68.chunk.js",
+    "static/js/2.dc6168f5.chunk.js",
     "static/css/main.ce7ab009.chunk.css",
-    "static/js/main.649bff7a.chunk.js"
+    "static/js/main.8de2a9fc.chunk.js"
   ]
 }
