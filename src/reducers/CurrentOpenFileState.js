@@ -2,17 +2,31 @@ import {convertStrValueOrDefault} from '../util/ConvertStrValueOrDefault';
 import {NO_OPEN_FILE_ID, validateHasFileIdObj, validateHasFileNameObj} from '../util/FileIdAndTypeUtils';
 
 export const INITIAL_FILE_ID_LOCAL_STORAGE_KEY = 'initialFileId';
+export const INITIAL_FILE_NAME_LOCAL_STORAGE_KEY = 'initialFileName';
 
 const storedInitialFileId = convertStrValueOrDefault(
   localStorage.getItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY),
   {},
   'invalid initialFileId',
 );
+
+const storedInitialFileName = convertStrValueOrDefault(
+  localStorage.getItem(INITIAL_FILE_NAME_LOCAL_STORAGE_KEY),
+  {},
+  'invalid initialFileName',
+);
+
 const initialFileId = {
   sourceId: storedInitialFileId.hasOwnProperty('sourceId')
     ? storedInitialFileId.sourceId : NO_OPEN_FILE_ID.sourceId,
   viewId: storedInitialFileId.hasOwnProperty('viewId') ? storedInitialFileId.viewId : NO_OPEN_FILE_ID.viewId,
   viewType: storedInitialFileId.hasOwnProperty('viewType') ? storedInitialFileId.viewType : NO_OPEN_FILE_ID.viewId,
+}
+
+const initialFileName = {
+  sourceName: storedInitialFileName.hasOwnProperty('sourceName')
+    ? storedInitialFileName.sourceName : '',
+  viewName: storedInitialFileName.hasOwnProperty('viewName') ? storedInitialFileId.viewName : '',
 }
 
 const SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE = 'currentOpenFileId/set';
@@ -23,7 +37,7 @@ export const currentOpenFileIdReducer = (state = initialFileId, action) =>
 
 const SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE = 'currentOpenFileName/set';
 export const setCurrentOpenFileNameAction = fileName => ({ type: SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE, fileName });
-export const currentOpenFileNameReducer = (state = {sourceName: '', viewName: ''}, action) =>
+export const currentOpenFileNameReducer = (state = initialFileName, action) =>
   action.type !== SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE || !validateHasFileNameObj(action)
     ? state : action.fileName;
 

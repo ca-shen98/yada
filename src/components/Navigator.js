@@ -16,6 +16,7 @@ import {INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY} from './SourceEditorWithTagFilter
 import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   INITIAL_FILE_ID_LOCAL_STORAGE_KEY,
+  INITIAL_FILE_NAME_LOCAL_STORAGE_KEY,
   setCurrentOpenFileIdAction,
   setCurrentOpenFileNameAction,
   setSelectNodeAction,
@@ -80,6 +81,7 @@ export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "
       store.dispatch(setSelectNodeAction(null));
     });
     localStorage.setItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY, JSON.stringify(fileId));
+    localStorage.setItem(INITIAL_FILE_NAME_LOCAL_STORAGE_KEY, JSON.stringify(fileName));
     localStorage.removeItem(INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY);
     return true;
   }
@@ -138,14 +140,14 @@ class FileListItem extends React.Component {
       const viewType = this.props.viewType;
       return (
         <div className={"fileList-viewRoot"} style={(this.props.selected) ? 
-                                                  {backgroundColor: 'rgba(0, 0, 0, 0.08)', width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} : 
+                                                  {backgroundColor: 'rgba(30, 61, 89, 0.3)', width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} : 
                                                   {width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} }>
           <IconButton>
             {
               (viewType === FILE_TYPE.CARD_VIEW) ? 
-              <AmpStoriesIcon/>:
+              <AmpStoriesIcon color="primary"/>:
               (viewType === FILE_TYPE.TEXT_VIEW) ?
-             <TextFieldsIcon /> :
+             <TextFieldsIcon color="primary"/> :
               null
             }
           </IconButton>
@@ -153,27 +155,29 @@ class FileListItem extends React.Component {
             value={this.props.fileName}
             className="file_list_input"
             disabled={!(this.props.selected && this.props.renameSelected)}
+            style={{color: "#1E3D59"}}
           />
           <Divider className={"fileList-divider"} orientation="vertical" />
           <IconButton className={"fileList-iconButton"} onClick={this.props.handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="disabled"/>
+            <MoreVertIcon fontSize="small" color="primary"/>
           </IconButton>
         </div>
       );
     }else{
       return (
         <div className={"fileList-viewRoot"} style={(this.props.selected) ? 
-                                                      {backgroundColor: '#a3d2f7', border:"solid #3f51b5 thin", width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} :
+                                                      {backgroundColor: 'rgba(30, 61, 89, 0.3)', border:"solid #3f51b5 thin", width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} :
                                                        {width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} }>
           <InputBase 
             value={this.props.fileName}
             className="file_list_input"
             disabled={!(this.props.selected && this.props.renameSelected)}
+            style={{color: "#1E3D59"}}
           />
           {this.props.childViewsExist ? (this.props.open ? <ExpandLess /> : <ExpandMore />) : null}
           <Divider className={"fileList-divider"} orientation="vertical" />
           <IconButton className={"fileList-iconButton"} onClick={this.props.handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="disabled"/>
+            <MoreVertIcon fontSize="small" color="primary"/>
           </IconButton>
         </div>
       );
@@ -398,6 +402,10 @@ class Navigator extends React.Component {
   };
 
   componentDidMount = () => {
+    this.setState({
+      selectedFileId : this.props.currentOpenFileId.sourceId,
+      selectedViewId: this.props.currentOpenFileId.viewId
+    })
     FileStorageSystemClient.doGetFilesList().then(filesList => {
       if (!filesList) { alert('failed to retrieve files list'); }
       else { this.setState({ filesList }); }
@@ -446,78 +454,6 @@ class Navigator extends React.Component {
         {...remainingProps}
       />
     );
-  };
-
-  fileListItem = ({ fileId, selected, open, handleEditMenuClick, childViewsExist }) => {
-    const useStyles = makeStyles((theme) => ({
-      root: {
-        padding: '2px 4px',
-        display: 'flex',
-        alignItems: 'center',
-        width: 400,
-      },
-      viewRoot: {
-        padding: '2px 4px',
-        display: 'flex',
-        alignItems: 'center',
-      },
-      input: {
-        marginLeft: theme.spacing(1),
-        flex: 1,
-      },
-      iconButton: {
-        padding: 5,
-      },
-      divider: {
-        height: 28,
-        margin: 4,
-      },
-    }));
-    const classes = useStyles();
-    const fileName = this.getFileName(fileId);
-    if(fileId.viewId !== 0){
-      const viewType = this.state.filesList[fileId.sourceId].views[fileId.viewId].type;
-      return (
-        <div className={classes.viewRoot} style={(selected) ? {backgroundColor: 'rgba(0, 0, 0, 0.08)'} : {backgroundColor: "F5F0E1"} } component="form" elevation={0}>
-          <IconButton>
-            {
-              (viewType === FILE_TYPE.CARD_VIEW) ? 
-              <AmpStoriesIcon color="primary"/>:
-              (viewType === FILE_TYPE.TEXT_VIEW) ?
-             <TextFieldsIcon color="primary"/> :
-              null
-            }
-          </IconButton>
-          <InputBase 
-            value={fileName}
-            className="file_list_input"
-            disabled={!(selected && this.state.renameSelected)}
-            style={{color: "#1E3D59"}}
-          />
-          <Divider className={classes.divider} orientation="vertical" />
-          <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="primary"/>
-          </IconButton>
-        </div>
-      );
-    }else{
-      console.log(fileName + " " + selected);
-      return (
-        <div className={classes.root} style={(selected) ? {backgroundColor: 'rgba(30, 61, 89, 0.3)', border:"solid #1E3D59 thin"} : {} } component="form" elevation={0}>
-          <InputBase 
-            value={fileName}
-            className="file_list_input"
-            disabled={!(selected && this.state.renameSelected)}
-            style={{color: "#1E3D59"}}
-          />
-          {childViewsExist ? (open ? <ExpandLess /> : <ExpandMore />) : null}
-          <Divider className={classes.divider} orientation="vertical" />
-          <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="primary"/>
-          </IconButton>
-        </div>
-      );
-    }
   };
 
   handleFileListClick = (fileId) => {
