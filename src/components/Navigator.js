@@ -129,6 +129,55 @@ const DEFAULT_STATE = {
   newViewAnchorElement: null
 };
 
+class FileListItem extends React.Component {
+  render = () => {
+    if(this.props.fileId.viewId !== 0){
+      const viewType = this.props.viewType;
+      return (
+        <div className={"fileList-viewRoot"} style={(this.props.selected) ? 
+                                                  {backgroundColor: 'rgba(0, 0, 0, 0.08)', width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} : 
+                                                  {width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} }>
+          <IconButton>
+            {
+              (viewType === FILE_TYPE.CARD_VIEW) ? 
+              <AmpStoriesIcon/>:
+              (viewType === FILE_TYPE.TEXT_VIEW) ?
+             <TextFieldsIcon /> :
+              null
+            }
+          </IconButton>
+          <InputBase 
+            value={this.props.fileName}
+            className="file_list_input"
+            disabled={!(this.props.selected && this.props.renameSelected)}
+          />
+          <Divider className={"fileList-divider"} orientation="vertical" />
+          <IconButton className={"fileList-iconButton"} onClick={this.props.handleEditMenuClick}>
+            <MoreVertIcon fontSize="small" color="disabled"/>
+          </IconButton>
+        </div>
+      );
+    }else{
+      return (
+        <div className={"fileList-viewRoot"} style={(this.props.selected) ? 
+                                                      {backgroundColor: '#a3d2f7', border:"solid #3f51b5 thin", width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} :
+                                                       {width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} }>
+          <InputBase 
+            value={this.props.fileName}
+            className="file_list_input"
+            disabled={!(this.props.selected && this.props.renameSelected)}
+          />
+          {this.props.childViewsExist ? (this.props.open ? <ExpandLess /> : <ExpandMore />) : null}
+          <Divider className={"fileList-divider"} orientation="vertical" />
+          <IconButton className={"fileList-iconButton"} onClick={this.props.handleEditMenuClick}>
+            <MoreVertIcon fontSize="small" color="disabled"/>
+          </IconButton>
+        </div>
+      );
+    }
+  }
+};
+
 class Navigator extends React.Component {
   
   state = DEFAULT_STATE;
@@ -628,16 +677,18 @@ class Navigator extends React.Component {
                       key={sourceId} 
                       disableGutters={true}
                       divider={true}
-                      selected={true}
                       style={{"padding":"0px"}}
                       onClick={() => {this.handleFileListClick(sourceId)}}
                       >
-                        <this.fileListItem
+                        <FileListItem
                           fileId={{ sourceId, viewId: 0 }}
                           selected={sourceId === this.state.selectedFileId}
                           open={sourceId === this.state.selectedFileId && this.state.selectedFileOpen}
                           handleEditMenuClick={this.handleEditMenuClick}
                           childViewsExist={Object.keys(views).length > 0}
+                          fileName={this.getFileName({ sourceId, viewId: 0 })}
+                          renameSelected={this.state.renameSelected}
+                          handleEditMenuClick={this.handleEditMenuClick}
                         />
                       </ListItem>
                         {
@@ -652,13 +703,17 @@ class Navigator extends React.Component {
                                       key={getFileIdKeyStr(fileId)} 
                                       disableGutters={true}
                                       divider={true}
-                                      selected={true}
                                       style={{ "paddingTop": "0px", "paddingBottom": "0px", "backgroundColor": "transparent"}}
                                       onClick={() => {this.handleViewListClick(fileId)}}
                                       >
-                                      <this.fileListItem
+                                      <FileListItem
                                           fileId={fileId}
                                           open={viewId === this.state.selectedViewId}
+                                          handleEditMenuClick={this.handleEditMenuClick}
+                                          fileName={this.getFileName(fileId)}
+                                          viewType={views[viewId].type}
+                                          renameSelected={this.state.renameSelected}
+                                          selected={viewId === this.state.selectedViewId}
                                           handleEditMenuClick={this.handleEditMenuClick}
                                         />
                                       </ListItem>
