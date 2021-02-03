@@ -101,18 +101,20 @@ class Navbar extends React.Component {
     const oldParsedTagFiltersStr = this.state.currentParsedTagFiltersStr;
     this.setState({ currentTagFiltersStr: tagFiltersStr, currentParsedTagFiltersStr: parsedTagFiltersStr });
     if (parsedTagFiltersStr === oldParsedTagFiltersStr) { return true; }
-    BlockTaggingEditorExtension.editor.view.dispatch(
-      BlockTaggingEditorExtension.editor.view.state.tr.setMeta(TagFilteringPluginKey, tagFilters)
-        .setSelection(
-          tagFilters
-            ? TextSelection.create(BlockTaggingEditorExtension.editor.view.state.doc, 0, 0)
-            : Selection.atStart(BlockTaggingEditorExtension.editor.view.state.doc)
-        ).scrollIntoView()
-    );
-    defer(() => {
-      if (tagFilters) { BlockTaggingEditorExtension.editor.view.dom.blur(); }
-      else { BlockTaggingEditorExtension.editor.view.focus(); }
-    });
+    if(BlockTaggingEditorExtension.editor !== undefined){
+      BlockTaggingEditorExtension.editor.view.dispatch(
+        BlockTaggingEditorExtension.editor.view.state.tr.setMeta(TagFilteringPluginKey, tagFilters)
+          .setSelection(
+            tagFilters
+              ? TextSelection.create(BlockTaggingEditorExtension.editor.view.state.doc, 0, 0)
+              : Selection.atStart(BlockTaggingEditorExtension.editor.view.state.doc)
+          ).scrollIntoView()
+      );
+      defer(() => {
+        if (tagFilters) { BlockTaggingEditorExtension.editor.view.dom.blur(); }
+        else { BlockTaggingEditorExtension.editor.view.focus(); }
+      });
+    }
     return true;
   };
 
@@ -138,16 +140,13 @@ class Navbar extends React.Component {
   };
 
   componentDidUpdate = prevProps => {
-    if(this.props.currentOpenFileName.viewName == ''){
-      if (
-        prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId
-      ) {
+    console.log(this.props.currentOpenFileId);
+    if(this.props.currentOpenFileName.viewName == '' && prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId){
         document.getElementById(TAG_FILTERS_INPUT_ID).value = "";
         this.handleApplyTagFilters();
         this.setState({ sourceSavedTagFilters: {} });
         this.changeFile();
       }
-    }
   };
 
   render = () => {
