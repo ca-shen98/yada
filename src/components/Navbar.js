@@ -138,14 +138,15 @@ class Navbar extends React.Component {
   };
 
   componentDidUpdate = prevProps => {
-    if (
-      prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
-      prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
-    ) {
-      document.getElementById(TAG_FILTERS_INPUT_ID).value = "";
-      this.handleApplyTagFilters();
-      this.setState({ sourceSavedTagFilters: {} });
-      this.changeFile();
+    if(this.props.currentOpenFileName.viewName == ''){
+      if (
+        prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId
+      ) {
+        document.getElementById(TAG_FILTERS_INPUT_ID).value = "";
+        this.handleApplyTagFilters();
+        this.setState({ sourceSavedTagFilters: {} });
+        this.changeFile();
+      }
     }
   };
 
