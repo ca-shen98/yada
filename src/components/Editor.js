@@ -34,10 +34,6 @@ class Editor extends React.Component {
     return (
       <div className="MainPane">
         <div id="editor_container">
-          <div className="InputRow" id="current_open_file_controls">
-            <div style={{ minWidth: '5px' }} />
-            {this.props.children}
-          </div>
           <div id="editor" hidden={noOpenFileIdCheck}>
             <RichMarkdownEditor
               extensions={[BlockTaggingEditorExtension]}

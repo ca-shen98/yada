@@ -1,6 +1,5 @@
 #editor_container {
   position: relative;
-  padding-top: 60px;
   flex: auto;
   display: flex;
   flex-direction: column;

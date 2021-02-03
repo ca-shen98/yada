@@ -106,7 +106,7 @@ export default {
   },
   doSetSourceSavedTagFilters: async (sourceId, sourceSavedTagFilters) => {
     const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
-    const filters = Object.keys(sourceSavedTagFilters).map(k => sourceSavedTagFilters[k]);
+    const filters = Object.keys(sourceSavedTagFilters);
     try {
       const response = await fetchWithTimeout(
         SERVER_BASE_URL + `filters?docID=`,

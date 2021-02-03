@@ -66,7 +66,6 @@ import AmpStoriesIcon from '@material-ui/icons/AmpStories';
 import Typography from '@material-ui/core/Typography';
 
 export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "viewName": ''}) => {
-  console.log(fileName);
   if (!validateFileIdObj(fileId)) { return false; }
   const currentOpenFileId = store.getState().currentOpenFileId;
   if (fileId.sourceId === currentOpenFileId.sourceId && fileId.viewId === currentOpenFileId.viewId) { return true; }
@@ -455,8 +454,6 @@ class Navigator extends React.Component {
   };
 
   handleFileListClick = (fileId) => {
-    console.log(fileId);
-    console.log(this.state.selectedFileId);
     if (fileId === this.state.selectedFileId) {
       handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0, viewType: FILE_TYPE.EMPTY}, {sourceName: this.state.filesList[fileId].name, viewName: ''});
       this.setState({

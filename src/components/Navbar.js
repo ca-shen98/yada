@@ -9,63 +9,149 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import TextFieldsIcon from '@material-ui/icons/TextFields';
 import AmpStoriesIcon from '@material-ui/icons/AmpStories';
-import {FILE_TYPE, checkNoOpenFileId} from '../util/FileIdAndTypeUtils';
+import {FILE_TYPE, checkNoOpenFileId, checkSourceFileId} from '../util/FileIdAndTypeUtils';
 import Button from '@material-ui/core/Button';
 import SaveIcon from '@material-ui/icons/Save';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import {handleSaveCurrentFileEditorContent} from './Editor';
-import InputBase from '@material-ui/core/InputBase';
-import { fade, withStyles, withstyles } from '@material-ui/core/styles';
-import ClearIcon from '@material-ui/icons/Clear';
+import {parse as parseTagFilters} from '../lib/TagFiltersGrammar';
+import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
+import {TagFilteringPluginKey} from '../editor_extension/plugins/TagFiltering';
+import {Selection, TextSelection} from 'prosemirror-state';
+import {defer} from 'lodash';
+import FileStorageSystemClient from '../backend/FileStorageSystemClient';
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import TextField from '@material-ui/core/TextField';
+import Grid from '@material-ui/core/Grid';
 
-const useStyles = theme => ({
-    search: {
-      position: 'relative',
-      borderRadius: theme.shape.borderRadius,
-      backgroundColor: fade(theme.palette.common.white, 0.15),
-      '&:hover': {
-        backgroundColor: fade(theme.palette.common.white, 0.25),
-      },
-      marginLeft: 0,
-      width: '100%',
-      [theme.breakpoints.up('sm')]: {
-        marginLeft: theme.spacing(1),
-        width: 'auto',
-      },
-    },
-    searchIcon: {
-      padding: theme.spacing(0, 2),
-      height: '100%',
-      position: 'absolute',
-      pointerEvents: 'none',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    inputRoot: {
-      color: 'inherit',
-    },
-    inputInput: {
-      padding: theme.spacing(1, 1, 1, 0),
-      // vertical padding + font size from searchIcon
-      paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
-      transition: theme.transitions.create('width'),
-      width: '100%',
-      [theme.breakpoints.up('sm')]: {
-        width: '12ch',
-        '&:focus': {
-          width: '20ch',
-        },
-      },
-    },
-  });
+const TAG_FILTERS_INPUT_ID = 'tag_filters_input';
+
+const DEFAULT_STATE = {
+  modifyingTagFilters: false,
+  currentTagFiltersStr: '',
+  currentParsedTagFiltersStr: '',
+  sourceSavedTagFilters: {},
+};
 
 class Navbar extends React.Component {
-    render = () => {
-    const classes = this.props.styles;
+  state = DEFAULT_STATE;
+
+  handleCancelModifyingTagFilters = () => {
+    const input = document.getElementById(TAG_FILTERS_INPUT_ID);
+    input.value = this.state.currentTagFiltersStr;
+    this.setState({ modifyingTagFilters: false });
+  };
+
+  handleStartModifyingTagFilters = () => {
+    this.setState({ modifyingTagFilters: true });
+    defer(() => {
+      const input = document.getElementById(TAG_FILTERS_INPUT_ID);
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    });
+  };
+
+  handleUnpersistCurrentTagFilters = () => {
+    if (
+      !this.state.currentTagFiltersStr ||
+      !this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentTagFiltersStr)
+    ) { return false; }
+    const newSourceSavedTagFilters = {...this.state.sourceSavedTagFilters};
+    delete newSourceSavedTagFilters[this.state.currentTagFiltersStr];
+    FileStorageSystemClient.doSetSourceSavedTagFilters(
+      this.props.currentOpenFileId.sourceId,
+      newSourceSavedTagFilters,
+    ).then(success => {
+      if (!success) { alert('failed to set source saved tag filters'); }
+      else { this.setState({ sourceSavedTagFilters: newSourceSavedTagFilters }); }
+    });
+  };
+
+  handlePersistNewSavedTagFilters = () => {
+    if (
+      !this.state.currentTagFiltersStr ||
+      this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentTagFiltersStr)
+    ) { return false; }
+    const newSourceSavedTagFilters = {...this.state.sourceSavedTagFilters};
+    newSourceSavedTagFilters[this.state.currentTagFiltersStr] = this.state.currentParsedTagFiltersStr;
+    FileStorageSystemClient.doSetSourceSavedTagFilters(
+      this.props.currentOpenFileId.sourceId,
+      newSourceSavedTagFilters,
+    ).then(success => {
+      if (!success) { alert('failed to set source saved tag filters'); }
+      else { this.setState({ sourceSavedTagFilters: newSourceSavedTagFilters }); }
+    });
+  };
+
+  handleApplyTagFilters = () => {
+    let tagFilters = null;
+    const tagFiltersStr = document.getElementById(TAG_FILTERS_INPUT_ID).value.trim();
+    if (tagFiltersStr) {
+      tagFilters = parseTagFilters(tagFiltersStr);
+      if (!tagFilters) {
+        alert('invalid tag filters');
+        return false;
+      }
+    }
+    document.getElementById(TAG_FILTERS_INPUT_ID).value = tagFiltersStr;
+    const parsedTagFiltersStr = JSON.stringify(tagFilters);
+    const oldParsedTagFiltersStr = this.state.currentParsedTagFiltersStr;
+    this.setState({ currentTagFiltersStr: tagFiltersStr, currentParsedTagFiltersStr: parsedTagFiltersStr });
+    if (parsedTagFiltersStr === oldParsedTagFiltersStr) { return true; }
+    BlockTaggingEditorExtension.editor.view.dispatch(
+      BlockTaggingEditorExtension.editor.view.state.tr.setMeta(TagFilteringPluginKey, tagFilters)
+        .setSelection(
+          tagFilters
+            ? TextSelection.create(BlockTaggingEditorExtension.editor.view.state.doc, 0, 0)
+            : Selection.atStart(BlockTaggingEditorExtension.editor.view.state.doc)
+        ).scrollIntoView()
+    );
+    defer(() => {
+      if (tagFilters) { BlockTaggingEditorExtension.editor.view.dom.blur(); }
+      else { BlockTaggingEditorExtension.editor.view.focus(); }
+    });
+    return true;
+  };
+
+  changeFile = async () => {
+    if (checkSourceFileId(this.props.currentOpenFileId)) {
+        FileStorageSystemClient.doGetSourceSavedTagFilters(this.props.currentOpenFileId.sourceId)
+            .then(sourceSavedTagFilters => {
+              if (!sourceSavedTagFilters) {
+                //alert('failed to retrieve source saved tag filters');
+              } else {
+                let filters = {}
+                sourceSavedTagFilters.forEach(element => {
+                  filters[element] = element;
+                });
+                this.setState({sourceSavedTagFilters: filters});
+              }
+            });
+    }
+  };
+
+  componentDidMount = () => {
+    this.changeFile();
+  };
+
+  componentDidUpdate = prevProps => {
+    if (
+      prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
+      prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
+    ) {
+      document.getElementById(TAG_FILTERS_INPUT_ID).value = "";
+      this.handleApplyTagFilters();
+      this.setState({ sourceSavedTagFilters: {} });
+      this.changeFile();
+    }
+  };
+
+  render = () => {
     const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
+    const currentTagFiltersSaved =this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentTagFiltersStr);
     return(
             <AppBar position="static" class="custom-navbar">
                 <Toolbar>
@@ -107,19 +193,77 @@ class Navbar extends React.Component {
                         </Button>
                         {
                             this.props.currentOpenFileName.viewName == '' ? 
-                            <div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", marginLeft: "250px", width: "50%", borderRadius: "10px", padding: "5px"}}>
-                                <div style={{float: "left", marginTop: "3px"}}>
-                                    <SearchIcon color="primary"/>
-                                </div>
-                                <InputBase
-                                    placeholder="Search with Tags…"
-                                    inputProps={{ 'aria-label': 'search' }}
-                                    color="primary"
-                                    style={{width: "90%"}}
-                                />
-                                <div style={{float: "right", marginTop: "3px"}}>
-                                    <ClearIcon color="primary"/>
-                                </div>
+                            <div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", marginLeft: "250px", width: "50vw", borderRadius: "10px", padding: "5px"}}>
+                                <Grid container>
+                                  <Grid item xs={1}>
+                                    <div style={{marginTop: "3px", marginLeft: "20px"}}>
+                                        <SearchIcon color="primary"/>
+                                    </div>
+                                  </Grid>
+                                  <Grid item xs={10}>
+                                  <Autocomplete
+                                    value={this.state.currentTagFiltersStr}
+                                    id={TAG_FILTERS_INPUT_ID}
+                                    freeSolo
+                                    options={Object.entries(this.state.sourceSavedTagFilters)
+                                      .map(([tagFiltersStr, _parsedTagFiltersStr]) => tagFiltersStr)}
+                                    renderInput={(params) => (
+                                      <TextField 
+                                            {...params} 
+                                            placeholder="Search with Tags: ( #{tag1} | !( #{tag2} ) ) & #{tag3}"
+                                            style={{margin:"0%"}}
+                                            margin="normal" 
+                                            variant="standard"
+                                            />
+                                    )}
+                                    onChange={(event, value, reason) => {
+                                      this.setState({currentTagFiltersStr : value});
+                                      this.handleStartModifyingTagFilters();
+                                      if (reason === 'clear'){
+                                        document.getElementById(TAG_FILTERS_INPUT_ID).value = '';
+                                        this.handleApplyTagFilters();
+                                      }
+                                    }}
+                                    onBlur={event => {
+                                      if (this.handleApplyTagFilters()) { this.setState({ modifyingTagFilters: false }); }
+                                      else {
+                                        const input = event.target;
+                                        defer(() => { input.focus(); });
+                                      }
+                                    }}
+                                    onKeyDown={event => { if (event.key === 'Escape') { this.handleCancelModifyingTagFilters(); } }}
+                                    onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
+                                  />
+                                  </Grid>
+                                  <Grid item xs={1}>
+                                <div style={{float: "right"}}>
+                                  { (this.state.modifyingTagFilters) ? null : 
+                                      (this.state.currentTagFiltersStr == '') ? null : 
+                                        (currentTagFiltersSaved) ?
+                                        <IconButton title="Unpersist Filter" style={{padding: "0px", paddingRight: "10px", paddingTop: "5px"}}>
+                                            <RemoveCircleIcon 
+                                            color="primary"
+                                            onClick={() => {
+                                              document.getElementById(TAG_FILTERS_INPUT_ID).value = "";
+                                              this.handleUnpersistCurrentTagFilters();
+                                              this.handleApplyTagFilters();
+                                            }}
+                                            />
+                                        </IconButton> :
+                                        <IconButton title="Persist Filter" style={{padding: "0px", paddingRight: "10px", paddingTop: "5px"}}>
+                                            <SaveIcon 
+                                            color="primary"
+                                            onClick={() => {
+                                              this.handlePersistNewSavedTagFilters();
+                                            }}
+                                            />
+                                        </IconButton>                                     
+                                    
+                                  }
+                                </div>      
+                                </Grid>                  
+                                </Grid>
+
                             </div>
                             : null
                         }
@@ -140,7 +284,7 @@ class Navbar extends React.Component {
 }
 
 export default connect(
-    state => ({ currentOpenFileId: state.currentOpenFileId, currentOpenFileName: state.currentOpenFileName, backendModeSignedInStatus: state.backendModeSignedInStatus, saveDirtyFlag: state.saveDirtyFlag, styles: withStyles(useStyles) }),
+    state => ({ currentOpenFileId: state.currentOpenFileId, currentOpenFileName: state.currentOpenFileName, backendModeSignedInStatus: state.backendModeSignedInStatus, saveDirtyFlag: state.saveDirtyFlag }),
     dispatch => ({
       dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
     }),
