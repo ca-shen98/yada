@@ -16,7 +16,9 @@ import {INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY} from './SourceEditorWithTagFilter
 import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   INITIAL_FILE_ID_LOCAL_STORAGE_KEY,
+  INITIAL_FILE_NAME_LOCAL_STORAGE_KEY,
   setCurrentOpenFileIdAction,
+  setCurrentOpenFileNameAction,
   setSelectNodeAction,
 } from '../reducers/CurrentOpenFileState';
 import {
@@ -61,22 +63,21 @@ import CheckIcon from '@material-ui/icons/Check';
 import AddIcon from '@material-ui/icons/Add';
 import TextFieldsIcon from '@material-ui/icons/TextFields';
 import AmpStoriesIcon from '@material-ui/icons/AmpStories';
-import DescriptionIcon from '@material-ui/icons/Description';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
 
-export const handleSetCurrentOpenFileId = fileId => {
-  console.log(fileId);
+export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "viewName": ''}) => {
   if (!validateFileIdObj(fileId)) { return false; }
   const currentOpenFileId = store.getState().currentOpenFileId;
   if (fileId.sourceId === currentOpenFileId.sourceId && fileId.viewId === currentOpenFileId.viewId) { return true; }
   if (!store.getState().saveDirtyFlag || window.confirm('confirm discard unsaved changes')) {
     batch(() => {
       store.dispatch(setCurrentOpenFileIdAction(fileId));
+      store.dispatch(setCurrentOpenFileNameAction(fileName));
       store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
       store.dispatch(setSelectNodeAction(null));
     });
     localStorage.setItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY, JSON.stringify(fileId));
+    localStorage.setItem(INITIAL_FILE_NAME_LOCAL_STORAGE_KEY, JSON.stringify(fileName));
     localStorage.removeItem(INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY);
     return true;
   }
@@ -135,14 +136,14 @@ class FileListItem extends React.Component {
       const viewType = this.props.viewType;
       return (
         <div className={"fileList-viewRoot"} style={(this.props.selected) ? 
-                                                  {backgroundColor: 'rgba(0, 0, 0, 0.08)', width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} : 
+                                                  {backgroundColor: 'rgba(30, 61, 89, 0.3)', width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} : 
                                                   {width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} }>
           <IconButton>
             {
               (viewType === FILE_TYPE.CARD_VIEW) ? 
-              <AmpStoriesIcon/>:
+              <AmpStoriesIcon color="primary"/>:
               (viewType === FILE_TYPE.TEXT_VIEW) ?
-             <TextFieldsIcon /> :
+             <TextFieldsIcon color="primary"/> :
               null
             }
           </IconButton>
@@ -150,27 +151,29 @@ class FileListItem extends React.Component {
             value={this.props.fileName}
             className="file_list_input"
             disabled={!(this.props.selected && this.props.renameSelected)}
+            style={{color: "#1E3D59"}}
           />
           <Divider className={"fileList-divider"} orientation="vertical" />
           <IconButton className={"fileList-iconButton"} onClick={this.props.handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="disabled"/>
+            <MoreVertIcon fontSize="small" color="primary"/>
           </IconButton>
         </div>
       );
     }else{
       return (
         <div className={"fileList-viewRoot"} style={(this.props.selected) ? 
-                                                      {backgroundColor: '#a3d2f7', border:"solid #3f51b5 thin", width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} :
+                                                      {backgroundColor: 'rgba(30, 61, 89, 0.3)', border:"solid #3f51b5 thin", width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} :
                                                        {width:"100%", display: "flex", padding: "2px 4px", alignItems: "center"} }>
           <InputBase 
             value={this.props.fileName}
             className="file_list_input"
             disabled={!(this.props.selected && this.props.renameSelected)}
+            style={{color: "#1E3D59"}}
           />
           {this.props.childViewsExist ? (this.props.open ? <ExpandLess /> : <ExpandMore />) : null}
           <Divider className={"fileList-divider"} orientation="vertical" />
           <IconButton className={"fileList-iconButton"} onClick={this.props.handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="disabled"/>
+            <MoreVertIcon fontSize="small" color="primary"/>
           </IconButton>
         </div>
       );
@@ -293,7 +296,8 @@ class Navigator extends React.Component {
     this.setState({ filesList: newFilesList });
     defer(() => {
       const fileId = { sourceId: updatedSourceId, viewId: !sourceFileType ? newFile.id : 0 };
-      handleSetCurrentOpenFileId(fileId);
+      const fileName = {sourceName: this.getSourceName(fileId), viewName: this.getViewName(fileId)};
+      handleSetCurrentOpenFileId(fileId, fileName);
     });
     if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
       if (sourceFileType) { doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList)); }
@@ -394,6 +398,11 @@ class Navigator extends React.Component {
   };
 
   componentDidMount = () => {
+    this.setState({
+      selectedFileId : this.props.currentOpenFileId.sourceId,
+      selectedViewId: this.props.currentOpenFileId.viewId,
+      selectedFileOpen: this.props.currentOpenFileId.viewId != 0
+    })
     FileStorageSystemClient.doGetFilesList().then(filesList => {
       if (!filesList) { alert('failed to retrieve files list'); }
       else { this.setState({ filesList }); }
@@ -444,84 +453,15 @@ class Navigator extends React.Component {
     );
   };
 
-  fileListItem = ({ fileId, selected, open, handleEditMenuClick, childViewsExist }) => {
-    const useStyles = makeStyles((theme) => ({
-      root: {
-        padding: '2px 4px',
-        display: 'flex',
-        alignItems: 'center',
-        width: 400,
-      },
-      viewRoot: {
-        padding: '2px 4px',
-        display: 'flex',
-        alignItems: 'center',
-        width: 200,
-      },
-      input: {
-        marginLeft: theme.spacing(1),
-        flex: 1,
-      },
-      iconButton: {
-        padding: 5,
-      },
-      divider: {
-        height: 28,
-        margin: 4,
-      },
-    }));
-    const classes = useStyles();
-    const fileName = this.getFileName(fileId);
-    if(fileId.viewId !== 0){
-      const viewType = this.state.filesList[fileId.sourceId].views[fileId.viewId].type;
-      return (
-        <Paper className={classes.viewRoot} style={(selected) ? {backgroundColor: 'rgba(0, 0, 0, 0.08)'} : {} } component="form" elevation={0}>
-          <IconButton>
-            {
-              (viewType === FILE_TYPE.CARD_VIEW) ? 
-              <AmpStoriesIcon/>:
-              (viewType === FILE_TYPE.TEXT_VIEW) ?
-             <TextFieldsIcon /> :
-              null
-            }
-          </IconButton>
-          <InputBase 
-            value={fileName}
-            className="file_list_input"
-            disabled={!(selected && this.state.renameSelected)}
-          />
-          <Divider className={classes.divider} orientation="vertical" />
-          <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="disabled"/>
-          </IconButton>
-        </Paper>
-      );
-    }else{
-      return (
-        <Paper className={classes.root} style={(selected) ? {backgroundColor: '#a3d2f7', border:"solid #3f51b5 thin"} : {} } component="form" elevation={0}>
-          <InputBase 
-            value={fileName}
-            className="file_list_input"
-            disabled={!(selected && this.state.renameSelected)}
-          />
-          {childViewsExist ? (open ? <ExpandLess /> : <ExpandMore />) : null}
-          <Divider className={classes.divider} orientation="vertical" />
-          <IconButton className={classes.iconButton} onClick={handleEditMenuClick}>
-            <MoreVertIcon fontSize="small" color="disabled"/>
-          </IconButton>
-        </Paper>
-      );
-    }
-  };
-
   handleFileListClick = (fileId) => {
     if (fileId === this.state.selectedFileId) {
+      handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0, viewType: FILE_TYPE.EMPTY}, {sourceName: this.state.filesList[fileId].name, viewName: ''});
       this.setState({
         selectedViewId: null,
         selectedFileOpen: !(this.state.selectedFileOpen)
       });
     }else{
-      if(handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0 })){
+      if(handleSetCurrentOpenFileId({ sourceId:fileId, viewId: 0, viewType: FILE_TYPE.EMPTY}, {sourceName: this.state.filesList[fileId].name, viewName: ''})){
         this.setState({
           selectedFileId: fileId,
           selectedViewId: null,
@@ -533,7 +473,8 @@ class Navigator extends React.Component {
   };
 
   handleViewListClick = (fileId) => {
-    handleSetCurrentOpenFileId(fileId);
+    const fileName = {sourceName: this.getSourceName(fileId), viewName: this.getViewName(fileId)};
+    handleSetCurrentOpenFileId(fileId, fileName);
     this.setState({
       selectedViewId: fileId.viewId,
     });
@@ -610,25 +551,6 @@ class Navigator extends React.Component {
     const numFilteredFiles = countNumFiles(filteredFilesList);
     return (
       <div className="SidePane">
-        { (this.state.selectedFileId === null) ? null :
-              <div>
-                <div id="current_file_container">
-                  <Grid container spacing={3} alignItems="center">
-                    <Grid item xs={3}>
-                    <IconButton>
-                    <DescriptionIcon   />
-                    </IconButton>
-                    </Grid>
-                    <Grid item xs={9}>
-                      <Typography variant="h6" color="inherit" id={CURRENT_SOURCE_NAME_INPUT_ID}>
-                          {this.getFileName({sourceId: this.state.selectedFileId, viewId: 0})}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </div>
-                <Divider variant="middle" />
-              </div>
-        }
         <div id="file_list_container">
             <Button
               variant="outlined"

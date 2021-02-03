@@ -1,13 +1,21 @@
 import {convertStrValueOrDefault} from '../util/ConvertStrValueOrDefault';
-import {NO_OPEN_FILE_ID, validateHasFileIdObj} from '../util/FileIdAndTypeUtils';
+import {NO_OPEN_FILE_ID, validateHasFileIdObj, validateHasFileNameObj} from '../util/FileIdAndTypeUtils';
 
 export const INITIAL_FILE_ID_LOCAL_STORAGE_KEY = 'initialFileId';
+export const INITIAL_FILE_NAME_LOCAL_STORAGE_KEY = 'initialFileName';
 
 const storedInitialFileId = convertStrValueOrDefault(
   localStorage.getItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY),
   {},
   'invalid initialFileId',
 );
+
+const storedInitialFileName = convertStrValueOrDefault(
+  localStorage.getItem(INITIAL_FILE_NAME_LOCAL_STORAGE_KEY),
+  {},
+  'invalid initialFileName',
+);
+
 const initialFileId = {
   sourceId: storedInitialFileId.hasOwnProperty('sourceId')
     ? storedInitialFileId.sourceId : NO_OPEN_FILE_ID.sourceId,
@@ -15,11 +23,23 @@ const initialFileId = {
   viewType: storedInitialFileId.hasOwnProperty('viewType') ? storedInitialFileId.viewType : NO_OPEN_FILE_ID.viewId,
 }
 
+const initialFileName = {
+  sourceName: storedInitialFileName.hasOwnProperty('sourceName')
+    ? storedInitialFileName.sourceName : '',
+  viewName: storedInitialFileName.hasOwnProperty('viewName') ? storedInitialFileName.viewName : '',
+}
+
 const SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE = 'currentOpenFileId/set';
 export const setCurrentOpenFileIdAction = fileId => ({ type: SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE, fileId });
 export const currentOpenFileIdReducer = (state = initialFileId, action) =>
   action.type !== SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE || !validateHasFileIdObj(action)
     ? state : action.fileId;
+
+const SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE = 'currentOpenFileName/set';
+export const setCurrentOpenFileNameAction = fileName => ({ type: SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE, fileName });
+export const currentOpenFileNameReducer = (state = initialFileName, action) =>
+  action.type !== SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE || !validateHasFileNameObj(action)
+    ? state : action.fileName;
 
 export const SET_SAVE_DIRTY_FLAG_ACTION_TYPE = 'saveDirtyFlag/set';
 export const CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE = 'saveDirtyFlag/clear';

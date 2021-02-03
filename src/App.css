@@ -8,6 +8,7 @@
   min-height: 240px;
   box-sizing: border-box;
   display: flex;
+  flex-direction: column;
 }
 
 /* .NoApp {
@@ -27,16 +28,17 @@
 .SidePane {
   flex: none;
   width: 275px;
-  padding: 9px 0;
-  border-right: 3px solid gray;
   display: flex;
   flex-direction: column;
+  background-color: #F5F0E1;
+  height: 100%;
 }
 
 .MainPane {
   flex: auto;
   padding: 9px 8px;
   display: flex;
+  height: 100%;
 }
 
 .MarginPane {

@@ -29,30 +29,11 @@ export const handleSaveCurrentFileEditorContent = () => {
 };
 
 class Editor extends React.Component {
-
   render = () => {
     const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
     return (
       <div className="MainPane">
         <div id="editor_container">
-          <div className="InputRow" id="current_open_file_controls">
-            <button
-              className="MonospaceCharButton"
-              title="close"
-              disabled={noOpenFileIdCheck}
-              onClick={() => { handleSetCurrentOpenFileId(NO_OPEN_FILE_ID); }}>
-              {'✕'}
-            </button>
-            <button
-              className="MonospaceCharButton"
-              title="save"
-              disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
-              onClick={handleSaveCurrentFileEditorContent}>
-              {'^'}
-            </button>
-            <div style={{ minWidth: '5px' }} />
-            {this.props.children}
-          </div>
           <div id="editor" hidden={noOpenFileIdCheck}>
             <RichMarkdownEditor
               extensions={[BlockTaggingEditorExtension]}
@@ -91,6 +72,6 @@ class Editor extends React.Component {
 };
 
 export default connect(
-  state => ({ currentOpenFileId: state.currentOpenFileId, saveDirtyFlag: state.saveDirtyFlag }),
+  state => ({ currentOpenFileId: state.currentOpenFileId, currentOpenFileName: state.currentOpenFileName, saveDirtyFlag: state.saveDirtyFlag }),
   dispatch => ({ dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }) }),
 )(Editor);
