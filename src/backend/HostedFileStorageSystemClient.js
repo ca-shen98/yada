@@ -1,5 +1,4 @@
 import Cookies from 'js-cookie';
-import axios from 'axios';
 import {fetchWithTimeout} from '../util/FetchWithTimeout';
 import {convertStrValueOrDefaultIfFalsy} from '../util/ConvertStrValueOrDefault';
 import {ACCESS_TOKEN_COOKIE_KEY, SERVER_BASE_URL} from '../reducers/BackendModeSignedInStatus';

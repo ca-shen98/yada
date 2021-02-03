@@ -1,13 +1,12 @@
 import './Editor.css';
 import React from 'react';
 import {connect} from 'react-redux';
-import {NO_OPEN_FILE_ID, checkNoOpenFileId, checkSourceFileId} from '../util/FileIdAndTypeUtils';
+import {checkNoOpenFileId, checkSourceFileId} from '../util/FileIdAndTypeUtils';
 import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   SET_SAVE_DIRTY_FLAG_ACTION_TYPE,
 } from '../reducers/CurrentOpenFileState';
 import {TextSelection} from 'prosemirror-state';
-import {handleSetCurrentOpenFileId} from './Navigator';
 import TagMenu from './TagMenu';
 import RichMarkdownEditor from 'rich-markdown-editor';
 

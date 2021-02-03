@@ -47,11 +47,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { makeStyles } from '@material-ui/core/styles';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -63,7 +61,6 @@ import CheckIcon from '@material-ui/icons/Check';
 import AddIcon from '@material-ui/icons/Add';
 import TextFieldsIcon from '@material-ui/icons/TextFields';
 import AmpStoriesIcon from '@material-ui/icons/AmpStories';
-import Typography from '@material-ui/core/Typography';
 
 export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "viewName": ''}) => {
   if (!validateFileIdObj(fileId)) { return false; }
@@ -401,7 +398,7 @@ class Navigator extends React.Component {
     this.setState({
       selectedFileId : this.props.currentOpenFileId.sourceId,
       selectedViewId: this.props.currentOpenFileId.viewId,
-      selectedFileOpen: this.props.currentOpenFileId.viewId != 0
+      selectedFileOpen: this.props.currentOpenFileId.viewId !== 0
     })
     FileStorageSystemClient.doGetFilesList().then(filesList => {
       if (!filesList) { alert('failed to retrieve files list'); }
@@ -537,15 +534,6 @@ class Navigator extends React.Component {
   }
 
   render = () => {
-    const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
-    const currentSourceRenameComponentProps = {
-      inputType: RENAME_INPUT_TYPES.CURRENT_SOURCE,
-      fileId: { sourceId: this.props.currentOpenFileId.sourceId, viewId: 0 },
-    };
-    const currentViewRenameComponentProps = {
-      inputType: RENAME_INPUT_TYPES.CURRENT_VIEW,
-      fileId: this.props.currentOpenFileId,
-    };
     const numFiles = countNumFiles(this.state.filesList);
     const filteredFilesList = this.state.searching ? this.handleDoFileNamesSearch() : this.state.filesList;
     const numFilteredFiles = countNumFiles(filteredFilesList);
@@ -610,7 +598,6 @@ class Navigator extends React.Component {
                           childViewsExist={Object.keys(views).length > 0}
                           fileName={this.getFileName({ sourceId, viewId: 0 })}
                           renameSelected={this.state.renameSelected}
-                          handleEditMenuClick={this.handleEditMenuClick}
                         />
                       </ListItem>
                         {
@@ -636,7 +623,6 @@ class Navigator extends React.Component {
                                           viewType={views[viewId].type}
                                           renameSelected={this.state.renameSelected}
                                           selected={viewId === this.state.selectedViewId}
-                                          handleEditMenuClick={this.handleEditMenuClick}
                                         />
                                       </ListItem>
                                     );
