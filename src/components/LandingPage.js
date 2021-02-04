@@ -44,7 +44,7 @@ class LandingPage extends React.Component {
       <div className={"landing-root"} style={{flexGrow: "0 1 auto"}}>
       <AppBar position="static" class="custom-navbar">
         <Toolbar>
-          <img className={"menuButton"} src={require('../images/logo.png')} style={{width: "50px", marginRight: "1%"}}/>
+          <img className={"menuButton"} src={require('../images/logo.png')} style={{width: "50px", marginRight: "1%"}} alt={"MENU"}/>
         </Toolbar>
       </AppBar>
 
@@ -55,7 +55,7 @@ class LandingPage extends React.Component {
         <Grid item xs={5} alignItems="center">
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={3}>
-              <img src={require('../images/darkLogo.png')} style={{width: "90%", marginLeft: "20%"}}/>
+              <img src={require('../images/darkLogo.png')} style={{width: "90%", marginLeft: "20%"}} alt={"YADA"}/>
             </Grid>
             <Grid item xs={9}>
               <Typography variant="h1" className={"title"} style={{fontFamily:"Bungee", color:"#1E3D59"}}>
@@ -93,7 +93,7 @@ class LandingPage extends React.Component {
           </div>
         </Grid>
         <Grid item xs={6}>
-           <img src={require('../images/graphic.png')} style={{width: "70%", marginLeft: "10%"}}/>
+           <img src={require('../images/graphic.png')} style={{width: "70%", marginLeft: "10%"}} alt={"Document Graphic"}/>
         </Grid>
     </Grid>
     </div>

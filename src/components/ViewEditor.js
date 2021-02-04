@@ -9,6 +9,7 @@ import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import {handleSetCurrentOpenFileId} from "./Navigator";
 import CardDeck from "./CardView/CardDeck";
 import TextView from "./TextView/TextView";
+import {setTagsInViewAction} from "../reducers/SetTagsInView";
 
 const DEFAULT_STATE = {
 	sourceId: 0,
@@ -27,6 +28,7 @@ class ViewEditor extends React.Component {
 				alert('failed to retrieve view');
 				handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
 			} else {
+				this.props.setTagsInView([]); // clear any tagsInView currently stored
 				this.setState({
 					sourceId: this.props.currentOpenFileId.sourceId,
 					viewId: this.props.currentOpenFileId.viewId,
@@ -62,5 +64,8 @@ class ViewEditor extends React.Component {
 	};
 }
 
-export default connect(state => ({ currentOpenFileId: state.currentOpenFileId }))(ViewEditor);
+export default connect(
+	state => ({ currentOpenFileId: state.currentOpenFileId }),
+	dispatch => ({ setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)) }),
+)(ViewEditor);
 

@@ -1,13 +1,12 @@
 import './Editor.css';
 import React from 'react';
 import {connect} from 'react-redux';
-import {NO_OPEN_FILE_ID, checkNoOpenFileId, checkSourceFileId} from '../util/FileIdAndTypeUtils';
+import {checkNoOpenFileId, checkSourceFileId} from '../util/FileIdAndTypeUtils';
 import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   SET_SAVE_DIRTY_FLAG_ACTION_TYPE,
 } from '../reducers/CurrentOpenFileState';
 import {TextSelection} from 'prosemirror-state';
-import {handleSetCurrentOpenFileId} from './Navigator';
 import TagMenu from './TagMenu';
 import RichMarkdownEditor from 'rich-markdown-editor';
 
@@ -33,8 +32,8 @@ class Editor extends React.Component {
     const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
     return (
       <div className="MainPane">
-        <div id="editor_container">
-          <div id="editor" hidden={noOpenFileIdCheck}>
+        <div className="editor_container">
+          <div className="editor" hidden={noOpenFileIdCheck}>
             <RichMarkdownEditor
               extensions={[BlockTaggingEditorExtension]}
               key={this.props.fileIdKeyStr}
@@ -53,16 +52,9 @@ class Editor extends React.Component {
             />
           </div>
           <div
-            className="PlaceholderDivWithText"
-            id="no_file_editor_placeholder"
+            className="placeholder_editor"
             hidden={!noOpenFileIdCheck}>
-            <div style={{ flexGrow: 1 }} />
-            <div style={{ display: 'flex' }}>
-              <div style={{ flexGrow: 2 }} />
-              open a doc using the navigator side pane on the left
-              <div style={{ flexGrow: 3 }} />
-            </div>
-            <div style={{ flexGrow: 8 }} />
+            <h5>Click or create a new document from the left pane</h5>
           </div>
         </div>
         <TagMenu />

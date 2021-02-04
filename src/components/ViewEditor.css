@@ -1,3 +1,11 @@
 .viewContainer {
     margin-top: 2em;
 }
+
+#editor, #no_file_editor_placeholder {
+    flex: auto;
+    overflow: auto;
+    padding: 9px 8px;
+    border: 2px dashed lightgray;
+    border-radius: 12px;
+}

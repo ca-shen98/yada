@@ -141,7 +141,7 @@ class Navbar extends React.Component {
 
   componentDidUpdate = prevProps => {
     console.log(this.props.currentOpenFileId);
-    if(this.props.currentOpenFileName.viewName == '' && prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId){
+    if(this.props.currentOpenFileName.viewName === '' && prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId){
         document.getElementById(TAG_FILTERS_INPUT_ID).value = "";
         this.handleApplyTagFilters();
         this.setState({ sourceSavedTagFilters: {} });
@@ -155,18 +155,18 @@ class Navbar extends React.Component {
     return(
             <AppBar position="static" class="custom-navbar">
                 <Toolbar>
-                    <img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "10px"}}/>
+                    <img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "10px"}} alt={"MENU"}/>
                     <Typography variant="h5" style={{fontFamily:"Bungee", color:"#F5F0E1"}}>
                         YADA
                     </Typography>
                     <div style={{flexGrow: 1, marginLeft: "150px"}}>
-                        {this.props.currentOpenFileName.sourceName == '' ? null : 
+                        {this.props.currentOpenFileName.sourceName === '' ? null :
                         <Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", float: "left", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
                             <Link color="inherit" style={{ color: "#F5F0E1",}}> 
                             <DescriptionIcon color="secondary"/>
                                 {this.props.currentOpenFileName.sourceName}
                             </Link>
-                            {this.props.currentOpenFileName.viewName == '' ? null : 
+                            {this.props.currentOpenFileName.viewName === '' ? null :
                                 <Link color="inherit" style={{color: "#F5F0E1"}}> 
                                 {
                                     (this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) ? 
@@ -192,7 +192,7 @@ class Navbar extends React.Component {
                             Save
                         </Button>
                         {
-                            this.props.currentOpenFileName.viewName == '' ? 
+                            this.props.currentOpenFileName.viewName === '' ?
                             <div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", marginLeft: "250px", width: "50vw", borderRadius: "10px", padding: "5px"}}>
                                 <Grid container>
                                   <Grid item xs={1}>
@@ -238,7 +238,7 @@ class Navbar extends React.Component {
                                   <Grid item xs={1}>
                                 <div style={{float: "right"}}>
                                   { (this.state.modifyingTagFilters) ? null : 
-                                      (this.state.currentTagFiltersStr == '') ? null : 
+                                      (this.state.currentTagFiltersStr === '') ? null :
                                         (currentTagFiltersSaved) ?
                                         <IconButton title="Unpersist Filter" style={{padding: "0px", paddingRight: "10px", paddingTop: "5px"}}>
                                             <RemoveCircleIcon 
