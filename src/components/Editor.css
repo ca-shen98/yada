@@ -1,4 +1,4 @@
-#editor_container {
+.editor_container {
   position: relative;
   flex: auto;
   display: flex;
@@ -21,7 +21,16 @@
   min-width: 0;
 }
 
-#editor, #no_file_editor_placeholder {
+.placeholder_editor {
+  flex: auto;
+  overflow: auto;
+  padding: 9px 8px;
+  border: 2px dashed lightgray;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.editor, #no_file_editor_placeholder {
   flex: auto;
   overflow: auto;
   padding: 9px 8px;
@@ -29,7 +38,7 @@
   border-radius: 12px;
 }
 
-#editor {
+.editor {
   padding-left: 32px;
 }
 
