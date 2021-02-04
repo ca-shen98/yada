@@ -6,6 +6,7 @@ import {connect} from 'react-redux';
 import {SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from '../reducers/CurrentOpenFileState';
 
 import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
+import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 
 const BLOCK_NODE_TAGS_LIST_ID = 'block_node_tags_list';
 
@@ -24,7 +25,11 @@ class TagMenu extends React.Component {
     const tag = document.getElementById(ADD_TAG_INPUT_ID).value.trim();
     if (!tag || INVALID_TAG_VALUE_REGEX.test(tag) || !this.props.selectNode) { return false; }
     if (this.state.selectNodeAttrs.hasOwnProperty('tags') && this.state.selectNodeAttrs.tags.hasOwnProperty(tag)) {
-      alert('tag value "' + tag + '" already exists');
+      this.props.dispatchSetToastAction({
+        message: `Tag value "${tag}" already exists`,
+        severity: TOAST_SEVERITY.ERROR,
+        open: true
+      });
       return false;
     }
     const newSelectNodeAttrs = { ...this.state.selectNodeAttrs, tags: {...this.state.selectNodeAttrs.tags} };
@@ -69,7 +74,11 @@ class TagMenu extends React.Component {
     ) { return false; }
     if (newTagValue === oldTagValue) { return true; }
     if (this.state.selectNodeAttrs.tags.hasOwnProperty(newTagValue)) {
-      alert('tag value "' + newTagValue + '" already exists');
+      this.props.dispatchSetToastAction({
+        message: `Tag value ${newTagValue} already exists`,
+        severity: TOAST_SEVERITY.ERROR,
+        open: true
+      });
       return false;
     }
     const newSelectNodeAttrs = { ...this.state.selectNodeAttrs, tags: {...this.state.selectNodeAttrs.tags} };
@@ -211,5 +220,8 @@ export default connect(
     saveDirtyFlag: state.saveDirtyFlag,
     currentOpenFileId: state.currentOpenFileId,
   }),
-  dispatch => ({ dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }) }),
+  dispatch => ({
+    dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
+    dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
+  }),
 )(TagMenu);

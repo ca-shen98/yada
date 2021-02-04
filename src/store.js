@@ -3,6 +3,7 @@ import {combineReducers} from 'redux';
 import {currentOpenFileIdReducer, saveDirtyFlagReducer, selectNodeReducer, currentOpenFileNameReducer} from './reducers/CurrentOpenFileState';
 import {backendModeSignedInStatusReducer} from './reducers/BackendModeSignedInStatus';
 import {setTagsInViewReducer} from "./reducers/SetTagsInView";
+import {setToastReducer} from "./reducers/Toast";
 
 export default configureStore({
   reducer: combineReducers({
@@ -11,6 +12,7 @@ export default configureStore({
     saveDirtyFlag: saveDirtyFlagReducer,
     selectNode: selectNodeReducer,
     backendModeSignedInStatus: backendModeSignedInStatusReducer,
-    tagsInView: setTagsInViewReducer
+    tagsInView: setTagsInViewReducer,
+    toast: setToastReducer,
   }),
 });

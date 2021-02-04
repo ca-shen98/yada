@@ -6,6 +6,12 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import {DragDropContext} from 'react-beautiful-dnd';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
+import {SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../../reducers/CurrentOpenFileState";
+
+export const TAG_HOLDERS = {
+	AVAILABLE: "tags_available",
+	IN_VIEW: "tags_in_view"
+}
 
 class TagEditor extends React.Component {
 	constructor(props) {
@@ -41,12 +47,12 @@ class TagEditor extends React.Component {
 			tagData: tagData,
 			columns: {
 				tags_in_view: {
-					id: 'tags_in_view',
+					id: TAG_HOLDERS.IN_VIEW,
 					title: "Tags in View",
 					tagIds: this.props.tagsInView
 				},
 				tags_available: {
-					id: 'tags_available',
+					id: TAG_HOLDERS.AVAILABLE,
 					title: "Available Tags",
 					tagIds: availableTags
 				},
@@ -111,6 +117,7 @@ class TagEditor extends React.Component {
 	
 	componentDidUpdate(prevProps, prevState, snapshot) {
 		if (prevProps.tagsInView !== this.props.tagsInView) {
+			if (!this.props.saveDirtyFlag) { this.props.dispatchSetSaveDirtyFlagAction(); }
 			const tagsInView = new Set(this.props.tagsInView);
 			const availableTags = Object.keys(this.props.allTagsData).filter(t => !tagsInView.has(t));
 			const newState = Object.assign({}, this.state);
@@ -134,7 +141,12 @@ class TagEditor extends React.Component {
 							}
 							return (
 								<Col key={column.id} md="12" lg="6">
-									<DragDropColumn key={column.id} column={column} tagData={tagDataInColumn}/>
+									<DragDropColumn
+										viewType={this.props.viewType}
+										key={column.id}
+										column={column}
+										tagData={tagDataInColumn}
+									/>
 								</Col>
 							);
 						})}
@@ -146,6 +158,9 @@ class TagEditor extends React.Component {
 }
 
 export default connect(
-	state => ({ tagsInView: state.tagsInView }),
-	dispatch => ({ setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)) }),
+	state => ({ tagsInView: state.tagsInView, saveDirtyFlag: state.saveDirtyFlag }),
+	dispatch => ({
+		setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)),
+		dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE })
+	}),
 )(TagEditor);

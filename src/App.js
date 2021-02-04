@@ -1,7 +1,6 @@
 import './App.css';
 import React from 'react';
 import {connect} from 'react-redux';
-import {checkSourceFileId} from './util/FileIdAndTypeUtils';
 import {
   BACKEND_MODE_SIGNED_IN_STATUS,
   getUserSignedInStatus,
@@ -10,12 +9,14 @@ import {
 import LandingPage from './components/LandingPage';
 import Navigator from './components/Navigator';
 import Navbar from './components/Navbar';
-import {handleSaveCurrentFileEditorContent} from './components/Editor';
 import EditorManager from "./components/EditorManager";
 import "./components/LandingPage.css"
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+import {setToastAction, TOAST_CLEAR, TOAST_DURATION_MS} from "./reducers/Toast";
 
-const theme = createMuiTheme({
+export const THEME = createMuiTheme({
   palette: {
     primary: {
       main: '#1E3D59'
@@ -30,19 +31,11 @@ class App extends React.Component {
 
   state = { mounted: false };
 
-  keydownHandler = event => {
-    if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey) && event.keyCode === 83) {
-      event.preventDefault();
-      if (this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) {
-        if (checkSourceFileId(this.props.currentOpenFileId)) { handleSaveCurrentFileEditorContent(); }
-      }
-    }
+  handleCloseToast = () => {
+    this.props.dispatchSetToastAction(TOAST_CLEAR);
   }
-
-  componentWillUnmount = () => { document.removeEventListener('keydown', this.keydownHandler); };
-
+  
   componentDidMount = () => {
-    document.addEventListener('keydown',this.keydownHandler);
     if (this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
       getUserSignedInStatus().then(backendModeSignedInStatus => {
         this.props.dispatchSetBackendModeSignedInStatusAction(backendModeSignedInStatus);
@@ -52,7 +45,7 @@ class App extends React.Component {
   };
   
   render = () =>
-    <MuiThemeProvider theme={theme}>
+    <MuiThemeProvider theme={THEME}>
     <React.Fragment>
       {
         this.state.mounted
@@ -69,6 +62,12 @@ class App extends React.Component {
                         <div style={{flexGrow: "100"}}>
                             <EditorManager/>
                         </div>
+                        {/*Global Snackbar: used for display toast messages to user*/}
+                        <Snackbar open={this.props.toast.open} autoHideDuration={TOAST_DURATION_MS} onClose={this.handleCloseToast}>
+                          <MuiAlert onClose={this.handleCloseToast} elevation={6} severity={this.props.toast.severity}>
+                            {this.props.toast.message}
+                          </MuiAlert>
+                        </Snackbar>
                       </div>
                     </div>
                 : <LandingPage />
@@ -86,9 +85,11 @@ export default connect(
   state => ({
     backendModeSignedInStatus: state.backendModeSignedInStatus,
     currentOpenFileId: state.currentOpenFileId,
-    currentOpenFileName: state.currentOpenFileName
+    currentOpenFileName: state.currentOpenFileName,
+    toast: state.toast,
   }),
   dispatch => ({
     dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
+    dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
   }),
 )(App);

@@ -10,6 +10,9 @@ import TagEditor from '../ViewComponents/TagEditor';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
 import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
 import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
+import {setToastAction, TOAST_SEVERITY} from "../../reducers/Toast";
+import store from "../../store";
+import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../../reducers/CurrentOpenFileState";
 
 
 class CardDeck extends React.Component {
@@ -32,8 +35,19 @@ class CardDeck extends React.Component {
 				FILE_TYPE.CARD_VIEW,
 				false,
 			)
-				.then(() => alert("Card view saved"))
-				.catch(() => alert("Failed to save card view"));
+				.then(() => {
+					this.props.dispatchSetToastAction({
+						message: "Saved view",
+						severity: TOAST_SEVERITY.SUCCESS,
+						open: true
+					});
+					store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+				})
+				.catch(() => this.props.dispatchSetToastAction({
+					message: "Failed to save view",
+					severity: TOAST_SEVERITY.ERROR,
+					open: true
+				}));
 		}
 	};
 	
@@ -87,7 +101,7 @@ class CardDeck extends React.Component {
 			}
 			return (
 				<Container className="viewContainer">
-					<TagEditor allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
+					<TagEditor viewType={FILE_TYPE.CARD_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
 					{cards}
 				</Container>
 			);
@@ -97,5 +111,8 @@ class CardDeck extends React.Component {
 
 export default connect(
 	state => ({ tagsInView: state.tagsInView, currentOpenFileId: state.currentOpenFileId }),
-	dispatch => ({ setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)) }),
+	dispatch => ({
+		setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)),
+		dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
+	}),
 )(CardDeck);
