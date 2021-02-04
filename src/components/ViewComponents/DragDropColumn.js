@@ -1,6 +1,9 @@
 import styled from 'styled-components'
 import React from 'react';
 import {Droppable, Draggable} from 'react-beautiful-dnd';
+import {THEME} from "../../App";
+import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
+import {TAG_HOLDERS} from "./TagEditor";
 
 class Tag extends React.Component {
 	render = () => {
@@ -9,7 +12,7 @@ class Tag extends React.Component {
 			border-radius: 10px;
 			padding: 8px;
 			margin-bottom: 8px;
-			background-color: ${props => (props.isDragging ? 'lightgreen' : 'white')};
+			background-color: ${props => (props.isDragging ? THEME.palette.secondary.dark : THEME.palette.secondary.light)};
 		`;
 		const TagId = styled.h5``;
 		const Content = styled.div``
@@ -38,9 +41,21 @@ class InnerTagList extends React.Component {
 	}
 	
 	render() {
-		return Object.keys(this.props.tagData).map((tagId, index) => (
-			<Tag key={tagId} tagId={tagId} index={index} tagInfo={this.props.tagData[tagId]}/>
-		));
+		console.log(this.props);
+		const tagList = [];
+		const tagIds = Object.keys(this.props.tagData);
+		for (let i = 0; i < tagIds.length; ++i) {
+			const tagId = tagIds[i];
+			tagList.push(<Tag key={tagId} tagId={tagId} index={i} tagInfo={this.props.tagData[tagId]}/>);
+			if (this.props.viewType === FILE_TYPE.CARD_VIEW && this.props.columnId === TAG_HOLDERS.IN_VIEW) {
+				if (i % 2 === 1 && i !== tagIds.length-1) {
+					tagList.push(
+						<hr style={{ color: THEME.palette.primary.main, backgroundColor: THEME.palette.primary.main, height: 1 }} />
+					);
+				}
+			}
+		}
+		return tagList;
 	}
 }
 
@@ -71,7 +86,7 @@ class DragDropColumn extends React.Component {
 			margin-top: 10px;
 			margin-bottom: 10px;
 			transition: background-color 0.2s ease;
-			background-color: ${props => (props.isDraggingOver) ? 'skyblue' : 'white'};
+			background-color: ${props => (props.isDraggingOver) ? THEME.palette.grey[300] : THEME.palette.grey[100]};
 		`;
 		const Title = styled.h3`
 			padding: 8px;
@@ -97,7 +112,7 @@ class DragDropColumn extends React.Component {
 									{...provided.droppableProps}
 								>
 									<TagList ref={this.tagListRef}>
-										<InnerTagList tagData={this.props.tagData}/>
+										<InnerTagList viewType={this.props.viewType} columnId={this.props.column.id} tagData={this.props.tagData}/>
 										{provided.placeholder}
 									</TagList>
 								</DroppableRegion>

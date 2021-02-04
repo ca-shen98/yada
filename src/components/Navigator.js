@@ -61,6 +61,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import AddIcon from '@material-ui/icons/Add';
 import TextFieldsIcon from '@material-ui/icons/TextFields';
 import AmpStoriesIcon from '@material-ui/icons/AmpStories';
+import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 
 export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "viewName": ''}) => {
   if (!validateFileIdObj(fileId)) { return false; }
@@ -268,54 +269,61 @@ class Navigator extends React.Component {
           fileType,
           true,
         );
-    const newFile = await newFilePromise;
-    if (!newFile) {
-      alert('failed to create new file');
-      return;
-    }
-    const updatedSourceId = sourceFileType ? newFile.id : this.state.selectedFileId;
-    const newFilesList = {
-      ...this.state.filesList,
-      [updatedSourceId]: {
-        name: sourceFileType ? newFile.name : this.state.filesList[updatedSourceId].name,
-        views: {
-          ...(
-            !sourceFileType
-              ? {
-                  ...this.state.filesList[updatedSourceId].views,
-                  [newFile.id]: { name: newFile.name, type: newFile.type },
-                }
-              : null
-          ),
-        },
-      },
-    };
-    this.setState({ filesList: newFilesList });
-    defer(() => {
-      const fileId = { sourceId: updatedSourceId, viewId: !sourceFileType ? newFile.id : 0 };
-      const fileName = {sourceName: this.getSourceName(fileId), viewName: this.getViewName(fileId)};
-      handleSetCurrentOpenFileId(fileId, fileName);
-    });
-    if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
-      if (sourceFileType) { doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList)); }
-      else { doSetLocalStorageSourceViews(updatedSourceId, newFilesList[updatedSourceId].views); }
-      this.setState({
-        nextNewFileIds: {
-          source: sourceFileType
-            ? calculateLocalStorageNextNewId(newFilesList, parseInt(updatedSourceId))
-            : this.state.nextNewFileIds.source,
-          nextNewViewIdsForSourceIds: {
-            ...this.state.nextNewFileIds.nextNewViewIdsForSourceIds,
+    try {
+      const newFile = await newFilePromise;
+      const updatedSourceId = sourceFileType ? newFile.id : this.state.selectedFileId;
+      const newFilesList = {
+        ...this.state.filesList,
+        [updatedSourceId]: {
+          name: sourceFileType ? newFile.name : this.state.filesList[updatedSourceId].name,
+          views: {
             ...(
-              !sourceFileType
-                ? {
-                    [updatedSourceId]:
-                      calculateLocalStorageNextNewId(newFilesList[updatedSourceId].views, parseInt(newFile.id)),
-                  }
-                : null
+                !sourceFileType
+                    ? {
+                      ...this.state.filesList[updatedSourceId].views,
+                      [newFile.id]: {name: newFile.name, type: newFile.type},
+                    }
+                    : null
             ),
           },
         },
+      };
+      this.setState({filesList: newFilesList});
+      defer(() => {
+        const fileId = {sourceId: updatedSourceId, viewId: !sourceFileType ? newFile.id : 0};
+        const fileName = {sourceName: this.getSourceName(fileId), viewName: this.getViewName(fileId)};
+        handleSetCurrentOpenFileId(fileId, fileName);
+      });
+      if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+        if (sourceFileType) {
+          doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
+        } else {
+          doSetLocalStorageSourceViews(updatedSourceId, newFilesList[updatedSourceId].views);
+        }
+        this.setState({
+          nextNewFileIds: {
+            source: sourceFileType
+                ? calculateLocalStorageNextNewId(newFilesList, parseInt(updatedSourceId))
+                : this.state.nextNewFileIds.source,
+            nextNewViewIdsForSourceIds: {
+              ...this.state.nextNewFileIds.nextNewViewIdsForSourceIds,
+              ...(
+                  !sourceFileType
+                      ? {
+                        [updatedSourceId]:
+                            calculateLocalStorageNextNewId(newFilesList[updatedSourceId].views, parseInt(newFile.id)),
+                      }
+                      : null
+              ),
+            },
+          },
+        });
+      }
+    } catch (e) {
+      this.props.dispatchSetToastAction({
+        message: "Failed to create new file",
+        severity: TOAST_SEVERITY.ERROR,
+        open: true
       });
     }
   }
@@ -336,7 +344,11 @@ class Navigator extends React.Component {
       : FileStorageSystemClient.doDeleteView(fileId.sourceId, fileId.viewId);
     const success = await deleteFilePromise;
     if (!success) {
-      alert('failed to delete file');
+      this.props.dispatchSetToastAction({
+        message: "Failed to delete file",
+        severity: TOAST_SEVERITY.ERROR,
+        open: true
+      });
       return;
     }
     const newFilesList = {...this.state.filesList};
@@ -374,7 +386,11 @@ class Navigator extends React.Component {
       : FileStorageSystemClient.doRenameView(fileId.sourceId, fileId.viewId, newName);
     const success = await renameFilePromise;
     if (!success) {
-      alert('failed to rename file');
+      this.props.dispatchSetToastAction({
+        message: "Failed to rename file",
+        severity: TOAST_SEVERITY.ERROR,
+        open: true
+      });
       return;
     }
     const newFilesList = {...this.state.filesList};
@@ -401,8 +417,13 @@ class Navigator extends React.Component {
       selectedFileOpen: this.props.currentOpenFileId.viewId !== 0
     })
     FileStorageSystemClient.doGetFilesList().then(filesList => {
-      if (!filesList) { alert('failed to retrieve files list'); }
-      else { this.setState({ filesList }); }
+      if (!filesList) {
+        this.props.dispatchSetToastAction({
+          message: "Failed to retrieve file list",
+          severity: TOAST_SEVERITY.ERROR,
+          open: true
+        });
+      } else { this.setState({ filesList }); }
       if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
         this.setState({ nextNewFileIds: calculateLocalStorageNextNewFileIds(this.state.filesList) });
       }
@@ -811,5 +832,6 @@ export default connect(
   }),
   dispatch => ({
     dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
+    dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
   }),
 )(Navigator);

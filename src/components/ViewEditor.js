@@ -10,6 +10,7 @@ import {handleSetCurrentOpenFileId} from "./Navigator";
 import CardDeck from "./CardView/CardDeck";
 import TextView from "./TextView/TextView";
 import {setTagsInViewAction} from "../reducers/SetTagsInView";
+import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 
 const DEFAULT_STATE = {
 	sourceId: 0,
@@ -25,7 +26,11 @@ class ViewEditor extends React.Component {
 	changeFile = async () => {
 		FileStorageSystemClient.doGetView(this.props.currentOpenFileId).then(value => {
 			if (value === null) {
-				alert('failed to retrieve view');
+				this.props.dispatchSetToastAction({
+					message: "Failed to retrieve view",
+					severity: TOAST_SEVERITY.ERROR,
+					open: true
+				})
 				handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
 			} else {
 				this.props.setTagsInView([]); // clear any tagsInView currently stored
@@ -66,6 +71,9 @@ class ViewEditor extends React.Component {
 
 export default connect(
 	state => ({ currentOpenFileId: state.currentOpenFileId }),
-	dispatch => ({ setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)) }),
+	dispatch => ({
+		setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)),
+		dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
+	}),
 )(ViewEditor);
 

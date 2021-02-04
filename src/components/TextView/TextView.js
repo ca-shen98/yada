@@ -8,6 +8,9 @@ import {setTagsInViewAction} from '../../reducers/SetTagsInView';
 import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
 import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
 import RichMarkdownEditor from "rich-markdown-editor";
+import {setToastAction, TOAST_SEVERITY} from "../../reducers/Toast";
+import store from "../../store";
+import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../../reducers/CurrentOpenFileState";
 
 
 class TextView extends React.Component {
@@ -30,8 +33,19 @@ class TextView extends React.Component {
 				FILE_TYPE.TEXT_VIEW,
 				false,
 				)
-				.then(() => alert("Text view saved"))
-				.catch(() => alert("Failed to save text view"));
+				.then(() => {
+					this.props.dispatchSetToastAction({
+						message: "Saved view",
+						severity: TOAST_SEVERITY.SUCCESS,
+						open: true
+					});
+					store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+				})
+				.catch(() => this.props.dispatchSetToastAction({
+					message: "Failed to save view",
+					severity: TOAST_SEVERITY.ERROR,
+					open: true
+				}));
 		}
 	};
 	
@@ -62,7 +76,7 @@ class TextView extends React.Component {
 		} else {
 			return (
 				<Container className="viewContainer">
-					<TagEditor allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
+					<TagEditor viewType={FILE_TYPE.TEXT_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
 					{
 						this.props.tagsInView.length > 0 &&
 						<RichMarkdownEditor
@@ -81,5 +95,8 @@ class TextView extends React.Component {
 
 export default connect(
 	state => ({ tagsInView: state.tagsInView, currentOpenFileId: state.currentOpenFileId }),
-	dispatch => ({ setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)) }),
+	dispatch => ({
+		setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)),
+		dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
+	}),
 )(TextView);

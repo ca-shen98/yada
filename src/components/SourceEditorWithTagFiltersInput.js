@@ -8,6 +8,10 @@ import {handleSetCurrentOpenFileId} from './Navigator';
 
 import FileStorageSystemClient from '../backend/FileStorageSystemClient';
 import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
+import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
+import {BACKEND_MODE_SIGNED_IN_STATUS} from "../reducers/BackendModeSignedInStatus";
+import store from "../store";
+import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
 
 export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = 'initialTagFilters';
 
@@ -19,7 +23,37 @@ const DEFAULT_STATE = {
 class SourceEditorWithTagFiltersInput extends React.Component {
 
   state = DEFAULT_STATE;
-
+  
+  keydownHandler = event => {
+    if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey) && event.keyCode === 83) {
+      event.preventDefault();
+      if (this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) {
+        if (checkSourceFileId(this.props.currentOpenFileId)) {
+          FileStorageSystemClient.doSaveSourceContent(
+              BlockTaggingEditorExtension.editor.value(true),
+              this.props.currentOpenFileId.sourceId,
+          ).then(success => {
+            if (success) {
+              this.props.dispatchSetToastAction({
+                message: "Saved source file",
+                severity: TOAST_SEVERITY.SUCCESS,
+                open: true
+              });
+              store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+            }
+            else {
+              this.props.dispatchSetToastAction({
+                message: "Failed to save source file",
+                severity: TOAST_SEVERITY.ERROR,
+                open: true
+              });
+            }
+          });
+        }
+      }
+    }
+  }
+  
   changeFile = async () => {
     if (!checkNoOpenFileId(this.props.currentOpenFileId)) {
       defer(() => {
@@ -30,7 +64,11 @@ class SourceEditorWithTagFiltersInput extends React.Component {
     if (checkSourceFileId(this.props.currentOpenFileId)) {
       FileStorageSystemClient.doGetSourceContent(this.props.currentOpenFileId.sourceId).then(value => {
         if (value === null) {
-          alert('failed to retrieve source content');
+          this.props.dispatchSetToastAction({
+            message: "Failed to retrieve source content",
+            severity: TOAST_SEVERITY.ERROR,
+            open: true
+          });
           handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
         } else {
           this.setState({fileIdKeyStr, fileContent: value ?? ''});
@@ -42,9 +80,13 @@ class SourceEditorWithTagFiltersInput extends React.Component {
   };
 
   componentDidMount = () => {
+    document.addEventListener('keydown',this.keydownHandler);
     this.changeFile();
   };
-
+  
+  componentWillUnmount = () => { document.removeEventListener('keydown', this.keydownHandler); };
+  
+  
   componentDidUpdate = prevProps => {
     if (
       prevProps.currentOpenFileId.sourceId !== this.props.currentOpenFileId.sourceId ||
@@ -61,5 +103,12 @@ class SourceEditorWithTagFiltersInput extends React.Component {
   };
 }
 
-export default connect(state => ({ currentOpenFileId: state.currentOpenFileId , 
-                                  currentOpenFileName: state.currentOpenFileName}))(SourceEditorWithTagFiltersInput);
+export default connect(
+    state => ({
+      currentOpenFileId: state.currentOpenFileId,
+      currentOpenFileName: state.currentOpenFileName
+    }),
+    dispatch => ({
+      dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
+    }),
+)(SourceEditorWithTagFiltersInput);

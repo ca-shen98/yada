@@ -1,31 +1,14 @@
 import './Editor.css';
 import React from 'react';
 import {connect} from 'react-redux';
-import {checkNoOpenFileId, checkSourceFileId} from '../util/FileIdAndTypeUtils';
+import {checkNoOpenFileId} from '../util/FileIdAndTypeUtils';
 import {
-  CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   SET_SAVE_DIRTY_FLAG_ACTION_TYPE,
 } from '../reducers/CurrentOpenFileState';
 import {TextSelection} from 'prosemirror-state';
 import TagMenu from './TagMenu';
 import RichMarkdownEditor from 'rich-markdown-editor';
-
-import store from '../store';
-import FileStorageSystemClient from '../backend/FileStorageSystemClient';
 import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
-
-export const handleSaveCurrentFileEditorContent = () => {
-  const currentOpenFileId = store.getState().currentOpenFileId;
-  if (checkSourceFileId(store.getState().currentOpenFileId) && store.getState().saveDirtyFlag) {
-    FileStorageSystemClient.doSaveSourceContent(
-      BlockTaggingEditorExtension.editor.value(true),
-      currentOpenFileId.sourceId,
-    ).then(success => {
-      if (success) { store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE }); }
-      else { alert('failed to save source content'); }
-    });
-  }
-};
 
 class Editor extends React.Component {
   render = () => {

@@ -6,7 +6,6 @@ import ReactCardFlip from 'react-card-flip';
 class Card extends React.Component {
 	constructor(props) {
 		super(props);
-		console.log(this.props.content);
 		this.state = {
 			isFlipped: false,
 			key: this.props.content["index"],
