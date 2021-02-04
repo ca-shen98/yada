@@ -49,8 +49,8 @@ class LandingPage extends React.Component {
       </AppBar>
 
     </div>
-    <div style={{backgroundColor: "#F5F0E1", flex: "1 1 auto"}}>
-    <Grid container spacing={3} alignItems="center" style={{height: "100%"}}>
+    <div style={{backgroundColor: "#F5F0E1", flex: "1 1 auto", display:"flex"}}>
+    <Grid container spacing={3} alignItems="center">
         <Grid item xs={1}></Grid>
         <Grid item xs={5} alignItems="center">
           <Grid container spacing={3} alignItems="center">

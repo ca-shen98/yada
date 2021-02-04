@@ -62,16 +62,11 @@ class App extends React.Component {
                     <div style={{flex: "0 1 auto"}}>
                       <Navbar />
                     </div>
-                    {/* <div style={{ position: 'absolute', top: '9px', right: '16px', fontSize: '.75em' }}>
-                      <span role="img" aria-label="Yet Another Docs App">
-                        🐇 &nbsp; <b>Y</b>et <b>A</b>nother <b>D</b>ocs <b>A</b>pp
-                      </span>
-                    </div> */}
-                      <div style={{flex: "1 1 auto"}}>
-                        <div style={{float: "left", height: "100%"}}>
+                      <div style={{flex: "1 1 auto", display: "flex"}}>
+                        <div style={{float: "left"}}>
                             <Navigator />
                         </div>
-                        <div style={{height: "100%"}}>
+                        <div style={{flexGrow: "100"}}>
                             <EditorManager/>
                         </div>
                       </div>
