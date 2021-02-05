@@ -6,9 +6,8 @@
 }
 
 #tag_menu_wrapper {
-  border: 1px solid #DCDCDC;
   border-radius: 8px;
-  background-color: #FAFAFA;
+  background-color: rgb(250, 250, 250);
 }
 
 #add_tag_input_row {

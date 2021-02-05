@@ -7,19 +7,51 @@ import {SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from '../reducers/CurrentOpenFileState'
 
 import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
+import InputBase from '@material-ui/core/InputBase';
+import Divider from '@material-ui/core/Divider';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Popover from '@material-ui/core/Popover';
+import CheckIcon from '@material-ui/icons/Check';
+import Input from '@material-ui/core/Input';
+import Chip from '@material-ui/core/Chip';
 
-const BLOCK_NODE_TAGS_LIST_ID = 'block_node_tags_list';
+const RENAME_TAG_FIELD = 'rename_field';
 
 const ADD_TAG_INPUT_ID = 'add_tag_input';
-
-const MODIFY_TAG_INPUT_ID_PREFIX = 'modify_tag_input_';
 
 const TAG_VALUE_REGEX = /[^{}]/;
 const INVALID_TAG_VALUE_REGEX = /[{}]/;
 
+class TagListItem extends React.Component {
+  render = () => 
+    <div style={{width:"100%", display: "flex", alignItems: "center"}}>
+      <Chip
+        label={this.props.tagValue}
+        color="primary"
+        onDelete={(event) => this.props.handleEditMenuClick(event, this.props.tagValue)}
+        deleteIcon={<MoreVertIcon color="secondary"/>}
+        style={{width: "100%", justifyContent: "space-between"}}
+        variant="outlined"
+      />
+    </div>
+};
+
 class TagMenu extends React.Component {
 
-  state = { selectNodeAttrs: {}, modifying: '' }
+  state = { selectNodeAttrs: {}, modifying: '', editMenuAnchorElement: null, renamePopoverElement: null, currentTag: '' }
 
   handleAddTag = () => {
     const tag = document.getElementById(ADD_TAG_INPUT_ID).value.trim();
@@ -43,16 +75,18 @@ class TagMenu extends React.Component {
     );
     this.setState({ selectNodeAttrs: newSelectNodeAttrs });
     this.props.dispatchSetSaveDirtyFlagAction();
+    document.getElementById(ADD_TAG_INPUT_ID).value = '';
     return true;
   };
 
-  handleDeleteTag = tag => {
+  handleDeleteTag = () => {
+    this.handleEditMenuClose();
     if (
       !this.props.selectNode || !this.state.selectNodeAttrs.hasOwnProperty('tags') ||
-      !this.state.selectNodeAttrs.tags.hasOwnProperty(tag)
+      !this.state.selectNodeAttrs.tags.hasOwnProperty(this.state.currentTag)
     ) { return false; }
     const newSelectNodeAttrs = { ...this.state.selectNodeAttrs, tags: {...this.state.selectNodeAttrs.tags} };
-    delete newSelectNodeAttrs.tags[tag];
+    delete newSelectNodeAttrs.tags[this.state.currentTag];
     BlockTaggingEditorExtension.editor.view.dispatch(
       BlockTaggingEditorExtension.editor.view.state.tr.setNodeMarkup(
         this.props.selectNode.pos,
@@ -60,19 +94,19 @@ class TagMenu extends React.Component {
         newSelectNodeAttrs,
       )
     );
-    this.setState({ selectNodeAttrs: newSelectNodeAttrs });
+    this.setState({ selectNodeAttrs: newSelectNodeAttrs, currentTag : '' });
     this.props.dispatchSetSaveDirtyFlagAction();
     return true;
   };
 
-  handleModifyTagValue = oldTagValue => {
-    const newTagValue = document.getElementById(MODIFY_TAG_INPUT_ID_PREFIX + oldTagValue).value.trim();
+  handleModifyTagValue = () => {
+    const newTagValue = document.getElementById(RENAME_TAG_FIELD).value.trim();
     if (
       !newTagValue || INVALID_TAG_VALUE_REGEX.test(newTagValue) || !this.props.selectNode ||
       !this.state.selectNodeAttrs.hasOwnProperty('tags') ||
-      !this.state.selectNodeAttrs.tags.hasOwnProperty(oldTagValue)
+      !this.state.selectNodeAttrs.tags.hasOwnProperty(this.state.currentTag)
     ) { return false; }
-    if (newTagValue === oldTagValue) { return true; }
+    if (newTagValue === this.state.currentTag) { return true; }
     if (this.state.selectNodeAttrs.tags.hasOwnProperty(newTagValue)) {
       this.props.dispatchSetToastAction({
         message: `Tag value ${newTagValue} already exists`,
@@ -82,8 +116,8 @@ class TagMenu extends React.Component {
       return false;
     }
     const newSelectNodeAttrs = { ...this.state.selectNodeAttrs, tags: {...this.state.selectNodeAttrs.tags} };
-    newSelectNodeAttrs.tags[newTagValue] = newSelectNodeAttrs.tags[oldTagValue];
-    delete newSelectNodeAttrs.tags[oldTagValue];
+    newSelectNodeAttrs.tags[newTagValue] = newSelectNodeAttrs.tags[this.state.currentTag];
+    delete newSelectNodeAttrs.tags[this.state.currentTag];
     BlockTaggingEditorExtension.editor.view.dispatch(
       BlockTaggingEditorExtension.editor.view.state.tr.setNodeMarkup(
         this.props.selectNode.pos,
@@ -94,22 +128,6 @@ class TagMenu extends React.Component {
     this.setState({ selectNodeAttrs: newSelectNodeAttrs });
     this.props.dispatchSetSaveDirtyFlagAction();
     return true;
-  };
-
-  handleCancelModifyTagValue = tag => {
-    const input = MODIFY_TAG_INPUT_ID_PREFIX + tag;
-    input.value = tag;
-    input.setSelectionRange(0, 0);
-    if (this.state.modifying === tag) { this.setState({ modifying: '' }); }
-  };
-
-  handleStartModifyingTagValue = (tag) => {
-    this.setState({ modifying: tag });
-    defer(() => {
-      const input = document.getElementById(MODIFY_TAG_INPUT_ID_PREFIX + tag);
-      input.focus();
-      input.setSelectionRange(0, input.value.length);
-    });
   };
   
   componentDidUpdate = prevProps => {
@@ -129,14 +147,41 @@ class TagMenu extends React.Component {
     }
   };
 
-  render = () =>
+  handleEditMenuClick = (event, tag) => {
+    this.setState({
+      editMenuAnchorElement: event.currentTarget,
+      currentTag: tag
+    })
+  }
+
+  handleEditMenuClose = () => {
+    this.setState({
+      editMenuAnchorElement: null
+    })
+  }
+
+  handleRenameMenuClick = (event) => {
+    this.setState({
+      renamePopoverElement: this.state.editMenuAnchorElement,
+      editMenuAnchorElement: null
+    })
+  }
+
+  handleRenamePopoverClose = () => {
+    this.setState({
+      renamePopoverElement: null
+    })
+  }
+
+  render = () => 
     <div className="MarginPane">
       <div id="tag_menu_wrapper">
         <div className="InputRow" id="add_tag_input_row">
-          <input
+          <OutlinedInput
             id={ADD_TAG_INPUT_ID}
-            title="new tag"
-            placeholder="new tag"
+            title="New Tag"
+            placeholder="New Tag"
+            color="primary"
             disabled={!this.props.selectNode}
             onKeyPress={event=> {
               if (event.key === 'Enter' && this.handleAddTag()) { event.target.value = ''; }
@@ -148,67 +193,125 @@ class TagMenu extends React.Component {
                 BlockTaggingEditorExtension.editor.view.focus();
               }
             }}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="Add"
+                  title="add"
+                  disabled={!this.props.selectNode}
+                  onClick={this.handleAddTag}
+                  edge="end"
+                >
+                  <AddCircleIcon color="primary" />
+                </IconButton>
+              </InputAdornment>
+            }
+            margin="dense"
           />
-          <button
-            className="MonospaceCharButton"
-            title="add"
-            disabled={!this.props.selectNode}
-            onClick={this.handleAddTag}>
-            {'+'}
-          </button>
         </div>
         <div id="tag_menu_list_container">
           {
             this.props.selectNode && this.state.selectNodeAttrs.hasOwnProperty('tags') &&
             Object.keys(this.state.selectNodeAttrs.tags).length > 0
-              ? <ul id={BLOCK_NODE_TAGS_LIST_ID}>
+              ? <List
+                  component="nav"
+                  aria-labelledby="nested-list-subheader"
+                  subheader={
+                    <ListSubheader component="div" id="nested-list-subheader">
+                      Tags
+                    </ListSubheader>
+                  }
+                  style={{"maxWidth" : 360, "width" : '100%'}}
+                >
                   {
-                    Object.keys(this.state.selectNodeAttrs.tags).map(tag =>
-                      <li key={tag}>
-                        <div className="ButtonRow">
-                          {
-                            this.state.modifying !== tag
-                              ? <button disabled>{tag}</button>
-                              :  <input
-                                  id={MODIFY_TAG_INPUT_ID_PREFIX + tag}
-                                  defaultValue={tag}
-                                  placeholder={tag}
-                                  disabled={this.state.modifying !== tag}
-                                  onBlur={event => {
-                                    this.handleModifyTagValue(tag);
-                                    if (this.state.modifying === tag) { this.setState({ modifying: '' }); }
-                                  }}
-                                  onKeyDown={event => {
-                                    if (event.key === 'Escape') { this.handleCancelModifyTagValue(tag); }
-                                  }}
-                                  onKeyPress={event => {
-                                    if (event.key === 'Enter') { event.target.blur(); }
-                                    if (!TAG_VALUE_REGEX.test(event.key)) { event.preventDefault(); }
-                                  }}
-                                />
-                          }
-                          <button
-                            className="MonospaceCharButton"
-                            title="modify"
-                            hidden={this.state.modifying === tag}
-                            onClick={() => { this.handleStartModifyingTagValue(tag); }}>
-                            {'#'}
-                          </button>
-                          <button
-                            className="MonospaceCharButton"
-                            title="remove"
-                            onClick={() => { this.handleDeleteTag(tag); }}>
-                            {'-'}
-                          </button>
-                        </div>
-                      </li>
+                    Object.keys(this.state.selectNodeAttrs.tags).map((tag) =>
+                      <ListItem
+                       dense={true}
+                      >
+                        <TagListItem 
+                          tagValue = {tag}
+                          handleEditMenuClick={this.handleEditMenuClick}
+                        />
+                      </ListItem>
                     )
                   }
-                </ul>
+                </List>
               : <div className="PlaceholderDivWithText" id="no_tags_placeholder">
-                  {'no ' + (!this.props.selectNode ? 'selected block' : 'block tags')}
+                  {'No ' + (!this.props.selectNode ? 'Selected Block' : 'Block Tags')}
                 </div>
           }
+          <Menu
+            id="edit_menu"
+            anchorEl={this.state.editMenuAnchorElement}
+            keepMounted
+            open={Boolean(this.state.editMenuAnchorElement)}
+            onClose={() => this.handleEditMenuClose()}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+              <MenuItem onClick={() => this.handleRenameMenuClick()}>
+                <ListItemIcon>
+                  <EditIcon fontSize="small" color="primary"  />
+                </ListItemIcon>
+                <ListItemText primary="Rename" color="primary"/>
+              </MenuItem>
+              <MenuItem onClick={() => this.handleDeleteTag()}>
+                <ListItemIcon>
+                  <DeleteIcon fontSize="small" color="primary"/>
+                </ListItemIcon>
+                <ListItemText primary="Delete" color="primary"/>
+              </MenuItem>
+          </Menu>
+          <Popover
+            open={Boolean(this.state.renamePopoverElement)}
+            anchorEl={this.state.renamePopoverElement}
+            anchorOrigin={{
+              vertical:'top',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical:'top',
+              horizontal: 'right'
+            }}
+            id="rename_popover"
+          >
+            <Input
+              id={RENAME_TAG_FIELD}
+              autoFocus={true}
+              defaultValue={this.state.currentTag}
+              onBlur={event => {this.handleModifyTagValue();                      
+                                this.handleRenamePopoverClose();
+              }}
+              onKeyDown={event => {
+                if (event.key === 'Escape') { event.target.value = this.state.currentTag; }
+              }}
+              onKeyPress={event => {
+                if (event.key === 'Enter') { event.target.blur(); }
+                if (!TAG_VALUE_REGEX.test(event.key)) { event.preventDefault(); }
+              }}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton 
+                    onClick= {() => {
+                      this.handleModifyTagValue();
+                      this.handleRenamePopoverClose();
+                    }}
+                  >
+                      <CheckIcon/>
+                  </IconButton>
+                </InputAdornment>
+              }
+              disableUnderline={true}
+              fullWidth={true}
+              style={{height:"50px", "paddingLeft": "10px"}}
+            />
+          </Popover>
         </div>
       </div>
     </div>;

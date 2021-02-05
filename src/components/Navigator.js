@@ -449,34 +449,6 @@ class Navigator extends React.Component {
       });
     }
   };
-  
-  renameInput = ({ inputType, fileId, ...remainingProps }) => {
-    const inputId = getRenameInputIdFunctions[inputType](fileId);
-    const value = this.getRenameInputValueFunctions[inputType](fileId);
-    return (
-      <input
-        id={inputId}
-        defaultValue={value}
-        placeholder={value}
-        disabled={
-          checkNoOpenFileId(fileId) || this.state.renaming.inputType !== inputType ||
-          this.state.renaming.fileId.sourceId !== fileId.sourceId ||
-          this.state.renaming.fileId.viewId !== fileId.viewId
-        }
-        onBlur={() => {
-          this.handleRenameFile(inputType, fileId).then(() => {
-            if (
-              this.state.renaming.inputType === inputType && this.state.renaming.fileId.sourceId === fileId.sourceId &&
-              this.state.renaming.fileId.viewId === fileId.viewId
-            ) { this.handleCancelRenaming(inputType, fileId); }
-          });
-        }}
-        onKeyDown={event => { if (event.key === 'Escape') { this.handleCancelRenaming(inputType, fileId); } }}
-        onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
-        {...remainingProps}
-      />
-    );
-  };
 
   handleFileListClick = (fileId) => {
     if (fileId === this.state.selectedFileId) {
@@ -687,23 +659,23 @@ class Navigator extends React.Component {
               (this.state.selectedViewId === null) ? 
               <MenuItem onClick={() => this.handleViewMenuOpen()}>
                 <ListItemIcon>
-                  <AddIcon fontSize="small" />
+                  <AddIcon fontSize="small" color="primary" />
                 </ListItemIcon>
-                <ListItemText primary="New View" />
+                <ListItemText primary="New View" color="primary"/>
               </MenuItem>
               : null
             }
               <MenuItem onClick={() => this.handleRenameMenuClick()}>
                 <ListItemIcon>
-                  <EditIcon fontSize="small" />
+                  <EditIcon fontSize="small" color="primary"/>
                 </ListItemIcon>
-                <ListItemText primary="Rename" />
+                <ListItemText primary="Rename" color="primary"/>
               </MenuItem>
               <MenuItem onClick={() => this.handleDeleteMenuClick()}>
                 <ListItemIcon>
-                  <DeleteIcon fontSize="small" />
+                  <DeleteIcon fontSize="small" color="primary"/>
                 </ListItemIcon>
-                <ListItemText primary="Delete" />
+                <ListItemText primary="Delete" color="primary"/>
               </MenuItem>
           </Menu>
           <Menu 
@@ -757,6 +729,7 @@ class Navigator extends React.Component {
           >
             <Input
               id="rename_field"
+              autoFocus={true}
               defaultValue={this.getFileName({sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId == null) ? 0 : this.state.selectedViewId})}
               onKeyPress={event => {
                 if(event.key === 'Enter') {
