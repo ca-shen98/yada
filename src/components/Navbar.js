@@ -241,7 +241,7 @@ class Navbar extends React.Component {
 							<Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", float: "left", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
 								<Link color="inherit" style={{ color: "#F5F0E1",}}>
 									<DescriptionIcon color="secondary"/>
-									{this.props.currentOpenFileName.sourceName}
+									{this.props.currentOpenFileName.sourceName.length <= 11 ?  this.props.currentOpenFileName.sourceName : (this.props.currentOpenFileName.sourceName.substring(0,11) + "...")}
 								</Link>
 								{this.props.currentOpenFileName.viewName === '' ? null :
 									<Link color="inherit" style={{color: "#F5F0E1"}}>
@@ -264,7 +264,7 @@ class Navbar extends React.Component {
 							disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
 							onClick={this.handleSave}
 							startIcon={<SaveIcon />}
-							style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", float: "left", marginRight: "20px" }}
+							style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", float: "left"}}
 						>
 							Save
 						</Button>

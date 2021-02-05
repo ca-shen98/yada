@@ -288,9 +288,15 @@ class Navigator extends React.Component {
           },
         },
       };
-      this.setState({filesList: newFilesList});
+      this.setState(
+        {filesList: newFilesList,
+         selectedFileId: updatedSourceId,
+         selectedFileOpen: !sourceFileType,
+         selectedViewId: (sourceFileType) ? 0 : newFile.id
+        });
+      
       defer(() => {
-        const fileId = {sourceId: updatedSourceId, viewId: !sourceFileType ? newFile.id : 0};
+        const fileId = {sourceId: updatedSourceId, viewId: !sourceFileType ? newFile.id : 0, viewType: sourceFileType ? FILE_TYPE.EMPTY: newFile.type};
         const fileName = {sourceName: this.getSourceName(fileId), viewName: this.getViewName(fileId)};
         handleSetCurrentOpenFileId(fileId, fileName);
       });
@@ -393,6 +399,7 @@ class Navigator extends React.Component {
       });
       return;
     }
+    store.dispatch(setCurrentOpenFileNameAction({sourceName: newName, viewName: ''}));
     const newFilesList = {...this.state.filesList};
     if (sourceFileIdCheck) {
       newFilesList[fileId.sourceId] = { name: newName, views: newFilesList[fileId.sourceId].views };
