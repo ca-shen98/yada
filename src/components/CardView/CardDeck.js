@@ -13,7 +13,8 @@ import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
 import {setToastAction, TOAST_SEVERITY} from "../../reducers/Toast";
 import store from "../../store";
 import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../../reducers/CurrentOpenFileState";
-
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 
 class CardDeck extends React.Component {
 	
@@ -21,6 +22,7 @@ class CardDeck extends React.Component {
 		super(props);
 		this.state = {
 			allTagsData: props.data.allTagsData,
+			studySwitch: false
 		}
 		this.props.setTagsInView(props.data.tagsInView);
 	}
@@ -101,6 +103,17 @@ class CardDeck extends React.Component {
 			}
 			return (
 				<Container className="viewContainer">
+					<FormControlLabel
+						control={
+						<Switch
+							checked={this.state.studySwitch}
+							onChange={() => {this.setState({studySwitch: !this.state.studySwitch})}}
+							name="checkedB"
+							color="primary"
+						/>
+						}
+						label="Study Mode"
+					/>
 					<TagEditor viewType={FILE_TYPE.CARD_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
 					{cards}
 				</Container>
