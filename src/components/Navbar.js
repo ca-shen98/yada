@@ -33,7 +33,7 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 import store from "../store";
-import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
+import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE, SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
 
 const TAG_FILTERS_INPUT_ID = 'tag_filters_input';
 
@@ -48,6 +48,7 @@ class Navbar extends React.Component {
 	state = DEFAULT_STATE;
 	
 	handleSave = () => {
+    store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE })
 		if (checkSourceFileId(this.props.currentOpenFileId)) {
 			FileStorageSystemClient.doSaveSourceContent(
 				BlockTaggingEditorExtension.editor.value(true),
@@ -59,14 +60,14 @@ class Navbar extends React.Component {
 						severity: TOAST_SEVERITY.SUCCESS,
 						open: true
 					});
-					store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
 				}
 				else {
 					this.props.dispatchSetToastAction({
 						message: "Failed to save source file",
 						severity: TOAST_SEVERITY.ERROR,
 						open: true
-					});
+          });
+          store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
 				}
 			});
 		} else if (checkViewFileId(this.props.currentOpenFileId) && this.props.currentOpenFileId.viewType !== NO_OPEN_FILE_ID.viewType) {
@@ -85,11 +86,14 @@ class Navbar extends React.Component {
 					});
 					store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
 				})
-				.catch(() => this.props.dispatchSetToastAction({
-					message: "Failed to save view",
-					severity: TOAST_SEVERITY.ERROR,
-					open: true
-				}));
+				.catch(() => {
+          this.props.dispatchSetToastAction({
+            message: "Failed to save view",
+            severity: TOAST_SEVERITY.ERROR,
+            open: true
+          });
+          store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
+        });
 		}
 	}
 	
@@ -237,7 +241,7 @@ class Navbar extends React.Component {
 							<Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", float: "left", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
 								<Link color="inherit" style={{ color: "#F5F0E1",}}>
 									<DescriptionIcon color="secondary"/>
-									{this.props.currentOpenFileName.sourceName}
+									{this.props.currentOpenFileName.sourceName.length <= 11 ?  this.props.currentOpenFileName.sourceName : (this.props.currentOpenFileName.sourceName.substring(0,11) + "...")}
 								</Link>
 								{this.props.currentOpenFileName.viewName === '' ? null :
 									<Link color="inherit" style={{color: "#F5F0E1"}}>
@@ -260,7 +264,7 @@ class Navbar extends React.Component {
 							disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
 							onClick={this.handleSave}
 							startIcon={<SaveIcon />}
-							style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", float: "left", marginRight: "20px" }}
+							style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", float: "left"}}
 						>
 							Save
 						</Button>
