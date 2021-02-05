@@ -39,6 +39,8 @@
   padding: 9px 8px;
   display: flex;
   height: 100%;
+  border: thin solid #1E3D59;
+  border-radius: 12px;
 }
 
 .MarginPane {
