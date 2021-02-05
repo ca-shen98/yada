@@ -399,7 +399,7 @@ class Navigator extends React.Component {
       });
       return;
     }
-    store.dispatch(setCurrentOpenFileNameAction({sourceName: newName, viewName: ''}));
+    store.dispatch(setCurrentOpenFileNameAction({sourceName: sourceFileIdCheck ? newName : this.getSourceName(fileId), viewName: sourceFileIdCheck ? '' : newName}));
     const newFilesList = {...this.state.filesList};
     if (sourceFileIdCheck) {
       newFilesList[fileId.sourceId] = { name: newName, views: newFilesList[fileId.sourceId].views };
