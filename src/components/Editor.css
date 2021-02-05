@@ -25,7 +25,7 @@
   flex: auto;
   overflow: auto;
   padding: 9px 8px;
-  border: 2px dashed lightgray;
+  border: thin solid #1E3D59;
   border-radius: 12px;
   text-align: center;
 }
@@ -34,7 +34,7 @@
   flex: auto;
   overflow: auto;
   padding: 9px 8px;
-  border: 2px dashed lightgray;
+  border: thin solid #1E3D59;
   border-radius: 12px;
 }
 
