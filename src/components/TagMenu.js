@@ -26,6 +26,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Popover from '@material-ui/core/Popover';
 import CheckIcon from '@material-ui/icons/Check';
 import Input from '@material-ui/core/Input';
+import Chip from '@material-ui/core/Chip';
 
 const RENAME_TAG_FIELD = 'rename_field';
 
@@ -37,15 +38,14 @@ const INVALID_TAG_VALUE_REGEX = /[{}]/;
 class TagListItem extends React.Component {
   render = () => 
     <div style={{width:"100%", display: "flex", alignItems: "center"}}>
-      <InputBase 
-        value={this.props.tagValue}
-        disabled={true}
-        style={{color: "#1E3D59"}}
+      <Chip
+        label={this.props.tagValue}
+        color="primary"
+        onDelete={(event) => this.props.handleEditMenuClick(event, this.props.tagValue)}
+        deleteIcon={<MoreVertIcon color="secondary"/>}
+        style={{width: "100%", justifyContent: "space-between"}}
+        variant="outlined"
       />
-      <Divider orientation="vertical" />
-      <IconButton onClick={(event) => this.props.handleEditMenuClick(event, this.props.tagValue)}>
-        <MoreVertIcon fontSize="small" color="primary"/>
-      </IconButton>
     </div>
 };
 
@@ -227,8 +227,6 @@ class TagMenu extends React.Component {
                     Object.keys(this.state.selectNodeAttrs.tags).map((tag) =>
                       <ListItem
                        dense={true}
-                       divider={true}
-                       style={{paddingTop: "0px", paddingBottom: "0px"}}
                       >
                         <TagListItem 
                           tagValue = {tag}
