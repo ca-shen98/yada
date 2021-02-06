@@ -6,6 +6,7 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from './Card';
+import StudyView from './StudyView';
 import TagEditor from '../ViewComponents/TagEditor';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
 import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
@@ -22,7 +23,7 @@ class CardDeck extends React.Component {
 		super(props);
 		this.state = {
 			allTagsData: props.data.allTagsData,
-			studySwitch: false
+			studySwitch: false,
 		}
 		this.props.setTagsInView(props.data.tagsInView);
 	}
@@ -69,7 +70,6 @@ class CardDeck extends React.Component {
 		} else { cardContent["back"] = null; }
 		return <Card content={cardContent} />;
 	};
-	
 	componentDidMount = () => {
 		document.addEventListener('keydown',this.keydownHandler);
 	};
@@ -89,17 +89,23 @@ class CardDeck extends React.Component {
 			);
 		} else {
 			const cards = [];
-			for (let i = 0; i < this.props.tagsInView.length; i+=4) {
-				cards.push(
-					<Row key={`row_${i%4}`} className="justify-content-md-center">
-						<Col lg="12" xl="6">
-							{this.constructCard(i)}
-						</Col>
-						<Col lg="12" xl="6">
-							{(i + 2 < this.props.tagsInView.length) && this.constructCard(i + 2)}
-						</Col>
-					</Row>
-				);
+			if(this.state.studySwitch) {
+				for (let i = 0; i < this.props.tagsInView.length; i+=2) {
+					cards.push(this.constructCard(i));
+				}
+			}else {
+				for (let i = 0; i < this.props.tagsInView.length; i+=4) {
+					cards.push(
+						<Row key={`row_${i%4}`} className="justify-content-md-center">
+							<Col lg="12" xl="6">
+								{this.constructCard(i)}
+							</Col>
+							<Col lg="12" xl="6">
+								{(i + 2 < this.props.tagsInView.length) && this.constructCard(i + 2)}
+							</Col>
+						</Row>
+					);
+				}
 			}
 			return (
 				<Container className="viewContainer">
@@ -114,8 +120,12 @@ class CardDeck extends React.Component {
 						}
 						label="Study Mode"
 					/>
-					<TagEditor viewType={FILE_TYPE.CARD_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
-					{cards}
+					{this.state.studySwitch ? <StudyView cards={cards}/> : 
+						<div>
+							<TagEditor viewType={FILE_TYPE.CARD_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
+							{cards}
+						</div>
+					}
 				</Container>
 			);
 		}
