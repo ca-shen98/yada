@@ -6,6 +6,7 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from './Card';
+import StudyView from './StudyView';
 import TagEditor from '../ViewComponents/TagEditor';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
 import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
@@ -13,7 +14,8 @@ import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
 import {setToastAction, TOAST_SEVERITY} from "../../reducers/Toast";
 import store from "../../store";
 import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../../reducers/CurrentOpenFileState";
-
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 
 class CardDeck extends React.Component {
 	
@@ -21,6 +23,7 @@ class CardDeck extends React.Component {
 		super(props);
 		this.state = {
 			allTagsData: props.data.allTagsData,
+			studySwitch: false,
 		}
 		this.props.setTagsInView(props.data.tagsInView);
 	}
@@ -67,7 +70,6 @@ class CardDeck extends React.Component {
 		} else { cardContent["back"] = null; }
 		return <Card content={cardContent} />;
 	};
-	
 	componentDidMount = () => {
 		document.addEventListener('keydown',this.keydownHandler);
 	};
@@ -87,22 +89,43 @@ class CardDeck extends React.Component {
 			);
 		} else {
 			const cards = [];
-			for (let i = 0; i < this.props.tagsInView.length; i+=4) {
-				cards.push(
-					<Row key={`row_${i%4}`} className="justify-content-md-center">
-						<Col lg="12" xl="6">
-							{this.constructCard(i)}
-						</Col>
-						<Col lg="12" xl="6">
-							{(i + 2 < this.props.tagsInView.length) && this.constructCard(i + 2)}
-						</Col>
-					</Row>
-				);
+			if(this.state.studySwitch) {
+				for (let i = 0; i < this.props.tagsInView.length; i+=2) {
+					cards.push(this.constructCard(i));
+				}
+			}else {
+				for (let i = 0; i < this.props.tagsInView.length; i+=4) {
+					cards.push(
+						<Row key={`row_${i%4}`} className="justify-content-md-center">
+							<Col lg="12" xl="6">
+								{this.constructCard(i)}
+							</Col>
+							<Col lg="12" xl="6">
+								{(i + 2 < this.props.tagsInView.length) && this.constructCard(i + 2)}
+							</Col>
+						</Row>
+					);
+				}
 			}
 			return (
 				<Container className="viewContainer">
-					<TagEditor viewType={FILE_TYPE.CARD_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
-					{cards}
+					<FormControlLabel
+						control={
+						<Switch
+							checked={this.state.studySwitch}
+							onChange={() => {this.setState({studySwitch: !this.state.studySwitch})}}
+							name="checkedB"
+							color="primary"
+						/>
+						}
+						label="Study Mode"
+					/>
+					{this.state.studySwitch ? <StudyView cards={cards}/> : 
+						<div>
+							<TagEditor viewType={FILE_TYPE.CARD_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
+							{cards}
+						</div>
+					}
 				</Container>
 			);
 		}
