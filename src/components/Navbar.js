@@ -39,16 +39,13 @@ import Grid from '@material-ui/core/Grid';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 import store from "../store";
 import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE, SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
-<<<<<<< HEAD
 import "./Navbar.css"
-
-=======
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
->>>>>>> Fixed Navbar and add sign out menu
+
 const TAG_FILTERS_INPUT_ID = 'tag_filters_input';
 
 
@@ -269,14 +266,9 @@ class Navbar extends React.Component {
 		const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
 		const currentTagFiltersSaved =this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentTagFiltersStr);
 		return(
-<<<<<<< HEAD
 			<div className={"sticky-navbar scrolled"}>
 				<AppBar class="custom-navbar">
-				<Toolbar>
-=======
-			<AppBar position="static" class="custom-navbar">
 				<Toolbar style={{justifyContent: "space-between"}}>
->>>>>>> Fixed Navbar and add sign out menu
 					<div style={{width: "275px"}}>
 						<Grid container>
 						<Grid item xs={2}>
@@ -289,17 +281,15 @@ class Navbar extends React.Component {
 						</Grid>
 						</Grid>
 					</div>
-					{/* <div style={{flexGrow: 1, marginLeft: "150px"}}> */}
 					<Grid container style={{width: "80vw"}}>
-					<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 2 : 5}>
+					<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 3 : 5}>
 							<Grid container spacing={0}>
-								<Grid item xs={6}>
+								<Grid item xs={6} s={6} xl={4}>
 									{this.props.currentOpenFileName.sourceName === '' ? null :
 										<Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
 											<Link underline="none" color="inherit" style={{ color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
 												<DescriptionIcon color="secondary"/>
 												{this.state.windowWidth < 1000 ? '' : this.props.currentOpenFileName.sourceName}
-												{/* {this.props.currentOpenFileName.sourceName.length <= 11 ?  this.props.currentOpenFileName.sourceName : (this.props.currentOpenFileName.sourceName.substring(0,11) + "...")} */}
 											</Link>
 											{this.props.currentOpenFileName.viewName === '' ? null :
 												<Link underline="none" color="inherit" style={{color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
@@ -316,7 +306,7 @@ class Navbar extends React.Component {
 										</Breadcrumbs>
 									}
 								</Grid>
-								<Grid item xs={4}>
+								<Grid item xs={5}>
 									<Button
 										variant="outlined"
 										color="secondary"
@@ -331,17 +321,13 @@ class Navbar extends React.Component {
 								</Grid>
 							</Grid>
 						</Grid>
-						<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 8 : 1}>
+						<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 6 : 1}>
 						{
 							this.props.currentOpenFileName.viewName === '' ?
-								<div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", width: "100%", borderRadius: "10px", padding: "5px"}}>
-									<Grid container>
-										<Grid item xs={1}>
-											<div style={{marginTop: "3px", marginLeft: "20px"}}>
+								<div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", width: "100%", borderRadius: "10px", padding: "5px", justifyContent: "spaceBetween", display: "flex"}}>
+											<div style={{marginTop: "3px", width: "20px", marginRight: "5px"}}>
 												<SearchIcon color="primary"/>
 											</div>
-										</Grid>
-										<Grid item xs={10}>
 											<Autocomplete
 												value={this.state.currentTagFiltersStr}
 												id={TAG_FILTERS_INPUT_ID}
@@ -357,6 +343,7 @@ class Navbar extends React.Component {
 														variant="standard"
 													/>
 												)}
+												style={{width:"90%"}}
 												onChange={(event, value, reason) => {
 													this.setState({currentTagFiltersStr : value});
 													this.handleStartModifyingTagFilters();
@@ -375,8 +362,6 @@ class Navbar extends React.Component {
 												onKeyDown={event => { if (event.key === 'Escape') { this.handleCancelModifyingTagFilters(); } }}
 												onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
 											/>
-										</Grid>
-										<Grid item xs={1}>
 											<div style={{float: "right"}}>
 												{ (this.state.modifyingTagFilters) ? null :
 													(this.state.currentTagFiltersStr === '') ? null :
@@ -402,15 +387,12 @@ class Navbar extends React.Component {
 													
 												}
 											</div>
-										</Grid>
-									</Grid>
 								
 								</div>
 								: null
 						}
 					</Grid>
 					</Grid>
-					{/* </div> */}
 					<IconButton
 						edge="end"
 						aria-label="account of current user"
@@ -434,7 +416,7 @@ class Navbar extends React.Component {
 							horizontal: 'center',
 						  }}
 						transformOrigin={{
-							vertical: 'bottom',
+							vertical: 'top',
 							horizontal: 'center',
 						}}
 					>
