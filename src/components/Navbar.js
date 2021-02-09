@@ -434,7 +434,7 @@ class Navbar extends React.Component {
 							horizontal: 'center',
 						  }}
 						transformOrigin={{
-							vertical: 'top',
+							vertical: 'bottom',
 							horizontal: 'center',
 						}}
 					>
