@@ -39,19 +39,12 @@ import Grid from '@material-ui/core/Grid';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 import store from "../store";
 import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE, SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
-<<<<<<< HEAD
 import "./Navbar.css"
-=======
->>>>>>> 0cdd306f5ac1d24bc526b9b51c30ad6b9db81d7d
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-<<<<<<< HEAD
-
-=======
->>>>>>> 0cdd306f5ac1d24bc526b9b51c30ad6b9db81d7d
 const TAG_FILTERS_INPUT_ID = 'tag_filters_input';
 
 
