@@ -15,6 +15,7 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import {setToastAction, TOAST_CLEAR, TOAST_DURATION_MS} from "./reducers/Toast";
+import MobilePage from "./components/MobilePage";
 
 export const THEME = createMuiTheme({
   palette: {
@@ -29,10 +30,27 @@ export const THEME = createMuiTheme({
 
 class App extends React.Component {
 
-  state = { mounted: false };
+  state = {
+    mounted: false,
+    width: window.innerWidth
+  };
 
   handleCloseToast = () => {
     this.props.dispatchSetToastAction(TOAST_CLEAR);
+  }
+  
+  handleWindowSizeChange = () => {
+    this.setState({ width: window.innerWidth });
+  };
+  
+  componentWillMount() {
+    window.addEventListener('resize', this.handleWindowSizeChange);
+  }
+  
+  // make sure to remove the listener
+  // when the component is not mounted anymore
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleWindowSizeChange);
   }
   
   componentDidMount = () => {
@@ -48,35 +66,34 @@ class App extends React.Component {
     <MuiThemeProvider theme={THEME}>
     <React.Fragment>
       {
-        this.state.mounted
-          ? (
-              this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
-                ? <div className="App">
-                    <div style={{flex: "0 1 auto"}}>
-                      <Navbar />
-                    </div>
-                      <div style={{flex: "1 1 auto", display: "flex"}}>
-                        <div style={{float: "left"}}>
-                            <Navigator />
-                        </div>
-                        <div style={{flexGrow: "100"}}>
-                            <EditorManager/>
-                        </div>
-                        {/*Global Snackbar: used for display toast messages to user*/}
-                        <Snackbar open={this.props.toast.open} autoHideDuration={TOAST_DURATION_MS} onClose={this.handleCloseToast}>
-                          <MuiAlert onClose={this.handleCloseToast} elevation={6} severity={this.props.toast.severity}>
-                            {this.props.toast.message}
-                          </MuiAlert>
-                        </Snackbar>
-                      </div>
-                    </div>
-                : <LandingPage />
-            )
-          : null
+        (this.state.width <= 500) // check if we can display YADA
+            ? <MobilePage/>
+            : (this.state.mounted
+                ? (
+                    this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
+                      ? <div className="App">
+                          <div style={{flex: "0 1 auto"}}>
+                            <Navbar />
+                          </div>
+                            <div style={{flex: "1 1 auto", display: "flex"}}>
+                              <div style={{float: "left"}}>
+                                  <Navigator />
+                              </div>
+                              <div style={{flexGrow: "100"}}>
+                                  <EditorManager/>
+                              </div>
+                              {/*Global Snackbar: used for display toast messages to user*/}
+                              <Snackbar open={this.props.toast.open} autoHideDuration={TOAST_DURATION_MS} onClose={this.handleCloseToast}>
+                                <MuiAlert onClose={this.handleCloseToast} elevation={6} severity={this.props.toast.severity}>
+                                  {this.props.toast.message}
+                                </MuiAlert>
+                              </Snackbar>
+                            </div>
+                          </div>
+                      : <LandingPage />
+                  )
+                : null)
       }
-      {/* <div className="NoApp">
-        This app doesn't support mobile screen widths.
-      </div> */}
     </React.Fragment>
     </MuiThemeProvider>
 };
