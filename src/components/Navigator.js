@@ -124,8 +124,8 @@ const DEFAULT_STATE = {
   selectedViewId: null,
   selectedFileOpen: false,
   editMenuAnchorElement: null,
-  renameSelected: false,
-  newViewAnchorElement: null
+  newViewAnchorElement: null, 
+  renamePopoverElement: null
 };
 
 class FileListItem extends React.Component {
@@ -148,7 +148,7 @@ class FileListItem extends React.Component {
           <InputBase 
             value={this.props.fileName}
             className="file_list_input"
-            disabled={!(this.props.selected && this.props.renameSelected)}
+            disabled={true}
             style={{color: "#1E3D59"}}
           />
           <Divider className={"fileList-divider"} orientation="vertical" />
@@ -165,7 +165,7 @@ class FileListItem extends React.Component {
           <InputBase 
             value={this.props.fileName}
             className="file_list_input"
-            disabled={!(this.props.selected && this.props.renameSelected)}
+            disabled={true}
             style={{color: "#1E3D59"}}
           />
           {this.props.childViewsExist ? (this.props.open ? <ExpandLess /> : <ExpandMore />) : null}
@@ -182,6 +182,8 @@ class FileListItem extends React.Component {
 class Navigator extends React.Component {
   
   state = DEFAULT_STATE;
+
+  renameField = React.createRef();
 
   resetState = () => { this.setState(DEFAULT_STATE); }
 
@@ -300,6 +302,7 @@ class Navigator extends React.Component {
         const fileName = {sourceName: this.getSourceName(fileId), viewName: this.getViewName(fileId)};
         handleSetCurrentOpenFileId(fileId, fileName);
       });
+      this.setState({renamePopoverElement: document.getElementById(getFileIdKeyStr({sourceId: updatedSourceId, viewId: !sourceFileType ? newFile.id : 0, viewType: sourceFileType ? FILE_TYPE.EMPTY: newFile.type}))});
       if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
         if (sourceFileType) {
           doSetLocalStorageSourceIdNames(convertFilesListStateToFileIdNamesList(newFilesList));
@@ -448,6 +451,12 @@ class Navigator extends React.Component {
         });
       });
     }
+    if(document.getElementById("rename_field") != null && this.state.renamePopoverElement != null){
+      console.log("Setting focus field");
+      // document.getElementById("rename_field").select();
+      document.getElementById("rename_field").focus();
+      // document.getElementById("rename_field").autofocus = true;
+    }
   };
 
   handleFileListClick = (fileId) => {
@@ -585,6 +594,7 @@ class Navigator extends React.Component {
                     <div>
                       <ListItem button 
                       key={sourceId} 
+                      id ={getFileIdKeyStr({ sourceId, viewId: 0 })}
                       disableGutters={true}
                       divider={true}
                       style={{"padding":"0px"}}
@@ -597,7 +607,6 @@ class Navigator extends React.Component {
                           handleEditMenuClick={this.handleEditMenuClick}
                           childViewsExist={Object.keys(views).length > 0}
                           fileName={this.getFileName({ sourceId, viewId: 0 })}
-                          renameSelected={this.state.renameSelected}
                         />
                       </ListItem>
                         {
@@ -610,6 +619,7 @@ class Navigator extends React.Component {
                                     return (
                                       <ListItem button 
                                       key={getFileIdKeyStr(fileId)} 
+                                      id ={getFileIdKeyStr(fileId)}
                                       disableGutters={true}
                                       divider={true}
                                       style={{ "paddingTop": "0px", "paddingBottom": "0px", "backgroundColor": "transparent"}}
@@ -621,7 +631,6 @@ class Navigator extends React.Component {
                                           handleEditMenuClick={this.handleEditMenuClick}
                                           fileName={this.getFileName(fileId)}
                                           viewType={views[viewId].type}
-                                          renameSelected={this.state.renameSelected}
                                           selected={viewId === this.state.selectedViewId}
                                         />
                                       </ListItem>
@@ -716,6 +725,7 @@ class Navigator extends React.Component {
           </Menu>
           <Popover
             open={Boolean(this.state.renamePopoverElement)}
+            onClose={this.handleRenamePopoverClose}
             anchorEl={this.state.renamePopoverElement}
             anchorOrigin={{
               vertical:'top',
@@ -728,6 +738,7 @@ class Navigator extends React.Component {
             id="rename_popover"
           >
             <Input
+              ref={this.renameField}
               id="rename_field"
               autoFocus={true}
               defaultValue={this.getFileName({sourceId: this.state.selectedFileId, viewId: (this.state.selectedViewId == null) ? 0 : this.state.selectedViewId})}
