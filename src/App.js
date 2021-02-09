@@ -72,24 +72,19 @@ class App extends React.Component {
                 ? (
                     this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
                       ? <div className="App">
-                          <div style={{flex: "0 1 auto"}}>
-                            <Navbar />
+                          <Navbar/>
+                          <div style={{marginTop: 64}}>
+                            <Navigator />
+                            <EditorManager/>
                           </div>
-                            <div style={{flex: "1 1 auto", display: "flex"}}>
-                              <div style={{float: "left"}}>
-                                  <Navigator />
-                              </div>
-                              <div style={{flexGrow: "100"}}>
-                                  <EditorManager/>
-                              </div>
-                              {/*Global Snackbar: used for display toast messages to user*/}
-                              <Snackbar open={this.props.toast.open} autoHideDuration={TOAST_DURATION_MS} onClose={this.handleCloseToast}>
-                                <MuiAlert onClose={this.handleCloseToast} elevation={6} severity={this.props.toast.severity}>
-                                  {this.props.toast.message}
-                                </MuiAlert>
-                              </Snackbar>
-                            </div>
-                          </div>
+      
+                          {/*Global Snackbar: used for display toast messages to user*/}
+                          <Snackbar open={this.props.toast.open} autoHideDuration={TOAST_DURATION_MS} onClose={this.handleCloseToast}>
+                            <MuiAlert onClose={this.handleCloseToast} elevation={6} severity={this.props.toast.severity}>
+                              {this.props.toast.message}
+                            </MuiAlert>
+                          </Snackbar>
+                        </div>
                       : <LandingPage />
                   )
                 : null)

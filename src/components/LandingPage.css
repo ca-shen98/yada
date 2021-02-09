@@ -1,15 +1,15 @@
 .landing-root {
-    flex-grow: 1,
-};
+    flex-grow: 1;
+}
 
 .menuButton {
     margin-right: 200px;
     width: 5%;
-};
+}
 
 .title {
     flex-grow: 1;
-    font-family: Bungee;
+    font-family: Bungee, serif;
 }
 
 .custom-navbar {
