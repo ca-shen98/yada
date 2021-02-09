@@ -313,7 +313,7 @@ class Navbar extends React.Component {
 										disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
 										onClick={this.handleSave}
 										startIcon={<SaveIcon />}
-										style= {{ borderRadius: "10px",padding: "8px 5px 8px 5px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%", minWidth: "0px"}}
+										style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%", minWidth: "0px"}}
 									>
 										{this.state.windowWidth < 1000 ? '' : 'Save'}
 									</Button>
