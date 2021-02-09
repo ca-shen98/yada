@@ -25,10 +25,7 @@
 
 .placeholder_editor {
   flex: auto;
-  overflow: auto;
-  padding: 9px 8px;
-  border: thin solid #1E3D59;
-  border-radius: 12px;
+  padding-top: 10px;
   text-align: center;
 }
 
