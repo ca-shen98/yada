@@ -82,3 +82,7 @@
   font-size: .85em;
   color: slategray;
 }
+
+.MuiBreadcrumbs-li {
+  max-width: 100%;
+}
