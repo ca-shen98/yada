@@ -16,6 +16,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import {setToastAction, TOAST_CLEAR, TOAST_DURATION_MS} from "./reducers/Toast";
 import MobilePage from "./components/MobilePage";
+import ReactGA from 'react-ga';
 
 export const THEME = createMuiTheme({
   palette: {
@@ -54,6 +55,8 @@ class App extends React.Component {
   }
   
   componentDidMount = () => {
+    ReactGA.initialize('UA-166709979-1');
+    ReactGA.pageview(window.location.pathname + window.location.search); // report page view
     if (this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
       getUserSignedInStatus().then(backendModeSignedInStatus => {
         this.props.dispatchSetBackendModeSignedInStatusAction(backendModeSignedInStatus);
