@@ -234,45 +234,64 @@ class Navbar extends React.Component {
 			<div className={"sticky-navbar scrolled"}>
 				<AppBar class="custom-navbar">
 				<Toolbar>
-					<img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "10px"}} alt={"MENU"}/>
-					<Typography variant="h5" style={{fontFamily:"Bungee", color:"#F5F0E1"}}>
-						YADA
-					</Typography>
-					<div style={{flexGrow: 1, marginLeft: "150px"}}>
-						{this.props.currentOpenFileName.sourceName === '' ? null :
-							<Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", float: "left", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
-								<Link color="inherit" style={{ color: "#F5F0E1",}}>
-									<DescriptionIcon color="secondary"/>
-									{this.props.currentOpenFileName.sourceName.length <= 11 ?  this.props.currentOpenFileName.sourceName : (this.props.currentOpenFileName.sourceName.substring(0,11) + "...")}
-								</Link>
-								{this.props.currentOpenFileName.viewName === '' ? null :
-									<Link color="inherit" style={{color: "#F5F0E1"}}>
-										{
-											(this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) ?
-												<AmpStoriesIcon color="secondary"/>:
-												(this.props.currentOpenFileId.viewType === FILE_TYPE.TEXT_VIEW) ?
-													<TextFieldsIcon color="secondary"/> :
-													null
-										}
-										{this.props.currentOpenFileName.viewName}
-									</Link>
-								}
-							</Breadcrumbs>
-						}
-						<Button
-							variant="outlined"
-							color="secondary"
-							title="save"
-							disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
-							onClick={this.handleSave}
-							startIcon={<SaveIcon />}
-							style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", float: "left"}}
-						>
-							Save
-						</Button>
+					<div style={{width: "275px"}}>
+						<Grid container>
+						<Grid item xs={2}>
+							<img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "10px"}} alt={"MENU"}/>
+						</Grid>
+						<Grid item xs={10}>
+							<Typography variant="h5" style={{fontFamily:"Bungee", color:"#F5F0E1", marginTop: "5px"}}>
+								YADA
+							</Typography>
+						</Grid>
+						</Grid>
+					</div>
+					{/* <div style={{flexGrow: 1, marginLeft: "150px"}}> */}
+					<Grid container style={{width: "80vw"}}>
+					<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 3 : 5} style={{backgroundColor: "red"}}>
+							<Grid container spacing={0}>
+								<Grid item xs={6}>
+									{this.props.currentOpenFileName.sourceName === '' ? null :
+										<Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
+											<Link underline="none" color="inherit" style={{ color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
+												<DescriptionIcon color="secondary"/>
+												{this.props.currentOpenFileName.sourceName}
+												{/* {this.props.currentOpenFileName.sourceName.length <= 11 ?  this.props.currentOpenFileName.sourceName : (this.props.currentOpenFileName.sourceName.substring(0,11) + "...")} */}
+											</Link>
+											{this.props.currentOpenFileName.viewName === '' ? null :
+												<Link underline="none" color="inherit" style={{color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
+													{
+														(this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) ?
+															<AmpStoriesIcon color="secondary"/>:
+															(this.props.currentOpenFileId.viewType === FILE_TYPE.TEXT_VIEW) ?
+																<TextFieldsIcon color="secondary"/> :
+																null
+													}
+													{this.props.currentOpenFileName.viewName}
+												</Link>
+											}
+										</Breadcrumbs>
+									}
+								</Grid>
+								<Grid item xs={4}>
+									<Button
+										variant="outlined"
+										color="secondary"
+										title="save"
+										disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
+										onClick={this.handleSave}
+										startIcon={<SaveIcon />}
+										style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", float: "left", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}
+									>
+										Save
+									</Button>
+								</Grid>
+							</Grid>
+						</Grid>
+						<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 9 : 1} style={{backgroundColor: "green"}}>
 						{
 							this.props.currentOpenFileName.viewName === '' ?
-								<div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", marginLeft: "250px", width: "50vw", borderRadius: "10px", padding: "5px"}}>
+								<div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", width: "100%", borderRadius: "10px", padding: "5px"}}>
 									<Grid container>
 										<Grid item xs={1}>
 											<div style={{marginTop: "3px", marginLeft: "20px"}}>
@@ -346,7 +365,9 @@ class Navbar extends React.Component {
 								</div>
 								: null
 						}
-					</div>
+					</Grid>
+					</Grid>
+					{/* </div> */}
 					<IconButton
 						edge="end"
 						aria-label="account of current user"
