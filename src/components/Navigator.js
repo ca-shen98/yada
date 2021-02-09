@@ -570,7 +570,8 @@ class Navigator extends React.Component {
                     component="nav"
                     aria-labelledby="nested-list-subheader"
                     subheader={
-                      <ListSubheader component="div" id="nested-list-subheader">
+                      <ListSubheader component="div" id="nested-list-subheader"
+                        style={{backgroundColor: "#F5F0E1"}}>
                         Source Files
                       </ListSubheader>
                     }

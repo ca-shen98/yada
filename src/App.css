@@ -12,12 +12,12 @@
 }
 
 .SidePane {
-  flex-grow: 100;
   width: 275px;
   display: flex;
   flex-direction: column;
   background-color: #F5F0E1;
-  height: 100%;
+  top: 64px;
+  bottom: 0;
   float: left;
   position: fixed;
 }
@@ -26,14 +26,16 @@
   margin: 10px 10px 10px 285px;
   border: thin solid #1E3D59;
   border-radius: 12px;
-  flex-grow: 100;
-  position: relative;
+  position: fixed;
+  top: 64px;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
 }
 
 .MainPane {
   position: relative;
   flex: auto;
-  padding: 9px 8px;
   display: flex;
   height: 100%;
 }

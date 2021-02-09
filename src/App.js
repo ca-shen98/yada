@@ -77,7 +77,6 @@ class App extends React.Component {
                             <Navigator />
                             <EditorManager/>
                           </div>
-      
                           {/*Global Snackbar: used for display toast messages to user*/}
                           <Snackbar open={this.props.toast.open} autoHideDuration={TOAST_DURATION_MS} onClose={this.handleCloseToast}>
                             <MuiAlert onClose={this.handleCloseToast} elevation={6} severity={this.props.toast.severity}>

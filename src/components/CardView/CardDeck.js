@@ -118,7 +118,7 @@ class CardDeck extends React.Component {
 							color="primary"
 						/>
 						}
-						label="Study Mode"
+						label="Display Mode"
 					/>
 					{this.state.studySwitch ? <StudyView cards={cards}/> : 
 						<div>
