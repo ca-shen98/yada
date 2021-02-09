@@ -1,6 +1,5 @@
 import './Navigator.css';
 import {debounce, defer} from 'lodash';
-import Cookies from 'js-cookie';
 import React from 'react';
 import {batch, connect} from 'react-redux';
 import {
@@ -22,7 +21,6 @@ import {
   setSelectNodeAction,
 } from '../reducers/CurrentOpenFileState';
 import {
-  ACCESS_TOKEN_COOKIE_KEY,
   BACKEND_MODE_SIGNED_IN_STATUS,
   getUserSignedInStatus,
   setBackendModeSignedInStatusAction,
@@ -778,21 +776,6 @@ class Navigator extends React.Component {
           </div>
         </div>
         <div id="user_controls_container">
-          {
-            this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN
-              ? <Button
-                  variant="outlined"
-                  onClick={() => {
-                    if (
-                      this.props.dispatchSetBackendModeSignedInStatusAction(
-                        BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
-                      )
-                    ) { Cookies.remove(ACCESS_TOKEN_COOKIE_KEY); }
-                  }}>
-                  Sign out
-                </Button>
-              : null
-          }
           <Button
             variant="outlined"
             onClick={() => {
