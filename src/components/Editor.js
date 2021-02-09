@@ -15,7 +15,6 @@ class Editor extends React.Component {
     const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
     return (
       <div className="MainPane">
-        <div className="editor_container">
           <div className="editor" hidden={noOpenFileIdCheck}>
             <RichMarkdownEditor
               extensions={[BlockTaggingEditorExtension]}
@@ -39,7 +38,6 @@ class Editor extends React.Component {
             hidden={!noOpenFileIdCheck}>
             <h5>Click or create a new document from the left pane</h5>
           </div>
-        </div>
         <TagMenu />
       </div>
     );

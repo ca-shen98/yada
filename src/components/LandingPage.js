@@ -41,14 +41,11 @@ class LandingPage extends React.Component {
 
   render = () =>
     <div style={{display:"flex", flexFlow: "column", height: "100vh", overflow: "hidden"}}>
-      <div className={"landing-root"} style={{flexGrow: "0 1 auto"}}>
       <AppBar position="static" class="custom-navbar">
         <Toolbar>
           <img className={"menuButton"} src={require('../images/logo.png')} style={{width: "50px", marginRight: "1%"}} alt={"MENU"}/>
         </Toolbar>
       </AppBar>
-
-    </div>
     <div style={{backgroundColor: "#F5F0E1", flex: "1 1 auto", display:"flex"}}>
     <Grid container alignItems="center">
         <Hidden smDown><Grid item md={1}/></Hidden>

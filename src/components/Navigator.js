@@ -1,6 +1,5 @@
 import './Navigator.css';
 import {debounce, defer} from 'lodash';
-import Cookies from 'js-cookie';
 import React from 'react';
 import {batch, connect} from 'react-redux';
 import {
@@ -22,9 +21,7 @@ import {
   setSelectNodeAction,
 } from '../reducers/CurrentOpenFileState';
 import {
-  ACCESS_TOKEN_COOKIE_KEY,
   BACKEND_MODE_SIGNED_IN_STATUS,
-  getUserSignedInStatus,
   setBackendModeSignedInStatusAction,
 } from '../reducers/BackendModeSignedInStatus';
 import {
@@ -573,7 +570,8 @@ class Navigator extends React.Component {
                     component="nav"
                     aria-labelledby="nested-list-subheader"
                     subheader={
-                      <ListSubheader component="div" id="nested-list-subheader">
+                      <ListSubheader component="div" id="nested-list-subheader"
+                        style={{backgroundColor: "#F5F0E1"}}>
                         Source Files
                       </ListSubheader>
                     }
@@ -765,40 +763,6 @@ class Navigator extends React.Component {
             hidden={!this.state.searching}>
             {(numFiles - numFilteredFiles) + ' of ' + (numFiles) + ' files hidden by search'}
           </div>
-        </div>
-        <div id="user_controls_container">
-          {
-            this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN
-              ? <Button
-                  variant="outlined"
-                  onClick={() => {
-                    if (
-                      this.props.dispatchSetBackendModeSignedInStatusAction(
-                        BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
-                      )
-                    ) { Cookies.remove(ACCESS_TOKEN_COOKIE_KEY); }
-                  }}>
-                  Sign out
-                </Button>
-              : null
-          }
-          <Button
-            variant="outlined"
-            onClick={() => {
-              if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
-                getUserSignedInStatus().then(backendModeSignedInStatus => {
-                  this.handleSwitchBackendModeSignedInStatus(backendModeSignedInStatus);
-                });
-              } else { this.handleSwitchBackendModeSignedInStatus(BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE); }
-            }}>
-            {
-              'Switch to ' +
-              (
-                this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
-                  ? 'cloud' : 'local'
-              ) + ' storage'
-            }
-          </Button>
         </div>
       </div>
     );

@@ -34,6 +34,7 @@ import Grid from '@material-ui/core/Grid';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 import store from "../store";
 import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE, SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
+import "./Navbar.css"
 
 const TAG_FILTERS_INPUT_ID = 'tag_filters_input';
 
@@ -230,7 +231,8 @@ class Navbar extends React.Component {
 		const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
 		const currentTagFiltersSaved =this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentTagFiltersStr);
 		return(
-			<AppBar position="static" class="custom-navbar">
+			<div className={"sticky-navbar scrolled"}>
+				<AppBar class="custom-navbar">
 				<Toolbar>
 					<img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "10px"}} alt={"MENU"}/>
 					<Typography variant="h5" style={{fontFamily:"Bungee", color:"#F5F0E1"}}>
@@ -356,6 +358,7 @@ class Navbar extends React.Component {
 					</IconButton>
 				</Toolbar>
 			</AppBar>
+			</div>
 		)
 	}
 }

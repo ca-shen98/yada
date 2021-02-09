@@ -1,0 +1,11 @@
+.sticky-navbar{
+    width: 100%;
+    transition: all .7s ease-in;
+    z-index: 1;
+}
+
+.scrolled{
+  position: fixed;
+  top: 0;
+  left: 0;
+}

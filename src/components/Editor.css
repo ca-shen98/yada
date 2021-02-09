@@ -3,6 +3,8 @@
   flex: auto;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  padding: 10px;
 }
 
 #current_open_file_controls {
@@ -23,16 +25,13 @@
 
 .placeholder_editor {
   flex: auto;
-  overflow: auto;
-  padding: 9px 8px;
-  border: thin solid #1E3D59;
-  border-radius: 12px;
+  padding-top: 10px;
   text-align: center;
 }
 
 .editor, #no_file_editor_placeholder {
   flex: auto;
-  overflow: auto;
+  overflow-y: scroll;
   padding: 9px 8px;
 }
 

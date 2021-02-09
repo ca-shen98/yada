@@ -43,7 +43,7 @@ class EditorManager extends React.Component {
 	
 	render = () => {
 		return (
-			<div className="MainPane">
+			<div className="MainContainer">
 				<div className="editor_container">
 					{
 						(this.state.fileType === FILE_TYPE.EMPTY) ?
