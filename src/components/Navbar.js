@@ -9,6 +9,11 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import Link from '@material-ui/core/Link';
 import TextFieldsIcon from '@material-ui/icons/TextFields';
 import AmpStoriesIcon from '@material-ui/icons/AmpStories';
+import Cookies from 'js-cookie';
+import {
+	ACCESS_TOKEN_COOKIE_KEY,
+	BACKEND_MODE_SIGNED_IN_STATUS
+  } from '../reducers/BackendModeSignedInStatus';
 import {
 	FILE_TYPE,
 	checkNoOpenFileId,
@@ -35,19 +40,31 @@ import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 import store from "../store";
 import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE, SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
 import "./Navbar.css"
-
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 const TAG_FILTERS_INPUT_ID = 'tag_filters_input';
 
-const DEFAULT_STATE = {
-	modifyingTagFilters: false,
-	currentTagFiltersStr: '',
-	currentParsedTagFiltersStr: '',
-	sourceSavedTagFilters: {},
-};
 
 class Navbar extends React.Component {
-	state = DEFAULT_STATE;
-	
+	constructor(props) {
+		super(props);
+		this.state = {
+			modifyingTagFilters: false,
+			currentTagFiltersStr: '',
+			currentParsedTagFiltersStr: '',
+			sourceSavedTagFilters: {},
+			windowWidth: window.innerWidth,
+			userIconElement: null
+		};
+	}
+	handleResize = (e) => {
+		console.log(window.innerWidth);
+		this.setState({ windowWidth: window.innerWidth });
+	};
+
 	handleSave = () => {
     store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE })
 		if (checkSourceFileId(this.props.currentOpenFileId)) {
@@ -216,6 +233,7 @@ class Navbar extends React.Component {
 	
 	componentDidMount = () => {
 		this.changeFile();
+		window.addEventListener("resize", this.handleResize);
 	};
 	
 	componentDidUpdate = prevProps => {
@@ -226,60 +244,89 @@ class Navbar extends React.Component {
 			this.changeFile();
 		}
 	};
+
+	componentWillUnmount() {
+		window.addEventListener("resize", this.handleResize);
+	} 
 	
+	handleUserMenuOpen = (event) => {
+		this.setState({
+		  userIconElement: event.currentTarget
+		})
+	  }
+	
+	  handleUserMenuClose = () => {
+		this.setState({
+		  userIconElement: null
+		})
+	  }
+
 	render = () => {
 		const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
 		const currentTagFiltersSaved =this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentTagFiltersStr);
 		return(
 			<div className={"sticky-navbar scrolled"}>
 				<AppBar class="custom-navbar">
-				<Toolbar>
-					<img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "10px"}} alt={"MENU"}/>
-					<Typography variant="h5" style={{fontFamily:"Bungee", color:"#F5F0E1"}}>
-						YADA
-					</Typography>
-					<div style={{flexGrow: 1, marginLeft: "150px"}}>
-						{this.props.currentOpenFileName.sourceName === '' ? null :
-							<Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", float: "left", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
-								<Link color="inherit" style={{ color: "#F5F0E1",}}>
-									<DescriptionIcon color="secondary"/>
-									{this.props.currentOpenFileName.sourceName.length <= 11 ?  this.props.currentOpenFileName.sourceName : (this.props.currentOpenFileName.sourceName.substring(0,11) + "...")}
-								</Link>
-								{this.props.currentOpenFileName.viewName === '' ? null :
-									<Link color="inherit" style={{color: "#F5F0E1"}}>
-										{
-											(this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) ?
-												<AmpStoriesIcon color="secondary"/>:
-												(this.props.currentOpenFileId.viewType === FILE_TYPE.TEXT_VIEW) ?
-													<TextFieldsIcon color="secondary"/> :
-													null
-										}
-										{this.props.currentOpenFileName.viewName}
-									</Link>
-								}
-							</Breadcrumbs>
-						}
-						<Button
-							variant="outlined"
-							color="secondary"
-							title="save"
-							disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
-							onClick={this.handleSave}
-							startIcon={<SaveIcon />}
-							style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", float: "left"}}
-						>
-							Save
-						</Button>
+				<Toolbar style={{justifyContent: "space-between"}}>
+					<div style={{width: "275px"}}>
+						<Grid container>
+						<Grid item xs={2}>
+							<img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "10px"}} alt={"MENU"}/>
+						</Grid>
+						<Grid item xs={10}>
+							<Typography variant="h5" style={{fontFamily:"Bungee", color:"#F5F0E1", marginTop: "5px"}}>
+								YADA
+							</Typography>
+						</Grid>
+						</Grid>
+					</div>
+					<Grid container style={{width: "80vw"}}>
+					<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 3 : 5}>
+							<Grid container spacing={0}>
+								<Grid item xs={6} s={6} xl={4}>
+									{this.props.currentOpenFileName.sourceName === '' ? null :
+										<Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
+											<Link underline="none" color="inherit" style={{ color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
+												<DescriptionIcon color="secondary"/>
+												{this.state.windowWidth < 1000 ? '' : this.props.currentOpenFileName.sourceName}
+											</Link>
+											{this.props.currentOpenFileName.viewName === '' ? null :
+												<Link underline="none" color="inherit" style={{color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
+													{
+														(this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) ?
+															<AmpStoriesIcon color="secondary"/>:
+															(this.props.currentOpenFileId.viewType === FILE_TYPE.TEXT_VIEW) ?
+																<TextFieldsIcon color="secondary"/> :
+																null
+													}
+													{this.state.windowWidth < 1000 ? '' : this.props.currentOpenFileName.viewName}
+												</Link>
+											}
+										</Breadcrumbs>
+									}
+								</Grid>
+								<Grid item xs={5}>
+									<Button
+										variant="outlined"
+										color="secondary"
+										title="save"
+										disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
+										onClick={this.handleSave}
+										startIcon={<SaveIcon />}
+										style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%", minWidth: "0px"}}
+									>
+										{this.state.windowWidth < 1000 ? '' : 'Save'}
+									</Button>
+								</Grid>
+							</Grid>
+						</Grid>
+						<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 6 : 1}>
 						{
 							this.props.currentOpenFileName.viewName === '' ?
-								<div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", marginLeft: "250px", width: "50vw", borderRadius: "10px", padding: "5px"}}>
-									<Grid container>
-										<Grid item xs={1}>
-											<div style={{marginTop: "3px", marginLeft: "20px"}}>
+								<div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", width: "100%", borderRadius: "10px", padding: "5px", justifyContent: "spaceBetween", display: "flex"}}>
+											<div style={{marginTop: "3px", width: "20px", marginRight: "5px"}}>
 												<SearchIcon color="primary"/>
 											</div>
-										</Grid>
-										<Grid item xs={10}>
 											<Autocomplete
 												value={this.state.currentTagFiltersStr}
 												id={TAG_FILTERS_INPUT_ID}
@@ -295,6 +342,7 @@ class Navbar extends React.Component {
 														variant="standard"
 													/>
 												)}
+												style={{width:"90%"}}
 												onChange={(event, value, reason) => {
 													this.setState({currentTagFiltersStr : value});
 													this.handleStartModifyingTagFilters();
@@ -313,8 +361,6 @@ class Navbar extends React.Component {
 												onKeyDown={event => { if (event.key === 'Escape') { this.handleCancelModifyingTagFilters(); } }}
 												onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
 											/>
-										</Grid>
-										<Grid item xs={1}>
 											<div style={{float: "right"}}>
 												{ (this.state.modifyingTagFilters) ? null :
 													(this.state.currentTagFiltersStr === '') ? null :
@@ -340,22 +386,55 @@ class Navbar extends React.Component {
 													
 												}
 											</div>
-										</Grid>
-									</Grid>
 								
 								</div>
 								: null
 						}
-					</div>
+					</Grid>
+					</Grid>
 					<IconButton
 						edge="end"
 						aria-label="account of current user"
 						aria-haspopup="true"
 						color="inherit"
 						style={{float: "right"}}
+						onClick={this.handleUserMenuOpen}
 					>
 						<AccountCircleIcon color="secondary"/>
 					</IconButton>
+					{
+					this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN ?
+					<Menu
+						id="userMenu"
+						anchorEl={this.state.userIconElement}
+						keepMounted
+						open={Boolean(this.state.userIconElement)}
+						onClose={() => this.handleUserMenuClose()}
+						anchorOrigin={{
+							vertical: 'bottom',
+							horizontal: 'center',
+						  }}
+						transformOrigin={{
+							vertical: 'top',
+							horizontal: 'center',
+						}}
+					>
+						<MenuItem 		onClick={() => {
+							if (
+							this.props.dispatchSetBackendModeSignedInStatusAction(
+								BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
+							)
+							) { Cookies.remove(ACCESS_TOKEN_COOKIE_KEY); }
+						}}>
+							<ListItemIcon>
+								<ExitToAppIcon fontSize="small" color="primary"/>
+							</ListItemIcon>
+							<ListItemText primary="Sign Out" color="primary"/>
+						</MenuItem>
+					</Menu>
+					: null
+				}
+					
 				</Toolbar>
 			</AppBar>
 			</div>
