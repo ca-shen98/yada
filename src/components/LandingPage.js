@@ -13,8 +13,8 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import ReactTypingEffect from 'react-typing-effect';
+import {Hidden} from "@material-ui/core";
 
 const CLIENT_ID = '709358329925-gic89ini15sgaenfrta1gshej1ik72jg.apps.googleusercontent.com';
 
@@ -50,9 +50,9 @@ class LandingPage extends React.Component {
 
     </div>
     <div style={{backgroundColor: "#F5F0E1", flex: "1 1 auto", display:"flex"}}>
-    <Grid container spacing={3} alignItems="center">
-        <Grid item xs={1}></Grid>
-        <Grid item xs={5} alignItems="center">
+    <Grid container alignItems="center">
+        <Hidden smDown><Grid item md={1}/></Hidden>
+        <Grid item sm={12} md={5} alignItems="center">
           <Grid container spacing={3} alignItems="center">
             <Grid item xs={3}>
               <img src={require('../images/darkLogo.png')} style={{width: "90%", marginLeft: "20%"}} alt={"YADA"}/>
@@ -72,29 +72,25 @@ class LandingPage extends React.Component {
              </Grid>
           </Grid>
           <br />
-          <div style={{marginLeft: "8%"}}>
+          <div align="center">
               <GoogleLogin
                   clientId={CLIENT_ID}
-                  buttonText="Sign in With Google"
+                  buttonText="Sign in with Google"
                   onSuccess={response => { this.handleLoginSuccess(response); }}
                   onFailure={response => { console.log(response); }}
                   cookiePolicy="single_host_origin"
                   responseType="code,token"
                   style={{float: "left"}}
                 />
-                <Button 
-                  variant="outlined"
-                  style={{"height" : "250%", marginLeft: "3%"}}
-                  onClick={() => {
-                    this.props.dispatchSetBackendModeSignedInStatusAction(BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE);
-                  }}>
-                  Use local storage
-                </Button>
           </div>
         </Grid>
-        <Grid item xs={6}>
-           <img src={require('../images/graphic.png')} style={{width: "70%", marginLeft: "10%"}} alt={"Document Graphic"}/>
+        <Hidden mdUp><Grid item sm={3}/></Hidden>
+        <Hidden smDown><Grid item md={1}/></Hidden>
+        <Grid item sm={6} md={4}>
+           <img src={require('../images/graphic.png')} style={{width: "100%"}} alt={"Document Graphic"}/>
         </Grid>
+        <Hidden smDown><Grid item md={1}/></Hidden>
+        <Hidden mdUp><Grid item sm={3}/></Hidden>
     </Grid>
     </div>
   </div>
