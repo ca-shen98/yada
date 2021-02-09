@@ -775,6 +775,28 @@ class Navigator extends React.Component {
             {(numFiles - numFilteredFiles) + ' of ' + (numFiles) + ' files hidden by search'}
           </div>
         </div>
+<<<<<<< HEAD
+=======
+        <div id="user_controls_container">
+          <Button
+            variant="outlined"
+            onClick={() => {
+              if (this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE) {
+                getUserSignedInStatus().then(backendModeSignedInStatus => {
+                  this.handleSwitchBackendModeSignedInStatus(backendModeSignedInStatus);
+                });
+              } else { this.handleSwitchBackendModeSignedInStatus(BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE); }
+            }}>
+            {
+              'Switch to ' +
+              (
+                this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
+                  ? 'cloud' : 'local'
+              ) + ' storage'
+            }
+          </Button>
+        </div>
+>>>>>>> Fixed Navbar and add sign out menu
       </div>
     );
   };
