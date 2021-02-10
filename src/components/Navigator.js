@@ -29,44 +29,40 @@ import {
   doSetLocalStorageSourceViews,
   calculateLocalStorageNextNewId,
   calculateLocalStorageNextNewFileIds,
-} from "../backend/LocalFileStorageSystemClient";
-import Button from "@material-ui/core/Button";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import Input from "@material-ui/core/Input";
-import InputAdornment from "@material-ui/core/InputAdornment";
-import SearchIcon from "@material-ui/icons/Search";
-import Divider from "@material-ui/core/Divider";
-import ListSubheader from "@material-ui/core/ListSubheader";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import Collapse from "@material-ui/core/Collapse";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import InputBase from "@material-ui/core/InputBase";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteIcon from "@material-ui/icons/Delete";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import EditIcon from "@material-ui/icons/Edit";
-import Popover from "@material-ui/core/Popover";
-import store from "../store";
-import FileStorageSystemClient from "../backend/FileStorageSystemClient";
-import CheckIcon from "@material-ui/icons/Check";
-import AddIcon from "@material-ui/icons/Add";
-import TextFieldsIcon from "@material-ui/icons/TextFields";
-import AmpStoriesIcon from "@material-ui/icons/AmpStories";
-import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
+} from '../backend/LocalFileStorageSystemClient';
+import Button from '@material-ui/core/Button';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import Input from '@material-ui/core/Input';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import SearchIcon from '@material-ui/icons/Search';
+import Divider from '@material-ui/core/Divider';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import InputBase from '@material-ui/core/InputBase';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import EditIcon from '@material-ui/icons/Edit';
+import Popover from '@material-ui/core/Popover';
+import store from '../store';
+import FileStorageSystemClient from '../backend/FileStorageSystemClient';
+import CheckIcon from '@material-ui/icons/Check';
+import AddIcon from '@material-ui/icons/Add';
+import TextFieldsIcon from '@material-ui/icons/TextFields';
+import AmpStoriesIcon from '@material-ui/icons/AmpStories';
+import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
+import {setStepsNavigatorAction} from "../reducers/Steps";
 
-export const handleSetCurrentOpenFileId = (
-  fileId,
-  fileName = { sourceName: "", viewName: "" }
-) => {
-  if (!validateFileIdObj(fileId)) {
-    return false;
-  }
+export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "viewName": ''}) => {
+  if (!validateFileIdObj(fileId)) { return false; }
   const currentOpenFileId = store.getState().currentOpenFileId;
   if (
     fileId.sourceId === currentOpenFileId.sourceId &&
@@ -152,6 +148,10 @@ const DEFAULT_STATE = {
 };
 
 class FileListItem extends React.Component {
+  componentDidMount = () => {
+    this.props.dispatchSetStepsNavigatorAction(true);
+  }
+
   render = () => {
     if (this.props.fileId.viewId !== 0) {
       const viewType = this.props.viewType;
@@ -1076,9 +1076,17 @@ export default connect(
     currentOpenFileId: state.currentOpenFileId,
     backendModeSignedInStatus: state.backendModeSignedInStatus,
   }),
+<<<<<<< HEAD
   (dispatch) => ({
     dispatchSetBackendModeSignedInStatusAction: (mode) =>
       dispatch(setBackendModeSignedInStatusAction(mode)),
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
   })
+=======
+  dispatch => ({
+    dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
+    dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
+    dispatchSetStepsNavigatorAction: stepsNavigator => dispatch(setStepsNavigatorAction(stepsNavigator))
+  }),
+>>>>>>> Tour stuff
 )(Navigator);
