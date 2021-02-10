@@ -11,6 +11,8 @@ import RichMarkdownEditor from "rich-markdown-editor";
 import {setToastAction, TOAST_SEVERITY} from "../../reducers/Toast";
 import store from "../../store";
 import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../../reducers/CurrentOpenFileState";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Switch from "@material-ui/core/Switch";
 
 
 class TextView extends React.Component {
@@ -19,6 +21,7 @@ class TextView extends React.Component {
 		super(props);
 		this.state = {
 			allTagsData: props.data.allTagsData,
+			displaySwitch: false,
 		}
 		this.props.setTagsInView(props.data.tagsInView);
 	}
@@ -76,7 +79,21 @@ class TextView extends React.Component {
 		} else {
 			return (
 				<Container className="viewContainer">
-					<TagEditor viewType={FILE_TYPE.TEXT_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
+					<FormControlLabel
+						control={
+							<Switch
+								checked={this.state.displaySwitch}
+								onChange={() => {this.setState({displaySwitch: !this.state.displaySwitch})}}
+								name="checkedB"
+								color="primary"
+							/>
+						}
+						label="Display Mode"
+					/>
+					{
+						!this.state.displaySwitch &&
+						<TagEditor viewType={FILE_TYPE.TEXT_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
+					}
 					{
 						this.props.tagsInView.length > 0 &&
 						<RichMarkdownEditor

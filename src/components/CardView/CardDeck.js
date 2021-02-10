@@ -23,7 +23,7 @@ class CardDeck extends React.Component {
 		super(props);
 		this.state = {
 			allTagsData: props.data.allTagsData,
-			studySwitch: false,
+			displaySwitch: false,
 		}
 		this.props.setTagsInView(props.data.tagsInView);
 	}
@@ -89,7 +89,7 @@ class CardDeck extends React.Component {
 			);
 		} else {
 			const cards = [];
-			if(this.state.studySwitch) {
+			if(this.state.displaySwitch) {
 				for (let i = 0; i < this.props.tagsInView.length; i+=2) {
 					cards.push(this.constructCard(i));
 				}
@@ -112,15 +112,15 @@ class CardDeck extends React.Component {
 					<FormControlLabel
 						control={
 						<Switch
-							checked={this.state.studySwitch}
-							onChange={() => {this.setState({studySwitch: !this.state.studySwitch})}}
+							checked={this.state.displaySwitch}
+							onChange={() => {this.setState({displaySwitch: !this.state.displaySwitch})}}
 							name="checkedB"
 							color="primary"
 						/>
 						}
 						label="Display Mode"
 					/>
-					{this.state.studySwitch ? <StudyView cards={cards}/> : 
+					{this.state.displaySwitch ? <StudyView cards={cards}/> :
 						<div>
 							<TagEditor viewType={FILE_TYPE.CARD_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
 							{cards}
