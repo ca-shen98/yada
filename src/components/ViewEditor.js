@@ -19,6 +19,29 @@ const DEFAULT_STATE = {
 	fileType: FILE_TYPE.EMPTY
 };
 
+export const handleSaveViewSpec = async () => {
+	FileStorageSystemClient.doSaveViewSpec(
+		store.getState().tagsInView,
+		store.getState().currentOpenFileId.sourceId,
+		store.getState().currentOpenFileId.viewId,
+		store.getState().currentOpenFileId.viewType,
+		false,
+	)
+		.then(() => {
+			store.dispatch(setToastAction({
+				message: "Saved view",
+				severity: TOAST_SEVERITY.SUCCESS,
+				open: true
+			}));
+			store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+		})
+		.catch(() => store.dispatch(setToastAction({
+			message: "Failed to save view",
+			severity: TOAST_SEVERITY.ERROR,
+			open: true
+		})));
+};
+
 class ViewEditor extends React.Component {
 	
 	state = DEFAULT_STATE;

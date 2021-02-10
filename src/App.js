@@ -6,6 +6,7 @@ import {
   getUserSignedInStatus,
   setBackendModeSignedInStatusAction,
 } from './reducers/BackendModeSignedInStatus';
+import {checkSourceFileId} from '../util/FileIdAndTypeUtils';
 import LandingPage from './components/LandingPage';
 import Navigator from './components/Navigator';
 import Navbar from './components/Navbar';
@@ -17,6 +18,9 @@ import MuiAlert from '@material-ui/lab/Alert';
 import {setToastAction, TOAST_CLEAR, TOAST_DURATION_MS} from "./reducers/Toast";
 import MobilePage from "./components/MobilePage";
 import ReactGA from 'react-ga';
+import { handleSaveSourceContent } from './components/SourceEditorWithTagFiltersInput';
+import { handleSaveViewSpec } from './components/ViewEditor';
+import { checkViewFileId } from './util/FileIdAndTypeUtils';
 
 export const THEME = createMuiTheme({
   palette: {
@@ -35,6 +39,16 @@ class App extends React.Component {
     mounted: false,
     width: window.innerWidth
   };
+  
+  keydownHandler = event => {
+    if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey) && event.keyCode === 83) {
+      event.preventDefault();
+      if (this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) {
+        if (checkSourceFileId(this.props.currentOpenFileId)) { handleSaveSourceContent(); }
+        else if (checkViewFileId(this.props.currentOpenFileId)) { handleSaveViewSpec(); }
+      }
+    }
+  }
 
   handleCloseToast = () => {
     this.props.dispatchSetToastAction(TOAST_CLEAR);
@@ -45,6 +59,7 @@ class App extends React.Component {
   };
   
   componentWillMount() {
+    document.addEventListener('keydown',this.keydownHandler);
     window.addEventListener('resize', this.handleWindowSizeChange);
   }
   
@@ -52,6 +67,7 @@ class App extends React.Component {
   // when the component is not mounted anymore
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleWindowSizeChange);
+    document.removeEventListener('keydown', this.keydownHandler);
   }
   
   componentDidMount = () => {

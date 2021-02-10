@@ -20,39 +20,32 @@ const DEFAULT_STATE = {
   fileContent: '',
 };
 
+export const handleSaveSourceContent = async () => {
+  FileStorageSystemClient.doSaveSourceContent(
+      BlockTaggingEditorExtension.editor.value(true),
+      store.getState().currentOpenFileId.sourceId,
+  ).then(success => {
+    if (success) {
+      store.dispatch(setToastAction({
+        message: "Saved source file",
+        severity: TOAST_SEVERITY.SUCCESS,
+        open: true
+      }));
+      store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+    }
+    else {
+      store.dispatch(setToastAction({
+        message: "Failed to save source file",
+        severity: TOAST_SEVERITY.ERROR,
+        open: true
+      }));
+    }
+  });
+};
+
 class SourceEditorWithTagFiltersInput extends React.Component {
 
   state = DEFAULT_STATE;
-  
-  keydownHandler = event => {
-    if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey) && event.keyCode === 83) {
-      event.preventDefault();
-      if (this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT) {
-        if (checkSourceFileId(this.props.currentOpenFileId)) {
-          FileStorageSystemClient.doSaveSourceContent(
-              BlockTaggingEditorExtension.editor.value(true),
-              this.props.currentOpenFileId.sourceId,
-          ).then(success => {
-            if (success) {
-              this.props.dispatchSetToastAction({
-                message: "Saved source file",
-                severity: TOAST_SEVERITY.SUCCESS,
-                open: true
-              });
-              store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
-            }
-            else {
-              this.props.dispatchSetToastAction({
-                message: "Failed to save source file",
-                severity: TOAST_SEVERITY.ERROR,
-                open: true
-              });
-            }
-          });
-        }
-      }
-    }
-  }
   
   changeFile = async () => {
     if (!checkNoOpenFileId(this.props.currentOpenFileId)) {
@@ -79,13 +72,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
     }
   };
 
-  componentDidMount = () => {
-    document.addEventListener('keydown',this.keydownHandler);
-    this.changeFile();
-  };
-  
-  componentWillUnmount = () => { document.removeEventListener('keydown', this.keydownHandler); };
-  
+  componentDidMount = () => { this.changeFile(); };
   
   componentDidUpdate = prevProps => {
     if (

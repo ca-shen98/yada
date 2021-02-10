@@ -23,48 +23,17 @@ class TextView extends React.Component {
 		this.props.setTagsInView(props.data.tagsInView);
 	}
 	
-	keydownHandler = (event) => {
-		if ((window.navigator.platform.match("Mac") ? event.metaKey : event.ctrlKey)  && event.keyCode === 83) {
-			event.preventDefault();
-			FileStorageSystemClient.doSaveViewSpec(
-				this.props.tagsInView,
-				this.props.currentOpenFileId.sourceId,
-				this.props.currentOpenFileId.viewId,
-				FILE_TYPE.TEXT_VIEW,
-				false,
-				)
-				.then(() => {
-					this.props.dispatchSetToastAction({
-						message: "Saved view",
-						severity: TOAST_SEVERITY.SUCCESS,
-						open: true
-					});
-					store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
-				})
-				.catch(() => this.props.dispatchSetToastAction({
-					message: "Failed to save view",
-					severity: TOAST_SEVERITY.ERROR,
-					open: true
-				}));
-		}
-	};
-	
 	constructTextView = () => {
 		return {
 			"type": "doc",
 			"content": this.props.tagsInView.map(t => this.state.allTagsData[t]["content"])
 		};
 	};
-	
-	componentDidMount = () => {
-		document.addEventListener('keydown',this.keydownHandler);
-	};
 	componentDidUpdate = prevProps => {
 		if (prevProps.tagsInView !== this.props.tagsInView) {
 			this.props.setTagsInView(this.props.tagsInView);
 		}
 	};
-	componentWillUnmount = () => { document.removeEventListener('keydown',this.keydownHandler); };
 	
 	render = () => {
 		if (!this.state.allTagsData || this.props.tagsInView == null) {

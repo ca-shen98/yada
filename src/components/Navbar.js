@@ -21,6 +21,8 @@ import {
 	checkViewFileId,
 	NO_OPEN_FILE_ID
 } from '../util/FileIdAndTypeUtils';
+import { handleSaveSourceContent } from './SourceEditorWithTagFiltersInput';
+import { handleSaveViewSpec } from './components/ViewEditor';
 import Button from '@material-ui/core/Button';
 import SaveIcon from '@material-ui/icons/Save';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
@@ -66,53 +68,8 @@ class Navbar extends React.Component {
 	};
 
 	handleSave = () => {
-    store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE })
-		if (checkSourceFileId(this.props.currentOpenFileId)) {
-			FileStorageSystemClient.doSaveSourceContent(
-				BlockTaggingEditorExtension.editor.value(true),
-				this.props.currentOpenFileId.sourceId,
-			).then(success => {
-				if (success) {
-					this.props.dispatchSetToastAction({
-						message: "Saved source file",
-						severity: TOAST_SEVERITY.SUCCESS,
-						open: true
-					});
-				}
-				else {
-					this.props.dispatchSetToastAction({
-						message: "Failed to save source file",
-						severity: TOAST_SEVERITY.ERROR,
-						open: true
-          });
-          store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
-				}
-			});
-		} else if (checkViewFileId(this.props.currentOpenFileId) && this.props.currentOpenFileId.viewType !== NO_OPEN_FILE_ID.viewType) {
-			FileStorageSystemClient.doSaveViewSpec(
-				this.props.tagsInView,
-				this.props.currentOpenFileId.sourceId,
-				this.props.currentOpenFileId.viewId,
-				this.props.currentOpenFileId.viewType,
-				false,
-				)
-				.then(() => {
-					this.props.dispatchSetToastAction({
-						message: "View saved",
-						severity: TOAST_SEVERITY.SUCCESS,
-						open: true
-					});
-					store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
-				})
-				.catch(() => {
-          this.props.dispatchSetToastAction({
-            message: "Failed to save view",
-            severity: TOAST_SEVERITY.ERROR,
-            open: true
-          });
-          store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
-        });
-		}
+		if (checkSourceFileId(this.props.currentOpenFileId)) { handleSaveSourceContent(); }
+		else if (checkViewFileId(this.props.currentOpenFileId)) { handleSaveViewSpec(); }
 	}
 	
 	handleCancelModifyingTagFilters = () => {
