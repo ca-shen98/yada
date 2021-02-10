@@ -1,3 +1,4 @@
+yarn install
 cwd=$(pwd)
 source dev.env
 
