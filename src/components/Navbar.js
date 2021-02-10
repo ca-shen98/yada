@@ -323,7 +323,7 @@ class Navbar extends React.Component {
 						<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 6 : 1}>
 						{
 							this.props.currentOpenFileName.viewName === '' ?
-								<div style={{backgroundColor: "rgba(245, 240, 225, 0.8)", width: "100%", borderRadius: "10px", padding: "5px", justifyContent: "spaceBetween", display: "flex"}}>
+								<div id="searchBar" style={{backgroundColor: "rgba(245, 240, 225, 0.8)", width: "100%", borderRadius: "10px", padding: "5px", justifyContent: "spaceBetween", display: "flex"}}>
 											<div style={{marginTop: "3px", width: "20px", marginRight: "5px"}}>
 												<SearchIcon color="primary"/>
 											</div>
