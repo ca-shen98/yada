@@ -3,7 +3,7 @@ import {defer} from 'lodash';
 import {v4 as uuidv4} from 'uuid';
 import React from 'react';
 import {connect} from 'react-redux';
-import {SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from '../reducers/CurrentOpenFileState';
+import {SAVE_DIRTY_STATUS, setSaveDirtyStatusAction} from '../reducers/CurrentOpenFileState';
 
 import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
@@ -72,7 +72,7 @@ class TagMenu extends React.Component {
       )
     );
     this.setState({ selectNodeAttrs: newSelectNodeAttrs });
-    this.props.dispatchSetSaveDirtyFlagAction();
+    this.props.dispatchSetSaveDirtyStatusAction(SAVE_DIRTY_STATUS.DIRTY);
     document.getElementById(ADD_TAG_INPUT_ID).value = '';
     return true;
   };
@@ -93,7 +93,7 @@ class TagMenu extends React.Component {
       )
     );
     this.setState({ selectNodeAttrs: newSelectNodeAttrs, currentTag : '' });
-    this.props.dispatchSetSaveDirtyFlagAction();
+    this.props.dispatchSetSaveDirtyStatusAction(SAVE_DIRTY_STATUS.DIRTY);
     return true;
   };
 
@@ -124,7 +124,7 @@ class TagMenu extends React.Component {
       )
     );
     this.setState({ selectNodeAttrs: newSelectNodeAttrs });
-    this.props.dispatchSetSaveDirtyFlagAction();
+    this.props.dispatchSetSaveDirtyStatusAction(SAVE_DIRTY_STATUS.DIRTY);
     return true;
   };
   
@@ -318,11 +318,11 @@ class TagMenu extends React.Component {
 export default connect(
   state => ({
     selectNode: state.selectNode,
-    saveDirtyFlag: state.saveDirtyFlag,
+    saveDirtyStatus: state.saveDirtyStatus,
     currentOpenFileId: state.currentOpenFileId,
   }),
   dispatch => ({
-    dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
+    dispatchSetSaveDirtyStatusAction: status => dispatch(setSaveDirtyStatusAction(status)),
     dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
   }),
 )(TagMenu);

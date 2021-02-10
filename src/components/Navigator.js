@@ -13,7 +13,8 @@ import {
 } from '../util/FileIdAndTypeUtils';
 import {INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY} from './SourceEditorWithTagFiltersInput';
 import {
-  CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
+  setSaveDirtyStatusAction,
+  SAVE_DIRTY_STATUS,
   INITIAL_FILE_ID_LOCAL_STORAGE_KEY,
   INITIAL_FILE_NAME_LOCAL_STORAGE_KEY,
   setCurrentOpenFileIdAction,
@@ -64,11 +65,11 @@ export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "
   if (!validateFileIdObj(fileId)) { return false; }
   const currentOpenFileId = store.getState().currentOpenFileId;
   if (fileId.sourceId === currentOpenFileId.sourceId && fileId.viewId === currentOpenFileId.viewId) { return true; }
-  if (!store.getState().saveDirtyFlag || window.confirm('confirm discard unsaved changes')) {
+  if (store.getState().saveDirtyStatus !== SAVE_DIRTY_STATUS.NONE || window.confirm('confirm discard unsaved changes')) {
     batch(() => {
       store.dispatch(setCurrentOpenFileIdAction(fileId));
       store.dispatch(setCurrentOpenFileNameAction(fileName));
-      store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+      store.dispatch(setSaveDirtyStatusAction(SAVE_DIRTY_STATUS.NONE));
       store.dispatch(setSelectNodeAction(null));
     });
     localStorage.setItem(INITIAL_FILE_ID_LOCAL_STORAGE_KEY, JSON.stringify(fileId));

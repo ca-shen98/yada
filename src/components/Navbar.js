@@ -21,6 +21,7 @@ import {
 	checkViewFileId,
 	NO_OPEN_FILE_ID
 } from '../util/FileIdAndTypeUtils';
+import {SAVE_DIRTY_STATUS} from '../reducers/CurrentOpenFileState';
 import { handleSaveSourceContent } from './SourceEditorWithTagFiltersInput';
 import { handleSaveViewSpec } from './components/ViewEditor';
 import Button from '@material-ui/core/Button';
@@ -39,8 +40,6 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
-import store from "../store";
-import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE, SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
 import "./Navbar.css"
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Menu from '@material-ui/core/Menu';
@@ -267,7 +266,7 @@ class Navbar extends React.Component {
 										variant="outlined"
 										color="secondary"
 										title="save"
-										disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
+										disabled={noOpenFileIdCheck || this.props.saveDirtyStatus !== SAVE_DIRTY_STATUS.DIRTY}
 										onClick={this.handleSave}
 										startIcon={<SaveIcon />}
 										style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%", minWidth: "0px"}}
@@ -405,7 +404,7 @@ export default connect(
 		currentOpenFileName: state.currentOpenFileName,
 		backendModeSignedInStatus: state.backendModeSignedInStatus,
 		tagsInView: state.tagsInView,
-		saveDirtyFlag: state.saveDirtyFlag
+		saveDirtyStatus: state.saveDirtyStatus,
 	}),
 	dispatch => ({
 		dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),

@@ -2,9 +2,7 @@ import './Editor.css';
 import React from 'react';
 import {connect} from 'react-redux';
 import {checkNoOpenFileId} from '../util/FileIdAndTypeUtils';
-import {
-  SET_SAVE_DIRTY_FLAG_ACTION_TYPE,
-} from '../reducers/CurrentOpenFileState';
+import {SAVE_DIRTY_STATUS, setSaveDirtyStatusAction} from '../reducers/CurrentOpenFileState';
 import {TextSelection} from 'prosemirror-state';
 import TagMenu from './TagMenu';
 import RichMarkdownEditor from 'rich-markdown-editor';
@@ -30,7 +28,11 @@ class Editor extends React.Component {
                   event.target.blur();
                 }
               }}
-              onChange={() => { if (!this.props.saveDirtyFlag) { this.props.dispatchSetSaveDirtyFlagAction(); } }}
+              onChange={() => {
+                if (this.props.saveDirtyStatus === SAVE_DIRTY_STATUS.NONE) {
+                  this.props.dispatchSetSaveDirtyStatusAction(SAVE_DIRTY_STATUS.DIRTY);
+                }
+              }}
             />
           </div>
           <div
@@ -45,6 +47,6 @@ class Editor extends React.Component {
 };
 
 export default connect(
-  state => ({ currentOpenFileId: state.currentOpenFileId, currentOpenFileName: state.currentOpenFileName, saveDirtyFlag: state.saveDirtyFlag }),
-  dispatch => ({ dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }) }),
+  state => ({ currentOpenFileId: state.currentOpenFileId, currentOpenFileName: state.currentOpenFileName, saveDirtyStatus: state.saveDirtyStatus }),
+  dispatch => ({ dispatchSetSaveDirtyStatusAction: status => dispatch(setSaveDirtyStatusAction(status)) }),
 )(Editor);

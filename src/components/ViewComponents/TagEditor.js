@@ -6,7 +6,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import {DragDropContext} from 'react-beautiful-dnd';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
-import {SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../../reducers/CurrentOpenFileState";
+import {SAVE_DIRTY_STATUS, setSaveDirtyStatusAction} from "../../reducers/CurrentOpenFileState";
 
 export const TAG_HOLDERS = {
 	AVAILABLE: "tags_available",
@@ -117,7 +117,7 @@ class TagEditor extends React.Component {
 	
 	componentDidUpdate(prevProps, prevState, snapshot) {
 		if (prevProps.tagsInView !== this.props.tagsInView) {
-			if (!this.props.saveDirtyFlag) { this.props.dispatchSetSaveDirtyFlagAction(); }
+			if (this.props.saveDirtyStatus === SAVE_DIRTY_STATUS.NONE) { this.props.dispatchSetSaveDirtyStatusAction(SAVE_DIRTY_STATUS.DIRTY); }
 			const tagsInView = new Set(this.props.tagsInView);
 			const availableTags = Object.keys(this.props.allTagsData).filter(t => !tagsInView.has(t));
 			const newState = Object.assign({}, this.state);
@@ -158,9 +158,9 @@ class TagEditor extends React.Component {
 }
 
 export default connect(
-	state => ({ tagsInView: state.tagsInView, saveDirtyFlag: state.saveDirtyFlag }),
+	state => ({ tagsInView: state.tagsInView, saveDirtyStatus: state.saveDirtyStatus }),
 	dispatch => ({
 		setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)),
-		dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE })
+		dispatchSetSaveDirtyStatusAction: status => dispatch(setSaveDirtyStatusAction(status)),
 	}),
 )(TagEditor);

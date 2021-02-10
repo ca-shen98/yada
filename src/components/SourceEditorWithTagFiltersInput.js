@@ -11,7 +11,7 @@ import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 import {BACKEND_MODE_SIGNED_IN_STATUS} from "../reducers/BackendModeSignedInStatus";
 import store from "../store";
-import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
+import {SAVE_DIRTY_STATUS, setSaveDirtyStatusAction} from "../reducers/CurrentOpenFileState";
 
 export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = 'initialTagFilters';
 
@@ -21,6 +21,7 @@ const DEFAULT_STATE = {
 };
 
 export const handleSaveSourceContent = async () => {
+  store.dispatch(setSaveDirtyStatusAction(SAVE_DIRTY_STATUS.SAVING));
   FileStorageSystemClient.doSaveSourceContent(
       BlockTaggingEditorExtension.editor.value(true),
       store.getState().currentOpenFileId.sourceId,
@@ -31,7 +32,7 @@ export const handleSaveSourceContent = async () => {
         severity: TOAST_SEVERITY.SUCCESS,
         open: true
       }));
-      store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+      store.dispatch(setSaveDirtyStatusAction(SAVE_DIRTY_STATUS.NONE));
     }
     else {
       store.dispatch(setToastAction({

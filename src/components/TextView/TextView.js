@@ -10,7 +10,6 @@ import {FILE_TYPE} from "../../util/FileIdAndTypeUtils";
 import RichMarkdownEditor from "rich-markdown-editor";
 import {setToastAction, TOAST_SEVERITY} from "../../reducers/Toast";
 import store from "../../store";
-import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../../reducers/CurrentOpenFileState";
 
 
 class TextView extends React.Component {

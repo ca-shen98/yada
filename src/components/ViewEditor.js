@@ -9,6 +9,7 @@ import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import {handleSetCurrentOpenFileId} from "./Navigator";
 import CardDeck from "./CardView/CardDeck";
 import TextView from "./TextView/TextView";
+import {SAVE_DIRTY_STATUS, setSaveDirtyStatusAction} from '../reducers/CurrentOpenFileState';
 import {setTagsInViewAction} from "../reducers/SetTagsInView";
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 
@@ -20,6 +21,7 @@ const DEFAULT_STATE = {
 };
 
 export const handleSaveViewSpec = async () => {
+	store.dispatch(setSaveDirtyStatusAction(SAVE_DIRTY_STATUS.SAVING));
 	FileStorageSystemClient.doSaveViewSpec(
 		store.getState().tagsInView,
 		store.getState().currentOpenFileId.sourceId,
@@ -33,7 +35,7 @@ export const handleSaveViewSpec = async () => {
 				severity: TOAST_SEVERITY.SUCCESS,
 				open: true
 			}));
-			store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+			store.dispatch(setSaveDirtyStatusAction(SAVE_DIRTY_STATUS.NONE));
 		})
 		.catch(() => store.dispatch(setToastAction({
 			message: "Failed to save view",

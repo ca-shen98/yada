@@ -41,11 +41,18 @@ export const currentOpenFileNameReducer = (state = initialFileName, action) =>
   action.type !== SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE || !validateHasFileNameObj(action)
     ? state : action.fileName;
 
-export const SET_SAVE_DIRTY_FLAG_ACTION_TYPE = 'saveDirtyFlag/set';
-export const CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE = 'saveDirtyFlag/clear';
-export const saveDirtyFlagReducer = (state = false, action) =>
-  action.type !== SET_SAVE_DIRTY_FLAG_ACTION_TYPE && action.type !== CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE
-    ? state : action.type === SET_SAVE_DIRTY_FLAG_ACTION_TYPE;
+export const SAVE_DIRTY_STATUS = {
+  NONE: 'NONE',
+  DIRTY: 'DIRTY',
+  SAVING: 'SAVING',
+};
+
+const SET_SAVE_DIRTY_STATUS_ACTION_TYPE = 'saveDirtyStatus/set';
+export const setSaveDirtyStatusAction = status => ({ type: SET_SAVE_DIRTY_STATUS_ACTION_TYPE, status });
+export const saveDirtyStatusReducer = (state = false, action) =>
+  action.type !== SET_SAVE_DIRTY_STATUS_ACTION_TYPE || !action.hasOwnProperty('status') ||
+  !SAVE_DIRTY_STATUS.hasOwnProperty(action.status)
+    ? state : status;
 
 const SET_SELECT_NODE_ACTION_TYPE = 'selectNode/set';
 export const setSelectNodeAction = selectNode => ({ type: SET_SELECT_NODE_ACTION_TYPE, selectNode });
