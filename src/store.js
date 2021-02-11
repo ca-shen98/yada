@@ -1,9 +1,14 @@
-import {configureStore} from '@reduxjs/toolkit';
-import {combineReducers} from 'redux';
-import {currentOpenFileIdReducer, saveDirtyFlagReducer, selectNodeReducer, currentOpenFileNameReducer} from './reducers/CurrentOpenFileState';
-import {backendModeSignedInStatusReducer} from './reducers/BackendModeSignedInStatus';
-import {setTagsInViewReducer} from "./reducers/SetTagsInView";
-import {setToastReducer} from "./reducers/Toast";
+import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers } from "redux";
+import {
+  currentOpenFileIdReducer,
+  saveDirtyFlagReducer,
+  selectNodeReducer,
+  currentOpenFileNameReducer,
+} from "./reducers/CurrentOpenFileState";
+import { backendModeSignedInStatusReducer } from "./reducers/BackendModeSignedInStatus";
+import { setTagsInViewReducer } from "./reducers/SetTagsInView";
+import { setToastReducer } from "./reducers/Toast";
 
 export default configureStore({
   reducer: combineReducers({
