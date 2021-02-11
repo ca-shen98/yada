@@ -395,7 +395,9 @@ class Navbar extends React.Component {
 												{ (this.state.modifyingTagFilters) ? null :
 													(this.state.currentTagFiltersStr === '') ? null :
 														(currentTagFiltersSaved) ?
-															<IconButton title="Unpersist Filter" style={{padding: "0px", paddingRight: "10px", paddingTop: "5px"}}>
+															<IconButton
+																title="Unpersist Filter"
+																style={{padding: "0px", paddingRight: "10px", paddingTop: "5px"}}>
 																<RemoveCircleIcon
 																	color="primary"
 																	onClick={() => {
@@ -405,7 +407,9 @@ class Navbar extends React.Component {
 																	}}
 																/>
 															</IconButton> :
-															<IconButton title="Persist Filter" style={{padding: "0px", paddingRight: "10px", paddingTop: "5px"}}>
+															<IconButton
+																title="Persist Filter"
+																style={{padding: "0px", paddingRight: "10px", paddingTop: "5px"}}>
 																<SaveIcon
 																	color="primary"
 																	onClick={() => {
@@ -423,7 +427,7 @@ class Navbar extends React.Component {
 					</Grid>
 					</Grid>
 					<IconButton
-                        title="Report a Bug"
+                        			title="Report a Bug"
 						edge="end"
 						aria-label="bug report"
 						aria-haspopup="true"
@@ -434,7 +438,7 @@ class Navbar extends React.Component {
 						<BugReportIcon color="secondary"/>
 					</IconButton>
 					<IconButton
-                        title="Account Options"
+                        			title="Account Options"
 						edge="end"
 						aria-label="account of current user"
 						aria-haspopup="true"
