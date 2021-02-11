@@ -304,13 +304,24 @@ class Navbar extends React.Component {
 							<Grid container spacing={0}>
 								<Grid item xs={6} s={6} xl={4}>
 									{this.props.currentOpenFileName.sourceName === '' ? null :
-										<Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
-											<Link underline="none" color="inherit" style={{ color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
+										<Breadcrumbs
+											aria-label="breadcrumb"
+											color="secondary"
+											style={{marginRight: "10px", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
+											<Link
+												title={this.props.currentOpenFileName.sourceName}
+												underline="none"
+												color="inherit"
+												style={{ color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
 												<DescriptionIcon color="secondary"/>
 												{this.state.windowWidth < 1000 ? '' : this.props.currentOpenFileName.sourceName}
 											</Link>
 											{this.props.currentOpenFileName.viewName === '' ? null :
-												<Link underline="none" color="inherit" style={{color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
+												<Link
+													title={this.props.currentOpenFileName.viewName}
+													underline="none"
+													color="inherit"
+													style={{color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
 													{
 														(this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) ?
 															<AmpStoriesIcon color="secondary"/>:
@@ -328,7 +339,7 @@ class Navbar extends React.Component {
 									<Button
 										variant="outlined"
 										color="secondary"
-										title="save"
+										title="Save"
 										disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
 										onClick={this.handleSave}
 										startIcon={<SaveIcon />}
@@ -412,6 +423,7 @@ class Navbar extends React.Component {
 					</Grid>
 					</Grid>
 					<IconButton
+                        title="Report a Bug"
 						edge="end"
 						aria-label="bug report"
 						aria-haspopup="true"
@@ -422,6 +434,7 @@ class Navbar extends React.Component {
 						<BugReportIcon color="secondary"/>
 					</IconButton>
 					<IconButton
+                        title="Account Options"
 						edge="end"
 						aria-label="account of current user"
 						aria-haspopup="true"
