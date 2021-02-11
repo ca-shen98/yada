@@ -8,13 +8,14 @@ import {
   SERVER_BASE_URL,
   ACCESS_TOKEN_COOKIE_KEY,
   setBackendModeSignedInStatusAction,
-} from "../reducers/BackendModeSignedInStatus";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
-import ReactTypingEffect from "react-typing-effect";
-import { Hidden } from "@material-ui/core";
+} from '../reducers/BackendModeSignedInStatus';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import ReactTypingEffect from 'react-typing-effect';
+import {Hidden} from "@material-ui/core";
+import { setNewUserAction } from '../reducers/Steps';
 
 const CLIENT_ID =
   "709358329925-gic89ini15sgaenfrta1gshej1ik72jg.apps.googleusercontent.com";
@@ -42,12 +43,9 @@ class LandingPage extends React.Component {
       console.log(e);
     }
     if (response && response.status === 201) {
-      Cookies.set(ACCESS_TOKEN_COOKIE_KEY, token, {
-        expires: new Date(expiry),
-      });
-      this.props.dispatchSetBackendModeSignedInStatusAction(
-        BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN
-      );
+      this.props.dispatchNewUserAction(response.data.is_new);
+      Cookies.set(ACCESS_TOKEN_COOKIE_KEY, token, { expires: new Date(expiry) });
+      this.props.dispatchSetBackendModeSignedInStatusAction(BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN);
     }
   };
 
@@ -155,9 +153,9 @@ class LandingPage extends React.Component {
 }
 
 export default connect(
-  (state) => ({ backendModeSignedInStatus: state.backendModeSignedInStatus }),
-  (dispatch) => ({
-    dispatchSetBackendModeSignedInStatusAction: (mode) =>
-      dispatch(setBackendModeSignedInStatusAction(mode)),
-  })
+  state => ({ backendModeSignedInStatus: state.backendModeSignedInStatus }),
+  dispatch => ({
+    dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
+    dispatchNewUserAction: newUser => dispatch(setNewUserAction(newUser))
+  }),
 )(LandingPage);

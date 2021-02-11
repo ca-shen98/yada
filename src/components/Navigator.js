@@ -59,7 +59,6 @@ import AddIcon from '@material-ui/icons/Add';
 import TextFieldsIcon from '@material-ui/icons/TextFields';
 import AmpStoriesIcon from '@material-ui/icons/AmpStories';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
-import {setStepsNavigatorAction} from "../reducers/Steps";
 
 export const handleSetCurrentOpenFileId = (fileId, fileName={"sourceName": '', "viewName": ''}) => {
   if (!validateFileIdObj(fileId)) { return false; }
@@ -148,10 +147,6 @@ const DEFAULT_STATE = {
 };
 
 class FileListItem extends React.Component {
-  componentDidMount = () => {
-    this.props.dispatchSetStepsNavigatorAction(true);
-  }
-
   render = () => {
     if (this.props.fileId.viewId !== 0) {
       const viewType = this.props.viewType;
@@ -1076,17 +1071,9 @@ export default connect(
     currentOpenFileId: state.currentOpenFileId,
     backendModeSignedInStatus: state.backendModeSignedInStatus,
   }),
-<<<<<<< HEAD
   (dispatch) => ({
     dispatchSetBackendModeSignedInStatusAction: (mode) =>
       dispatch(setBackendModeSignedInStatusAction(mode)),
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
   })
-=======
-  dispatch => ({
-    dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
-    dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
-    dispatchSetStepsNavigatorAction: stepsNavigator => dispatch(setStepsNavigatorAction(stepsNavigator))
-  }),
->>>>>>> Tour stuff
 )(Navigator);
