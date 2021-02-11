@@ -43,7 +43,8 @@
     "eject": "react-scripts eject",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
-    "dev_install": "./dev_install.sh"
+    "dev_install": "./dev_install.sh",
+    "format": "prettier --write ."
   },
   "eslintConfig": {
     "extends": "react-app"
