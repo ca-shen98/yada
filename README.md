@@ -1,4 +1,5 @@
 ## [Yada - Yet another docs app](https://fydp-saac.github.io/yada)
+
 ^ link to hosted demo version - the docs are stored in browser window's local storage
 
 **\[TLDR\] the idea:** a novel/unique paradigm for information management by curating distinct view files of (outliner
