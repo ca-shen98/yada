@@ -33,6 +33,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "gh-pages": "^2.2.0",
+    "prettier": "2.2.1",
     "react-scripts": "3.4.1"
   },
   "scripts": {
@@ -42,10 +43,19 @@
     "eject": "react-scripts eject",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
-    "dev_install": "./dev_install.sh"
+    "dev_install": "./dev_install.sh",
+    "format": "prettier --write ."
   },
   "eslintConfig": {
     "extends": "react-app"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   },
   "browserslist": {
     "production": [
