@@ -129,7 +129,6 @@ class App extends React.Component {
   }
 
   onInitialStepsExit = () => {
-    console.log("Exit Called");
     this.setState(() => ({ initialTourStart: false, documentStepsStart: true }));
   };
 
