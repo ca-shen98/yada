@@ -86,6 +86,7 @@ class TextView extends React.Component {
 								onChange={() => {this.setState({displaySwitch: !this.state.displaySwitch})}}
 								name="checkedB"
 								color="primary"
+								className="displayModeSwitch"
 							/>
 						}
 						label="Display Mode"
@@ -97,7 +98,7 @@ class TextView extends React.Component {
 					{
 						this.props.tagsInView.length > 0 &&
 						<RichMarkdownEditor
-							className="TextViewEditor"
+							className="TextViewEditor viewContent"
 							readOnly={true}
 							key={"text_view"}
 							defaultValue={JSON.stringify(this.constructTextView())}

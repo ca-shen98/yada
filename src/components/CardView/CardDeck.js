@@ -72,6 +72,7 @@ class CardDeck extends React.Component {
 	};
 	componentDidMount = () => {
 		document.addEventListener('keydown',this.keydownHandler);
+		console.log("Cards Mounted");
 	};
 	componentDidUpdate = prevProps => {
 		if (prevProps.tagsInView !== this.props.tagsInView) {
@@ -116,6 +117,7 @@ class CardDeck extends React.Component {
 							onChange={() => {this.setState({displaySwitch: !this.state.displaySwitch})}}
 							name="checkedB"
 							color="primary"
+							className="displayModeSwitch"
 						/>
 						}
 						label="Display Mode"
@@ -123,7 +125,9 @@ class CardDeck extends React.Component {
 					{this.state.displaySwitch ? <StudyView cards={cards}/> :
 						<div>
 							<TagEditor viewType={FILE_TYPE.CARD_VIEW} allTagsData={this.state.allTagsData} tagsInView={this.props.tagsInView} />
-							{cards}
+							<div className="viewContent">
+								{cards}
+							</div>
 						</div>
 					}
 				</Container>

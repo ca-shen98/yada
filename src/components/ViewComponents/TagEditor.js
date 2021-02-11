@@ -7,6 +7,7 @@ import Col from 'react-bootstrap/Col';
 import {DragDropContext} from 'react-beautiful-dnd';
 import {setTagsInViewAction} from '../../reducers/SetTagsInView';
 import {SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../../reducers/CurrentOpenFileState";
+import {setTagEditorOpenedAction} from "../../reducers/Steps";
 
 export const TAG_HOLDERS = {
 	AVAILABLE: "tags_available",
@@ -126,12 +127,17 @@ class TagEditor extends React.Component {
 			this.setState(newState);
 		}
 	}
+
+	componentDidMount(){
+		console.log("setting it to true");
+		this.props.dispatchSetTagEditorOpenedAction(true);
+	}
 	
 	render = () => {
 		return (
 			<DragDropContext onDragEnd={this.onDragEnd}>
 				<Container>
-					<Row className="justify-content-md-center">
+					<Row className="justify-content-md-center dragDrop">
 						{this.state.columnOrder.map(columnId => {
 							const column = this.state.columns[columnId];
 							// Generate subdict here
@@ -161,6 +167,7 @@ export default connect(
 	state => ({ tagsInView: state.tagsInView, saveDirtyFlag: state.saveDirtyFlag }),
 	dispatch => ({
 		setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)),
-		dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE })
+		dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
+		dispatchSetTagEditorOpenedAction: tagMenuEditor => dispatch(setTagEditorOpenedAction(tagMenuEditor))
 	}),
 )(TagEditor);
