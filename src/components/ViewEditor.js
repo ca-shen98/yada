@@ -70,7 +70,6 @@ class ViewEditor extends React.Component {
 	
 	componentDidMount = () => {
 		this.changeFile().then(() => console.log("Mounted view file"));
-		console.log("View Editor Mounted")
 	};
 	componentDidUpdate = prevProps => {
 		if (
@@ -80,7 +79,6 @@ class ViewEditor extends React.Component {
 			this.changeFile().then(() => console.log("Updated view file"));
 		}
 		if (prevProps.newUser !== this.props.newUser) {
-			console.log("updating card tour start");
 			this.setState({cardTourStart: this.props.newUser});
 		  }
 	};
@@ -90,8 +88,6 @@ class ViewEditor extends React.Component {
 	};
 
 	render = () => {
-		console.log(this.state.cardTourStart);
-		console.log(this.props.tagEditorOpened);
 		return(
 			<div>
 				<Steps
