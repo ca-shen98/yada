@@ -4,7 +4,7 @@ import {currentOpenFileIdReducer, saveDirtyFlagReducer, selectNodeReducer, curre
 import {backendModeSignedInStatusReducer} from './reducers/BackendModeSignedInStatus';
 import {setTagsInViewReducer} from "./reducers/SetTagsInView";
 import {setToastReducer} from "./reducers/Toast";
-import { setStepsReducer, setStepsNavigatorReducer} from './reducers/Steps';
+import { setTagMenuOpenedReducer, setNewUserReducer} from './reducers/Steps';
 
 export default configureStore({
   reducer: combineReducers({
@@ -15,7 +15,7 @@ export default configureStore({
     backendModeSignedInStatus: backendModeSignedInStatusReducer,
     tagsInView: setTagsInViewReducer,
     toast: setToastReducer,
-    steps: setStepsReducer,
-    stepsNavigator: setStepsNavigatorReducer
+    tagMenuOpened: setTagMenuOpenedReducer,
+    newUser: setNewUserReducer
   }),
 });

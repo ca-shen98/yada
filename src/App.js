@@ -19,6 +19,7 @@ import {setToastAction, TOAST_CLEAR, TOAST_DURATION_MS} from "./reducers/Toast";
 import MobilePage from "./components/MobilePage";
 import ReactGA from 'react-ga';
 import { Steps } from "intro.js-react";
+import { setNewUserAction } from './reducers/Steps';
 
 export const THEME = createMuiTheme({
   palette: {
@@ -36,7 +37,7 @@ class App extends React.Component {
   state = {
     mounted: false,
     width: window.innerWidth,
-    steps: [
+    initialTourSteps: [
       {
         title: "Welcome to Yada!",
         intro: "Hello 👋"
@@ -49,14 +50,17 @@ class App extends React.Component {
                 "<b>Block</b>: A piece of content in the document seperated by a space which you can add a tag to"
       },
       {
+        title: "Navigator",
+        element: ".SidePane",
+        intro: "This is the navigator. Here you can create, update, rename and delete new views and documents. <br>" +
+               "<b>Click on the \"Welcome to Yada! \" document to get started!</b>"
+      }
+    ],
+    documentTourSteps: [
+      {
         title: "Editor 📝",
         element: ".editor",
         intro: "This is the main editor where you can use Markdown Syntax"
-      },
-      {
-        title: "Navigator",
-        element: ".SidePane",
-        intro: "This is the navigator. Here you can create, update, rename and delete new views and documents"
       },
       {
         title: "Views",
@@ -77,10 +81,9 @@ class App extends React.Component {
         title: "Finally ✌",
         intro: "Follow the steps in the welcome doc, to make your own blocks, tags, views and much more. You can refer to the Example documents to further see how to use Yada!"
       }
-
     ],
-    stepsEnabled: this.props.startSteps,
-    initialStep: 0,
+    initialTourStart: this.props.newUser,
+    documentStepsStart: false
   };
 
   handleCloseToast = () => {
@@ -113,20 +116,19 @@ class App extends React.Component {
     console.log("everything mounted");
     console.log(document.getElementById("tag_menu_wrapper"));
   };
+  componentDidUpdate = (prevProps) => {
+    if (prevProps.newUser !== this.props.newUser) {
+      this.setState({initialTourStart: this.props.newUser});
+    }
+  }
 
-
-  componentDidUpdate = prevProps => {
-		console.log(prevProps);
-    console.log(this.props.steps);
-    console.log(this.props.stepsNavigator);
-    console.log(document.getElementsByClassName('fileList-iconButton'));
-	};
-  onStepsExit = () => {
-    this.setState(() => ({ stepsEnabled: false }));
+  onInitialStepsExit = () => {
+    console.log("Exit Called");
+    this.setState(() => ({ initialTourStart: false, documentStepsStart: true }));
   };
 
-  toggleSteps = () => {
-    this.setState(prevState => ({ stepsEnabled: !prevState.stepsEnabled }));
+  onDocumentStepsExit = () => {
+    this.setState(() => ({ documentStepsStart: false }));
   };
   
   render = () =>
@@ -140,10 +142,18 @@ class App extends React.Component {
                     this.props.backendModeSignedInStatus !== BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
                       ? <div className="App">
                           <Steps
-                            enabled={this.props.steps && this.props.stepsNavigator}
-                            steps={this.state.steps}
-                            initialStep={this.state.initialStep}
-                            onExit={this.onStepsExit}
+                            enabled={this.state.initialTourStart}
+                            steps={this.state.initialTourSteps}
+                            initialStep={0}
+                            onExit={this.onInitialStepsExit}
+                            options={{disableInteraction: true, exitOnOverlayClick: false, exitOnEsc: false}}
+                          />
+                          <Steps
+                            enabled={this.state.documentStepsStart && this.props.tagMenuOpened}
+                            steps={this.state.documentTourSteps}
+                            initialStep={0}
+                            onExit={this.onDocumentStepsExit}
+                            options={{disableInteraction: true}}
                           />
                           <Navbar/>
                           <div style={{marginTop: 64}}>
@@ -171,11 +181,13 @@ export default connect(
     currentOpenFileId: state.currentOpenFileId,
     currentOpenFileName: state.currentOpenFileName,
     toast: state.toast,
-    steps: state.steps,
-    stepsNavigator: state.stepsNavigator
+    tagMenuOpened: state.tagMenuOpened,
+    stepsNavigator: state.stepsNavigator,
+    newUser: state.newUser
   }),
   dispatch => ({
     dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
     dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
+    dispatchNewUserAction: newUser => dispatch(setNewUserAction(newUser))
   }),
 )(App);
