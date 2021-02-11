@@ -113,8 +113,6 @@ class App extends React.Component {
         this.setState({ mounted: true });
       });
     } else { this.setState({ mounted: true }); }
-    console.log("everything mounted");
-    console.log(document.getElementById("tag_menu_wrapper"));
   };
   componentDidUpdate = (prevProps) => {
     if (prevProps.newUser !== this.props.newUser) {
