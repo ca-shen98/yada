@@ -14,11 +14,11 @@
   right: 16px;
 }
 
-#current_open_file_controls > div {
+#current_open_file_controls>div {
   flex: auto;
 }
 
-#current_open_file_controls > .InputRow {
+#current_open_file_controls>.InputRow {
   flex-grow: 4;
   min-width: 0;
 }
@@ -29,8 +29,7 @@
   text-align: center;
 }
 
-.editor,
-#no_file_editor_placeholder {
+.editor, #no_file_editor_placeholder {
   flex: auto;
   overflow-y: scroll;
   padding: 9px 8px;

@@ -1,4 +1,4 @@
-import nearley from "nearley";
+import nearley from 'nearley';
 // Generated automatically by nearley, version undefined
 // http://github.com/Hardmath123/nearley
 /*
@@ -25,7 +25,7 @@ const Grammar = {
     {
       name: "Expression_",
       symbols: ["Factor", "_", { literal: "|", pos: 30 }, "_", "Expression"],
-      postprocess: function (d) {
+      postprocess: function(d) {
         return [d[0], d[2], d[4]];
       },
     },
@@ -34,7 +34,7 @@ const Grammar = {
     {
       name: "Factor_",
       symbols: ["Term", "_", { literal: "&", pos: 60 }, "_", "Factor"],
-      postprocess: function (d) {
+      postprocess: function(d) {
         return [d[0], d[2], d[4]];
       },
     },
@@ -56,7 +56,7 @@ const Grammar = {
         "_",
         { literal: ")", pos: 118 },
       ],
-      postprocess: function (d) {
+      postprocess: function(d) {
         return d[2];
       },
     },
@@ -78,7 +78,7 @@ const Grammar = {
     {
       name: "Tag",
       symbols: ["Tag$string$1", "Tag$ebnf$1", { literal: "}", pos: 131 }],
-      postprocess: function (d) {
+      postprocess: function(d) {
         return d[1].join("").trim();
       },
     },
@@ -93,7 +93,7 @@ const Grammar = {
     {
       name: "_",
       symbols: ["_$ebnf$1"],
-      postprocess: function (d) {
+      postprocess: function(d) {
         return null;
       },
     },

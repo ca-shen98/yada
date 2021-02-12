@@ -1,8 +1,8 @@
 .TextViewEditor {
-  flex: auto;
-  overflow: auto;
-  padding: 9px 8px;
-  margin: 14px;
-  border: 2px dashed lightgray;
-  border-radius: 12px;
+    flex: auto;
+    overflow: auto;
+    padding: 9px 8px;
+    margin: 14px;
+    border: 2px dashed lightgray;
+    border-radius: 12px;
 }

@@ -1,5 +1,4 @@
-#tag_menu_wrapper,
-#tag_menu_list_container {
+#tag_menu_wrapper, #tag_menu_list_container {
   flex: auto;
   overflow: auto;
   display: flex;
@@ -19,8 +18,7 @@
   margin-bottom: 9px;
 }
 
-#block_node_tags_list,
-#no_tags_placeholder {
+#block_node_tags_list, #no_tags_placeholder {
   padding: 0 12px;
   margin: 0;
   list-style: none;

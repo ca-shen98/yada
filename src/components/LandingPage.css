@@ -1,17 +1,17 @@
 .landing-root {
-  flex-grow: 1;
+    flex-grow: 1;
 }
 
 .menuButton {
-  margin-right: 200px;
-  width: 5%;
+    margin-right: 200px;
+    width: 5%;
 }
 
 .title {
-  flex-grow: 1;
-  font-family: Bungee, serif;
+    flex-grow: 1;
+    font-family: Bungee, serif;
 }
 
 .custom-navbar {
-  background-color: #1e3d59;
+    background-color: #1E3D59;
 }
