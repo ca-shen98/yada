@@ -129,6 +129,7 @@ class TagEditor extends React.Component {
 	}
 
 	componentDidMount(){
+		console.log("setting it to true");
 		this.props.dispatchSetTagEditorOpenedAction(true);
 	}
 	
