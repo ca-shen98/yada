@@ -57,19 +57,8 @@
   padding: 1px 0;
 }
 
-.introjs-tooltip {
-  background-color: #F5F0E1;
-}
-
-.introjs-tooltiptext {
-  color: #1E3D59;
-}
-
-.introjs-tooltip-title {
-  color: #1E3D59;
-}
-
-.InputRow>input, .ButtonRow>:first-child {
+.InputRow > input,
+.ButtonRow > :first-child {
   flex: auto;
   text-align: left;
   text-overflow: ellipsis;

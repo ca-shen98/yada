@@ -5,27 +5,26 @@ import React from "react";
 import { connect } from "react-redux";
 import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../reducers/CurrentOpenFileState";
 
-import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
-import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
-import {setStepsAction} from "../reducers/Steps";
-import OutlinedInput from '@material-ui/core/OutlinedInput';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import IconButton from '@material-ui/core/IconButton';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Popover from '@material-ui/core/Popover';
-import CheckIcon from '@material-ui/icons/Check';
-import Input from '@material-ui/core/Input';
-import Chip from '@material-ui/core/Chip';
+import BlockTaggingEditorExtension from "../editor_extension/BlockTagging";
+import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
+import OutlinedInput from "@material-ui/core/OutlinedInput";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import IconButton from "@material-ui/core/IconButton";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import Popover from "@material-ui/core/Popover";
+import CheckIcon from "@material-ui/icons/Check";
+import Input from "@material-ui/core/Input";
+import Chip from "@material-ui/core/Chip";
 
 const RENAME_TAG_FIELD = "rename_field";
 
@@ -160,11 +159,8 @@ class TagMenu extends React.Component {
     this.props.dispatchSetSaveDirtyFlagAction();
     return true;
   };
-  
-  componentDidMount = () => {
-    this.props.dispatchSetStepsAction(true);
-  }
-  componentDidUpdate = prevProps => {
+
+  componentDidUpdate = (prevProps) => {
     if (
       prevProps.currentOpenFileId.sourceId !==
         this.props.currentOpenFileId.sourceId ||
@@ -380,9 +376,9 @@ export default connect(
     saveDirtyFlag: state.saveDirtyFlag,
     currentOpenFileId: state.currentOpenFileId,
   }),
-  dispatch => ({
-    dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
-    dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
-    dispatchSetStepsAction: steps => dispatch(setStepsAction(steps))
-  }),
+  (dispatch) => ({
+    dispatchSetSaveDirtyFlagAction: () =>
+      dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
+    dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
+  })
 )(TagMenu);
