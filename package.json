@@ -33,8 +33,6 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "gh-pages": "^2.2.0",
-    "husky": ">=4",
-    "lint-staged": ">=10",
     "prettier": "2.2.1",
     "react-scripts": "3.4.1"
   },
@@ -57,8 +55,7 @@
     }
   },
   "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown",
-    "*.{js,css,md}": "prettier --write"
+    "**/*": "prettier --write --ignore-unknown"
   },
   "browserslist": {
     "production": [
