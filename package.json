@@ -33,7 +33,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "gh-pages": "^2.2.0",
-    "husky": "^5.0.9",
+    "husky": ">=4",
     "lint-staged": ">=10",
     "prettier": "2.2.1",
     "react-scripts": "3.4.1"
@@ -46,8 +46,7 @@
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
     "dev_install": "./dev_install.sh",
-    "format": "prettier --write .",
-    "postinstall": "husky install"
+    "format": "prettier --write ."
   },
   "eslintConfig": {
     "extends": "react-app"
