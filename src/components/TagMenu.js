@@ -383,6 +383,6 @@ export default connect(
   dispatch => ({
     dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
     dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
-    dispatchSetTagMenuOpenedAction: tagMenuOpened => dispatch(setTagMenuOpenedAction(tagMenuOpened))
+    dispatchSetTagMenuOpenedAction: steps => dispatch(setTagMenuOpenedAction(steps))
   }),
 )(TagMenu);
