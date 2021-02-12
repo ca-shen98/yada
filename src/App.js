@@ -114,6 +114,7 @@ class App extends React.Component {
       });
     } else { this.setState({ mounted: true }); }
   };
+
   componentDidUpdate = (prevProps) => {
     if (prevProps.newUser !== this.props.newUser) {
       this.setState({initialTourStart: this.props.newUser});
@@ -121,14 +122,16 @@ class App extends React.Component {
   }
 
   onInitialStepsExit = () => {
-    this.setState(() => ({ initialTourStart: false, documentStepsStart: true }));
+    if(this.state.initialTourStart){
+      this.setState(() => ({ initialTourStart: false, documentStepsStart: true }));
+    }
   };
 
   onDocumentStepsExit = () => {
     this.setState(() => ({ documentStepsStart: false }));
   };
   
-  render = () =>
+  render = () => 
     <MuiThemeProvider theme={THEME}>
     <React.Fragment>
       {
@@ -170,6 +173,7 @@ class App extends React.Component {
       }
     </React.Fragment>
     </MuiThemeProvider>
+  
 };
 
 export default connect(

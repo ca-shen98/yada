@@ -12,6 +12,7 @@ import TextView from "./TextView/TextView";
 import {setTagsInViewAction} from "../reducers/SetTagsInView";
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 import { Steps } from "intro.js-react";
+import { setNewUserAction } from '../reducers/Steps';
 
 class ViewEditor extends React.Component {
 	
@@ -85,6 +86,7 @@ class ViewEditor extends React.Component {
 	
 	onStepsExit = () => {
 		this.setState(() => ({ cardTourStart: false}));
+		this.props.dispatchNewUserAction(false);
 	};
 
 	render = () => {
@@ -116,6 +118,7 @@ export default connect(
 	dispatch => ({
 		setTagsInView: tagsInView => dispatch(setTagsInViewAction(tagsInView)),
 		dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
+		dispatchNewUserAction: newUser => dispatch(setNewUserAction(newUser))
 	}),
 )(ViewEditor);
 

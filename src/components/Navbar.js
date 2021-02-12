@@ -45,6 +45,8 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import { setNewUserAction } from '../reducers/Steps'
+
 const TAG_FILTERS_INPUT_ID = 'tag_filters_input';
 
 
@@ -424,7 +426,11 @@ class Navbar extends React.Component {
 							this.props.dispatchSetBackendModeSignedInStatusAction(
 								BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
 							)
-							) { Cookies.remove(ACCESS_TOKEN_COOKIE_KEY); }
+							) { 
+								Cookies.remove(ACCESS_TOKEN_COOKIE_KEY); 
+								this.props.dispatchNewUserAction(false);
+								localStorage.clear();
+							}
 						}}>
 							<ListItemIcon>
 								<ExitToAppIcon fontSize="small" color="primary"/>
@@ -453,5 +459,6 @@ export default connect(
 	dispatch => ({
 		dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
 		dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
+		dispatchNewUserAction: newUser => dispatch(setNewUserAction(newUser))
 	}),
 )(Navbar);
