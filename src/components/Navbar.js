@@ -38,7 +38,7 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
 import store from "../store";
-import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE, SET_SAVE_DIRTY_FLAG_ACTION_TYPE} from "../reducers/CurrentOpenFileState";
+import {CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE, SET_SAVE_DIRTY_FLAG_ACTION_TYPE, signoutAction} from "../reducers/CurrentOpenFileState";
 import "./Navbar.css"
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Menu from '@material-ui/core/Menu';
@@ -430,6 +430,7 @@ class Navbar extends React.Component {
 								Cookies.remove(ACCESS_TOKEN_COOKIE_KEY); 
 								this.props.dispatchNewUserAction(false);
 								localStorage.clear();
+								this.props.dispatchSignOutAction();
 							}
 						}}>
 							<ListItemIcon>
@@ -459,6 +460,7 @@ export default connect(
 	dispatch => ({
 		dispatchSetBackendModeSignedInStatusAction: mode => dispatch(setBackendModeSignedInStatusAction(mode)),
 		dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
-		dispatchNewUserAction: newUser => dispatch(setNewUserAction(newUser))
+		dispatchNewUserAction: newUser => dispatch(setNewUserAction(newUser)),
+		dispatchSignOutAction: () => dispatch(signoutAction())
 	}),
 )(Navbar);
