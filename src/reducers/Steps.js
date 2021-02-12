@@ -1,11 +1,11 @@
-export const SET_TAG_MENU_OPENED_ACTION_TYPE = 'tagMenuOpened/set'
-export const setTagMenuOpenedAction = tagMenuOpened => ({type: SET_TAG_MENU_OPENED_ACTION_TYPE, tagMenuOpened});
-export const setTagMenuOpenedReducer = (state = false, action) =>
-    action.type !== SET_TAG_MENU_OPENED_ACTION_TYPE 
-        ? state : action.tagMenuOpened;
+export const SET_STEPS_ACTION_TYPE = 'steps/set'
+export const setStepsAction = steps => ({type: SET_STEPS_ACTION_TYPE, steps});
+export const setStepsReducer = (state = false, action) =>
+    action.type !== SET_STEPS_ACTION_TYPE 
+        ? state : action.steps;
 
-export const SET_NEW_USER_ACTION_TYPE = 'newUser/set'
-export const setNewUserAction = newUser => ({type: SET_NEW_USER_ACTION_TYPE, newUser});
-export const setNewUserReducer = (state = false, action) =>
-    action.type !== SET_NEW_USER_ACTION_TYPE 
-        ? state : action.newUser;
+export const SET_STEPS_NAVIGATOR_ACTION_TYPE = 'stepsNavigator/set'
+export const setStepsNavigatorAction = stepsNavigator => ({type: SET_STEPS_NAVIGATOR_ACTION_TYPE, stepsNavigator});
+export const setStepsNavigatorReducer = (state = false, action) =>
+    action.type !== SET_STEPS_NAVIGATOR_ACTION_TYPE 
+        ? state : action.stepsNavigator;

@@ -7,7 +7,7 @@ import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../reducers/CurrentOpenFileStat
 
 import BlockTaggingEditorExtension from '../editor_extension/BlockTagging';
 import {setToastAction, TOAST_SEVERITY} from "../reducers/Toast";
-import {setTagMenuOpenedAction} from "../reducers/Steps";
+import {setStepsAction} from "../reducers/Steps";
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -162,7 +162,7 @@ class TagMenu extends React.Component {
   };
   
   componentDidMount = () => {
-    this.props.dispatchSetTagMenuOpenedAction(true);
+    this.props.dispatchSetStepsAction(true);
   }
   componentDidUpdate = prevProps => {
     if (
@@ -383,6 +383,6 @@ export default connect(
   dispatch => ({
     dispatchSetSaveDirtyFlagAction: () => dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
     dispatchSetToastAction: toast => dispatch(setToastAction(toast)),
-    dispatchSetTagMenuOpenedAction: steps => dispatch(setTagMenuOpenedAction(steps))
+    dispatchSetStepsAction: steps => dispatch(setStepsAction(steps))
   }),
 )(TagMenu);
