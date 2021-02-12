@@ -322,311 +322,185 @@ class Navbar extends React.Component {
     });
   };
 
-  render = () => {
-    const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
-    const currentTagFiltersSaved = this.state.sourceSavedTagFilters.hasOwnProperty(
-      this.state.currentTagFiltersStr
-    );
-    return (
-      <div className={"sticky-navbar scrolled"}>
-        <AppBar class="custom-navbar">
-          <Toolbar style={{ justifyContent: "space-between" }}>
-            <div style={{ width: "275px" }}>
-              <Grid container>
-                <Grid item xs={2}>
-                  <img
-                    className={"menuButton"}
-                    src={require("../images/logo.png")}
-                    style={{ width: "40px", marginRight: "10px" }}
-                    alt={"MENU"}
-                  />
-                </Grid>
-                <Grid item xs={10}>
-                  <Typography
-                    variant="h5"
-                    style={{
-                      fontFamily: "Bungee",
-                      color: "#F5F0E1",
-                      marginTop: "5px",
-                    }}
-                  >
-                    YADA
-                  </Typography>
-                </Grid>
-              </Grid>
-            </div>
-            <Grid container style={{ width: "80vw" }}>
-              <Grid
-                item
-                xs={this.props.currentOpenFileName.viewName === "" ? 3 : 5}
-              >
-                <Grid container spacing={0}>
-                  <Grid item xs={6} s={6} xl={4}>
-                    {this.props.currentOpenFileName.sourceName === "" ? null : (
-                      <Breadcrumbs
-                        aria-label="breadcrumb"
-                        color="secondary"
-                        style={{
-                          marginRight: "10px",
-                          border: "1px solid #F5F0E1",
-                          borderRadius: "10px",
-                          padding: "8px",
-                        }}
-                      >
-                        <Link
-                          title={this.props.currentOpenFileName.sourceName}
-                          underline="none"
-                          color="inherit"
-                          style={{
-                            color: "#F5F0E1",
-                            textOverflow: "ellipsis",
-                            overflow: "hidden",
-                            whiteSpace: "nowrap",
-                            display: "block",
-                            maxWidth: "100%",
-                          }}
-                        >
-                          <DescriptionIcon color="secondary" />
-                          {this.state.windowWidth < 1000
-                            ? ""
-                            : this.props.currentOpenFileName.sourceName}
-                        </Link>
-                        {this.props.currentOpenFileName.viewName ===
-                        "" ? null : (
-                          <Link
-                            title={this.props.currentOpenFileName.viewName}
-                            underline="none"
-                            color="inherit"
-                            style={{
-                              color: "#F5F0E1",
-                              textOverflow: "ellipsis",
-                              overflow: "hidden",
-                              whiteSpace: "nowrap",
-                              display: "block",
-                              maxWidth: "100%",
-                            }}
-                          >
-                            {this.props.currentOpenFileId.viewType ===
-                            FILE_TYPE.CARD_VIEW ? (
-                              <AmpStoriesIcon color="secondary" />
-                            ) : this.props.currentOpenFileId.viewType ===
-                              FILE_TYPE.TEXT_VIEW ? (
-                              <TextFieldsIcon color="secondary" />
-                            ) : null}
-                            {this.state.windowWidth < 1000
-                              ? ""
-                              : this.props.currentOpenFileName.viewName}
-                          </Link>
-                        )}
-                      </Breadcrumbs>
-                    )}
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      title="Save"
-                      disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
-                      onClick={this.handleSave}
-                      startIcon={<SaveIcon />}
-                      style={{
-                        borderRadius: "10px",
-                        paddingTop: "8px",
-                        paddingBottom: "8px",
-                        textOverflow: "ellipsis",
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                        display: "inline-block",
-                        maxWidth: "100%",
-                        minWidth: "0px",
-                      }}
-                    >
-                      {this.state.windowWidth < 1000 ? "" : "Save"}
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid
-                item
-                xs={this.props.currentOpenFileName.viewName === "" ? 6 : 1}
-              >
-                {this.props.currentOpenFileName.viewName === "" ? (
-                  <div
-                    id="searchBar"
-                    style={{
-                      backgroundColor: "rgba(245, 240, 225, 0.8)",
-                      width: "100%",
-                      borderRadius: "10px",
-                      padding: "5px",
-                      justifyContent: "spaceBetween",
-                      display: "flex",
-                    }}
-                  >
-                    <div
-                      style={{
-                        marginTop: "3px",
-                        width: "20px",
-                        marginRight: "5px",
-                      }}
-                    >
-                      <SearchIcon color="primary" />
-                    </div>
-                    <Autocomplete
-                      value={this.state.currentTagFiltersStr}
-                      id={TAG_FILTERS_INPUT_ID}
-                      freeSolo
-                      options={Object.entries(
-                        this.state.sourceSavedTagFilters
-                      ).map(
-                        ([tagFiltersStr, _parsedTagFiltersStr]) => tagFiltersStr
-                      )}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          placeholder="Search with Tags: ( #{tag1} | !( #{tag2} ) ) & #{tag3}"
-                          style={{ margin: "0%" }}
-                          margin="normal"
-                          variant="standard"
-                        />
-                      )}
-                      style={{ width: "90%" }}
-                      onChange={(event, value, reason) => {
-                        this.setState({ currentTagFiltersStr: value });
-                        this.handleStartModifyingTagFilters();
-                        if (reason === "clear") {
-                          document.getElementById(TAG_FILTERS_INPUT_ID).value =
-                            "";
-                          this.handleApplyTagFilters();
-                        }
-                      }}
-                      onBlur={(event) => {
-                        if (this.handleApplyTagFilters()) {
-                          this.setState({ modifyingTagFilters: false });
-                        } else {
-                          const input = event.target;
-                          defer(() => {
-                            input.focus();
-                          });
-                        }
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === "Escape") {
-                          this.handleCancelModifyingTagFilters();
-                        }
-                      }}
-                      onKeyPress={(event) => {
-                        if (event.key === "Enter") {
-                          event.target.blur();
-                        }
-                      }}
-                    />
-                    <div style={{ float: "right" }}>
-                      {this.state.modifyingTagFilters ? null : this.state
-                          .currentTagFiltersStr ===
-                        "" ? null : currentTagFiltersSaved ? (
-                        <IconButton
-                          title="Unpersist Filter"
-                          style={{
-                            padding: "0px",
-                            paddingRight: "10px",
-                            paddingTop: "5px",
-                          }}
-                        >
-                          <RemoveCircleIcon
-                            color="primary"
-                            onClick={() => {
-                              document.getElementById(
-                                TAG_FILTERS_INPUT_ID
-                              ).value = "";
-                              this.handleUnpersistCurrentTagFilters();
-                              this.handleApplyTagFilters();
-                            }}
-                          />
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          title="Persist Filter"
-                          style={{
-                            padding: "0px",
-                            paddingRight: "10px",
-                            paddingTop: "5px",
-                          }}
-                        >
-                          <SaveIcon
-                            color="primary"
-                            onClick={() => {
-                              this.handlePersistNewSavedTagFilters();
-                            }}
-                          />
-                        </IconButton>
-                      )}
-                    </div>
-                  </div>
-                ) : null}
-              </Grid>
-            </Grid>
-            <IconButton
-              title="Report a Bug"
-              edge="end"
-              aria-label="bug report"
-              aria-haspopup="true"
-              color="inherit"
-              style={{ float: "right" }}
-              onClick={this.handleBugReport}
-            >
-              <BugReportIcon color="secondary" />
-            </IconButton>
-            <IconButton
-              title="Account Options"
-              edge="end"
-              aria-label="account of current user"
-              aria-haspopup="true"
-              color="inherit"
-              style={{ float: "right" }}
-              onClick={this.handleUserMenuOpen}
-            >
-              <AccountCircleIcon color="secondary" />
-            </IconButton>
-            {this.props.backendModeSignedInStatus ===
-            BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN ? (
-              <Menu
-                id="userMenu"
-                anchorEl={this.state.userIconElement}
-                keepMounted
-                open={Boolean(this.state.userIconElement)}
-                onClose={() => this.handleUserMenuClose()}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "center",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "center",
-                }}
-              >
-                <MenuItem
-                  onClick={() => {
-                    if (
-                      this.props.dispatchSetBackendModeSignedInStatusAction(
-                        BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
-                      )
-                    ) {
-                      Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
-                    }
-                  }}
-                >
-                  <ListItemIcon>
-                    <ExitToAppIcon fontSize="small" color="primary" />
-                  </ListItemIcon>
-                  <ListItemText primary="Sign Out" color="primary" />
-                </MenuItem>
-              </Menu>
-            ) : null}
-          </Toolbar>
-        </AppBar>
-      </div>
-    );
-  };
+	render = () => {
+		const noOpenFileIdCheck = checkNoOpenFileId(this.props.currentOpenFileId);
+		const currentTagFiltersSaved =this.state.sourceSavedTagFilters.hasOwnProperty(this.state.currentTagFiltersStr);
+		return(
+			<div className={"sticky-navbar scrolled"}>
+				<AppBar class="custom-navbar">
+				<Toolbar style={{justifyContent: "space-between"}}>
+					<div style={{width: "275px"}}>
+						<Grid container>
+						<Grid item xs={2}>
+							<img className={"menuButton"} src={require('../images/logo.png')} style={{width: "40px", marginRight: "10px"}} alt={"MENU"}/>
+						</Grid>
+						<Grid item xs={10}>
+							<Typography variant="h5" style={{fontFamily:"Bungee", color:"#F5F0E1", marginTop: "5px"}}>
+								YADA
+							</Typography>
+						</Grid>
+						</Grid>
+					</div>
+					<Grid container style={{width: "80vw"}}>
+					<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 3 : 5}>
+							<Grid container spacing={0}>
+								<Grid item xs={6} s={6} xl={4}>
+									{this.props.currentOpenFileName.sourceName === '' ? null :
+										<Breadcrumbs aria-label="breadcrumb" color="secondary" style={{marginRight: "10px", border:"1px solid #F5F0E1", borderRadius: "10px", padding: "8px"}}>
+											<Link underline="none" color="inherit" style={{ color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
+												<DescriptionIcon color="secondary"/>
+												{this.state.windowWidth < 1000 ? '' : this.props.currentOpenFileName.sourceName}
+											</Link>
+											{this.props.currentOpenFileName.viewName === '' ? null :
+												<Link underline="none" color="inherit" style={{color: "#F5F0E1", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "block", maxWidth: "100%"}}>
+													{
+														(this.props.currentOpenFileId.viewType === FILE_TYPE.CARD_VIEW) ?
+															<AmpStoriesIcon color="secondary"/>:
+															(this.props.currentOpenFileId.viewType === FILE_TYPE.TEXT_VIEW) ?
+																<TextFieldsIcon color="secondary"/> :
+																null
+													}
+													{this.state.windowWidth < 1000 ? '' : this.props.currentOpenFileName.viewName}
+												</Link>
+											}
+										</Breadcrumbs>
+									}
+								</Grid>
+								<Grid item xs={5}>
+									<Button
+										variant="outlined"
+										color="secondary"
+										title="save"
+										disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
+										onClick={this.handleSave}
+										startIcon={<SaveIcon />}
+										style= {{ borderRadius: "10px",paddingTop: "8px", paddingBottom: "8px", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", display: "inline-block", maxWidth: "100%", minWidth: "0px"}}
+									>
+										{this.state.windowWidth < 1000 ? '' : 'Save'}
+									</Button>
+								</Grid>
+							</Grid>
+						</Grid>
+						<Grid item xs={this.props.currentOpenFileName.viewName === '' ? 6 : 1}>
+						{
+							this.props.currentOpenFileName.viewName === '' ?
+								<div id="searchBar" style={{backgroundColor: "rgba(245, 240, 225, 0.8)", width: "100%", borderRadius: "10px", padding: "5px", justifyContent: "spaceBetween", display: "flex"}}>
+											<div style={{marginTop: "3px", width: "20px", marginRight: "5px"}}>
+												<SearchIcon color="primary"/>
+											</div>
+											<Autocomplete
+												value={this.state.currentTagFiltersStr}
+												id={TAG_FILTERS_INPUT_ID}
+												freeSolo
+												options={Object.entries(this.state.sourceSavedTagFilters)
+													.map(([tagFiltersStr, _parsedTagFiltersStr]) => tagFiltersStr)}
+												renderInput={(params) => (
+													<TextField
+														{...params}
+														placeholder="Search with Tags: ( #{tag1} | !( #{tag2} ) ) & #{tag3}"
+														style={{margin:"0%"}}
+														margin="normal"
+														variant="standard"
+													/>
+												)}
+												style={{width:"90%"}}
+												onChange={(event, value, reason) => {
+													this.setState({currentTagFiltersStr : value});
+													this.handleStartModifyingTagFilters();
+													if (reason === 'clear'){
+														document.getElementById(TAG_FILTERS_INPUT_ID).value = '';
+														this.handleApplyTagFilters();
+													}
+												}}
+												onBlur={event => {
+													if (this.handleApplyTagFilters()) { this.setState({ modifyingTagFilters: false }); }
+													else {
+														const input = event.target;
+														defer(() => { input.focus(); });
+													}
+												}}
+												onKeyDown={event => { if (event.key === 'Escape') { this.handleCancelModifyingTagFilters(); } }}
+												onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
+											/>
+											<div style={{float: "right"}}>
+												{ (this.state.modifyingTagFilters) ? null :
+													(this.state.currentTagFiltersStr === '') ? null :
+														(currentTagFiltersSaved) ?
+															<IconButton title="Unpersist Filter" style={{padding: "0px", paddingRight: "10px", paddingTop: "5px"}}>
+																<RemoveCircleIcon
+																	color="primary"
+																	onClick={() => {
+																		document.getElementById(TAG_FILTERS_INPUT_ID).value = "";
+																		this.handleUnpersistCurrentTagFilters();
+																		this.handleApplyTagFilters();
+																	}}
+																/>
+															</IconButton> :
+															<IconButton title="Persist Filter" style={{padding: "0px", paddingRight: "10px", paddingTop: "5px"}}>
+																<SaveIcon
+																	color="primary"
+																	onClick={() => {
+																		this.handlePersistNewSavedTagFilters();
+																	}}
+																/>
+															</IconButton>
+													
+												}
+											</div>
+								
+								</div>
+								: null
+						}
+					</Grid>
+					</Grid>
+					<IconButton
+						edge="end"
+						aria-label="account of current user"
+						aria-haspopup="true"
+						color="inherit"
+						style={{float: "right"}}
+						onClick={this.handleUserMenuOpen}
+					>
+						<AccountCircleIcon color="secondary"/>
+					</IconButton>
+					{
+					this.props.backendModeSignedInStatus === BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN ?
+					<Menu
+						id="userMenu"
+						anchorEl={this.state.userIconElement}
+						keepMounted
+						open={Boolean(this.state.userIconElement)}
+						onClose={() => this.handleUserMenuClose()}
+						anchorOrigin={{
+							vertical: 'bottom',
+							horizontal: 'center',
+						  }}
+						transformOrigin={{
+							vertical: 'top',
+							horizontal: 'center',
+						}}
+					>
+						<MenuItem 		onClick={() => {
+							if (
+							this.props.dispatchSetBackendModeSignedInStatusAction(
+								BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
+							)
+							) { Cookies.remove(ACCESS_TOKEN_COOKIE_KEY); }
+						}}>
+							<ListItemIcon>
+								<ExitToAppIcon fontSize="small" color="primary"/>
+							</ListItemIcon>
+							<ListItemText primary="Sign Out" color="primary"/>
+						</MenuItem>
+					</Menu>
+					: null
+				}
+					
+				</Toolbar>
+			</AppBar>
+			</div>
+		)
+	}
 }
 
 export default connect(
