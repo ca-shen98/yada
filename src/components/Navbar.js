@@ -422,7 +422,7 @@ class Navbar extends React.Component {
 												onKeyDown={event => { if (event.key === 'Escape') { this.handleCancelModifyingTagFilters(); } }}
 												onKeyPress={event => { if (event.key === 'Enter') { event.target.blur(); } }}
 											/>
-											<div style={{float: "right"}}>
+<div style={{float: "right"}}>
 												{ (this.state.modifyingTagFilters) ? null :
 													(this.state.currentTagFiltersStr === '') ? null :
 														(currentTagFiltersSaved) ?
