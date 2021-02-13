@@ -436,12 +436,15 @@ class Navbar extends React.Component {
                         color="secondary"
                         style={{
                           position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          maxWidth: "100%",
-                          minWidth: "0px",
-                          marginTop: -12,
-                          marginLeft: -12,
+                          top: "0%",
+                          left: "0%",
+                          height: "40px",
+                          width: "40px",
+                          paddingTop: "4px",
+                          paddingBottom: "4px",
+                          paddingLeft: "4px",
+                          paddingRight: "4px",
+                          marginLeft: "26px",
                           zIndex: 1,
                         }}
                       />
