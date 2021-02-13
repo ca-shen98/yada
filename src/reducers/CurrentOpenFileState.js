@@ -1,6 +1,9 @@
 import {convertStrValueOrDefault} from '../util/ConvertStrValueOrDefault';
 import {NO_OPEN_FILE_ID, validateHasFileIdObj, validateHasFileNameObj} from '../util/FileIdAndTypeUtils';
 
+export const SIGNOUT = 'signout';
+export const signoutAction = ()=> ({ type: SIGNOUT });
+
 export const INITIAL_FILE_ID_LOCAL_STORAGE_KEY = 'initialFileId';
 export const INITIAL_FILE_NAME_LOCAL_STORAGE_KEY = 'initialFileName';
 
@@ -29,17 +32,39 @@ const initialFileName = {
   viewName: storedInitialFileName.hasOwnProperty('viewName') ? storedInitialFileName.viewName : '',
 }
 
+const emptyFileId = {
+  sourceId: NO_OPEN_FILE_ID.sourceId,
+  viewId: NO_OPEN_FILE_ID.viewId,
+  viewType: NO_OPEN_FILE_ID.viewType,
+}
+
+const emptyFileName = {
+  sourceName: '',
+  viewName: ''
+}
+
 const SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE = 'currentOpenFileId/set';
 export const setCurrentOpenFileIdAction = fileId => ({ type: SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE, fileId });
-export const currentOpenFileIdReducer = (state = initialFileId, action) =>
-  action.type !== SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE || !validateHasFileIdObj(action)
+export const currentOpenFileIdReducer = (state = initialFileId, action) => {
+  if (action.type === SIGNOUT){
+    console.log("setting to empty file id");
+    return emptyFileId
+  }else{
+    return action.type !== SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE || !validateHasFileIdObj(action)
     ? state : action.fileId;
+  }
+}
 
 const SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE = 'currentOpenFileName/set';
 export const setCurrentOpenFileNameAction = fileName => ({ type: SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE, fileName });
-export const currentOpenFileNameReducer = (state = initialFileName, action) =>
-  action.type !== SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE || !validateHasFileNameObj(action)
+export const currentOpenFileNameReducer = (state = initialFileName, action) => {
+  if (action.type === SIGNOUT) {
+    return emptyFileName;
+  }else{
+    return action.type !== SET_CURRENT_OPEN_FILE_NAME_ACTION_TYPE || !validateHasFileNameObj(action)
     ? state : action.fileName;
+  }
+}
 
 export const SET_SAVE_DIRTY_FLAG_ACTION_TYPE = 'saveDirtyFlag/set';
 export const CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE = 'saveDirtyFlag/clear';
