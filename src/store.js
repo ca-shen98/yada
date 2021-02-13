@@ -3,6 +3,7 @@ import { combineReducers } from "redux";
 import {
   currentOpenFileIdReducer,
   saveDirtyFlagReducer,
+  saveInProgressReducer,
   selectNodeReducer,
   currentOpenFileNameReducer,
   SIGNOUT,
@@ -20,6 +21,7 @@ const reducers = combineReducers({
   currentOpenFileId: currentOpenFileIdReducer,
   currentOpenFileName: currentOpenFileNameReducer,
   saveDirtyFlag: saveDirtyFlagReducer,
+  saveInProgress: saveInProgressReducer,
   selectNode: selectNodeReducer,
   backendModeSignedInStatus: backendModeSignedInStatusReducer,
   tagsInView: setTagsInViewReducer,

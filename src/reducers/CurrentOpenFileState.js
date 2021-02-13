@@ -96,6 +96,13 @@ export const saveDirtyFlagReducer = (state = false, action) =>
     ? state
     : action.type === SET_SAVE_DIRTY_FLAG_ACTION_TYPE;
 
+export const SET_SAVE_IN_PROGRESS = "save_in_progress/set";
+export const CLEAR_SAVE_IN_PROGRESS = "save_in_progress/clear";
+export const saveInProgressReducer = (state = false, action) =>
+  action.type !== SET_SAVE_IN_PROGRESS && action.type !== CLEAR_SAVE_IN_PROGRESS
+    ? state
+    : action.type === SET_SAVE_IN_PROGRESS;
+
 const SET_SELECT_NODE_ACTION_TYPE = "selectNode/set";
 export const setSelectNodeAction = (selectNode) => ({
   type: SET_SELECT_NODE_ACTION_TYPE,
