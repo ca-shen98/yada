@@ -1,13 +1,14 @@
 .viewContainer {
-    padding-top: 1em;
-    height: 100%;
-    overflow-y: scroll;
+  padding-top: 1em;
+  height: 100%;
+  overflow-y: scroll;
 }
 
-#editor, #no_file_editor_placeholder {
-    flex: auto;
-    overflow: auto;
-    padding: 9px 8px;
-    border: 2px dashed lightgray;
-    border-radius: 12px;
+#editor,
+#no_file_editor_placeholder {
+  flex: auto;
+  overflow: auto;
+  padding: 9px 8px;
+  border: 2px dashed lightgray;
+  border-radius: 12px;
 }

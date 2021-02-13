@@ -15,7 +15,7 @@
   width: 275px;
   display: flex;
   flex-direction: column;
-  background-color: #F5F0E1;
+  background-color: #f5f0e1;
   top: 64px;
   bottom: 0;
   float: left;
@@ -24,7 +24,7 @@
 
 .MainContainer {
   margin: 10px 10px 10px 285px;
-  border: thin solid #1E3D59;
+  border: thin solid #1e3d59;
   border-radius: 12px;
   position: fixed;
   top: 64px;
@@ -48,7 +48,8 @@
   flex-direction: column;
 }
 
-.InputRow, .ButtonRow {
+.InputRow,
+.ButtonRow {
   display: flex;
 }
 
@@ -57,29 +58,34 @@
 }
 
 .introjs-tooltip {
-  background-color: #F5F0E1;
+  background-color: #f5f0e1;
 }
 
 .introjs-tooltiptext {
-  color: #1E3D59;
+  color: #1e3d59;
 }
 
 .introjs-tooltip-title {
-  color: #1E3D59;
+  color: #1e3d59;
 }
 
-.InputRow>input, .ButtonRow>:first-child {
+.InputRow > input,
+.ButtonRow > :first-child {
   flex: auto;
   text-align: left;
   text-overflow: ellipsis;
   min-width: 0;
 }
 
-.InputRow>input, .InputRow>button, .ButtonRow>input, .ButtonRow>button {
+.InputRow > input,
+.InputRow > button,
+.ButtonRow > input,
+.ButtonRow > button {
   margin-left: 1px;
 }
 
-.InputRow>:first-child, .ButtonRow>:first-child {
+.InputRow > :first-child,
+.ButtonRow > :first-child {
   margin-left: 0;
 }
 
@@ -88,7 +94,7 @@
 }
 
 .PlaceholderDivWithText {
-  font-size: .85em;
+  font-size: 0.85em;
   color: slategray;
 }
 
@@ -96,6 +102,6 @@
   max-width: 100%;
 }
 
-.MuiBreadcrumbs-ol{
+.MuiBreadcrumbs-ol {
   justify-content: center;
 }
