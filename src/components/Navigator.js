@@ -695,10 +695,11 @@ class Navigator extends React.Component {
       sourceName: this.getSourceName(fileId),
       viewName: this.getViewName(fileId),
     };
-    handleSetCurrentOpenFileId(fileId, fileName);
-    this.setState({
-      selectedViewId: fileId.viewId,
-    });
+    if (handleSetCurrentOpenFileId(fileId, fileName)) {
+      this.setState({
+        selectedViewId: fileId.viewId,
+      });
+    }
   };
 
   handleEditMenuClick = (event) => {
