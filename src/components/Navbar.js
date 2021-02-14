@@ -424,12 +424,11 @@ class Navbar extends React.Component {
                         overflow: "hidden",
                         whiteSpace: "nowrap",
                         display: "inline-block",
-                        maxWidth: "100%",
-                        minWidth: "0px",
+                        maxWidth: "45px",
+                        minWidth: "45px",
                         zIndex: 0,
                       }}
                     >
-                      {this.state.windowWidth < 1000 ? "" : "Save"}
                       <CircularProgress
                         hidden={!this.props.saveInProgress}
                         color="secondary"
@@ -443,7 +442,6 @@ class Navbar extends React.Component {
                           paddingBottom: "4px",
                           paddingLeft: "4px",
                           paddingRight: "4px",
-                          marginLeft: "26px",
                           zIndex: 1,
                         }}
                       />
