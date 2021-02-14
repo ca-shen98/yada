@@ -91,7 +91,6 @@ class ViewEditor extends React.Component {
     if (prevProps.newUser !== this.props.newUser) {
       this.setState({ cardTourStart: this.props.newUser });
     }
-    console.log("FILE LOAD STATE IS", this.props.fileLoading);
   };
 
   onStepsExit = () => {
