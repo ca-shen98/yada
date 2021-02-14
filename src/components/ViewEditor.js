@@ -100,7 +100,7 @@ class ViewEditor extends React.Component {
 
   render = () => {
     return (
-      <div>
+      <div className="viewContainer">
         <Steps
           enabled={this.state.cardTourStart && this.props.tagEditorOpened}
           steps={this.state.steps}

@@ -94,7 +94,7 @@ class CardDeck extends React.Component {
   render = () => {
     if (!this.state.allTagsData || this.props.tagsInView == null) {
       return (
-        <Container className="viewContainer">
+        <Container>
           <h5>Loading Card Deck ...</h5>
         </Container>
       );
@@ -120,7 +120,7 @@ class CardDeck extends React.Component {
         }
       }
       return (
-        <Container className="viewContainer">
+        <Container>
           <FormControlLabel
             control={
               <Switch

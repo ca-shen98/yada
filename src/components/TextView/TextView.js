@@ -81,13 +81,13 @@ class TextView extends React.Component {
   render = () => {
     if (!this.state.allTagsData || this.props.tagsInView == null) {
       return (
-        <Container className="viewContainer">
+        <Container>
           <h5>Loading Text View ...</h5>
         </Container>
       );
     } else {
       return (
-        <Container className="viewContainer">
+        <Container>
           <FormControlLabel
             control={
               <Switch
