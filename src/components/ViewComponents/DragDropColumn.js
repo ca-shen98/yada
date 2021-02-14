@@ -44,7 +44,6 @@ class InnerTagList extends React.Component {
   }
 
   render() {
-    console.log(this.props);
     const tagList = [];
     const tagIds = Object.keys(this.props.tagData);
     for (let i = 0; i < tagIds.length; ++i) {

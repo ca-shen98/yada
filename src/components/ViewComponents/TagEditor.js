@@ -117,6 +117,7 @@ class TagEditor extends React.Component {
           [newFinish.id]: newFinish,
         },
       };
+      this.props.dispatchSetSaveDirtyFlagAction();
     }
     this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
     this.setState(newState);
@@ -124,9 +125,6 @@ class TagEditor extends React.Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.tagsInView !== this.props.tagsInView) {
-      if (!this.props.saveDirtyFlag) {
-        this.props.dispatchSetSaveDirtyFlagAction();
-      }
       const tagsInView = new Set(this.props.tagsInView);
       const availableTags = Object.keys(this.props.allTagsData).filter(
         (t) => !tagsInView.has(t)
