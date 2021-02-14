@@ -10,13 +10,19 @@ import {
 } from "../util/FileIdAndTypeUtils";
 import Editor from "./Editor";
 import { handleSetCurrentOpenFileId } from "./Navigator";
-
+import CircularProgress from "@material-ui/core/CircularProgress";
 import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import BlockTaggingEditorExtension from "../editor_extension/BlockTagging";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import { BACKEND_MODE_SIGNED_IN_STATUS } from "../reducers/BackendModeSignedInStatus";
 import store from "../store";
-import { CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../reducers/CurrentOpenFileState";
+import {
+  CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
+  SET_FILE_LOADING,
+  CLEAR_FILE_LOADING,
+  SET_SAVE_IN_PROGRESS,
+  CLEAR_SAVE_IN_PROGRESS,
+} from "../reducers/CurrentOpenFileState";
 
 export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = "initialTagFilters";
 
@@ -41,10 +47,12 @@ class SourceEditorWithTagFiltersInput extends React.Component {
         BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
       ) {
         if (checkSourceFileId(this.props.currentOpenFileId)) {
+          store.dispatch({ type: SET_SAVE_IN_PROGRESS });
           FileStorageSystemClient.doSaveSourceContent(
             BlockTaggingEditorExtension.editor.value(true),
             this.props.currentOpenFileId.sourceId
           ).then((success) => {
+            store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
             if (success) {
               this.props.dispatchSetToastAction({
                 message: "Saved source file",
@@ -73,9 +81,11 @@ class SourceEditorWithTagFiltersInput extends React.Component {
     }
     const fileIdKeyStr = getFileIdKeyStr(this.props.currentOpenFileId);
     if (checkSourceFileId(this.props.currentOpenFileId)) {
+      this.props.dispatchSetFileLoading();
       FileStorageSystemClient.doGetSourceContent(
         this.props.currentOpenFileId.sourceId
       ).then((value) => {
+        this.props.dispatchClearFileLoading();
         if (value === null) {
           this.props.dispatchSetToastAction({
             message: "Failed to retrieve source content",
@@ -112,7 +122,18 @@ class SourceEditorWithTagFiltersInput extends React.Component {
   };
 
   render = () => {
-    return (
+    return this.props.fileLoading ? (
+      <CircularProgress
+        color="primary"
+        style={{
+          position: "absolute",
+          top: "40%",
+          left: "45%",
+          height: "100px",
+          width: "100px",
+        }}
+      />
+    ) : (
       <Editor
         fileIdKeyStr={this.state.fileIdKeyStr}
         fileContent={this.state.fileContent}
@@ -125,8 +146,11 @@ export default connect(
   (state) => ({
     currentOpenFileId: state.currentOpenFileId,
     currentOpenFileName: state.currentOpenFileName,
+    fileLoading: state.fileLoading,
   }),
   (dispatch) => ({
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
+    dispatchSetFileLoading: () => dispatch({ type: SET_FILE_LOADING }),
+    dispatchClearFileLoading: () => dispatch({ type: CLEAR_FILE_LOADING }),
   })
 )(SourceEditorWithTagFiltersInput);

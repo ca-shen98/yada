@@ -41,6 +41,8 @@ import store from "../store";
 import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   SET_SAVE_DIRTY_FLAG_ACTION_TYPE,
+  SET_SAVE_IN_PROGRESS,
+  CLEAR_SAVE_IN_PROGRESS,
   signoutAction,
 } from "../reducers/CurrentOpenFileState";
 import "./Navbar.css";
@@ -49,6 +51,7 @@ import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { setNewUserAction } from "../reducers/Steps";
 
 const TAG_FILTERS_INPUT_ID = "tag_filters_input";
@@ -71,12 +74,14 @@ class Navbar extends React.Component {
   };
 
   handleSave = () => {
+    store.dispatch({ type: SET_SAVE_IN_PROGRESS });
     store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
     if (checkSourceFileId(this.props.currentOpenFileId)) {
       FileStorageSystemClient.doSaveSourceContent(
         BlockTaggingEditorExtension.editor.value(true),
         this.props.currentOpenFileId.sourceId
       ).then((success) => {
+        store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
         if (success) {
           this.props.dispatchSetToastAction({
             message: "Saved source file",
@@ -109,6 +114,7 @@ class Navbar extends React.Component {
             severity: TOAST_SEVERITY.SUCCESS,
             open: true,
           });
+          store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
           store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
         })
         .catch(() => {
@@ -117,6 +123,7 @@ class Navbar extends React.Component {
             severity: TOAST_SEVERITY.ERROR,
             open: true,
           });
+          store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
           store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
         });
     }
@@ -416,11 +423,27 @@ class Navbar extends React.Component {
                         overflow: "hidden",
                         whiteSpace: "nowrap",
                         display: "inline-block",
-                        maxWidth: "100%",
-                        minWidth: "0px",
+                        maxWidth: "45px",
+                        minWidth: "45px",
+                        zIndex: 0,
                       }}
                     >
-                      {this.state.windowWidth < 1000 ? "" : "Save"}
+                      <CircularProgress
+                        hidden={!this.props.saveInProgress}
+                        color="secondary"
+                        style={{
+                          position: "absolute",
+                          top: "0%",
+                          left: "0%",
+                          height: "40px",
+                          width: "40px",
+                          paddingTop: "4px",
+                          paddingBottom: "4px",
+                          paddingLeft: "4px",
+                          paddingRight: "4px",
+                          zIndex: 1,
+                        }}
+                      />
                     </Button>
                   </Grid>
                 </Grid>
@@ -606,6 +629,7 @@ export default connect(
     backendModeSignedInStatus: state.backendModeSignedInStatus,
     tagsInView: state.tagsInView,
     saveDirtyFlag: state.saveDirtyFlag,
+    saveInProgress: state.saveInProgress,
   }),
   (dispatch) => ({
     dispatchSetBackendModeSignedInStatusAction: (mode) =>

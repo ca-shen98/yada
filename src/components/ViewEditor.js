@@ -10,6 +10,11 @@ import { setTagsInViewAction } from "../reducers/SetTagsInView";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import { Steps } from "intro.js-react";
 import { setNewUserAction } from "../reducers/Steps";
+import {
+  SET_FILE_LOADING,
+  CLEAR_FILE_LOADING,
+} from "../reducers/CurrentOpenFileState";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 class ViewEditor extends React.Component {
   state = {
@@ -45,8 +50,10 @@ class ViewEditor extends React.Component {
   };
 
   changeFile = async () => {
+    this.props.dispatchSetFileLoading();
     FileStorageSystemClient.doGetView(this.props.currentOpenFileId).then(
       (value) => {
+        this.props.dispatchClearFileLoading();
         if (value === null) {
           this.props.dispatchSetToastAction({
             message: "Failed to retrieve view",
@@ -105,7 +112,18 @@ class ViewEditor extends React.Component {
             exitOnEsc: false,
           }}
         />
-        {this.state.fileType === FILE_TYPE.CARD_VIEW ? (
+        {this.props.fileLoading ? (
+          <CircularProgress
+            color="primary"
+            style={{
+              position: "absolute",
+              top: "40%",
+              left: "45%",
+              height: "100px",
+              width: "100px",
+            }}
+          />
+        ) : this.state.fileType === FILE_TYPE.CARD_VIEW ? (
           <CardDeck data={this.state.data} />
         ) : this.state.fileType === FILE_TYPE.TEXT_VIEW ? (
           <TextView data={this.state.data} />
@@ -120,10 +138,13 @@ export default connect(
     currentOpenFileId: state.currentOpenFileId,
     newUser: state.newUser,
     tagEditorOpened: state.tagEditorOpened,
+    fileLoading: state.fileLoading,
   }),
   (dispatch) => ({
     setTagsInView: (tagsInView) => dispatch(setTagsInViewAction(tagsInView)),
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
     dispatchNewUserAction: (newUser) => dispatch(setNewUserAction(newUser)),
+    dispatchSetFileLoading: () => dispatch({ type: SET_FILE_LOADING }),
+    dispatchClearFileLoading: () => dispatch({ type: CLEAR_FILE_LOADING }),
   })
 )(ViewEditor);
