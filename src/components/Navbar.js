@@ -70,7 +70,6 @@ class Navbar extends React.Component {
     };
   }
   handleResize = (e) => {
-    console.log(window.innerWidth);
     this.setState({ windowWidth: window.innerWidth });
   };
 
@@ -152,17 +151,24 @@ class Navbar extends React.Component {
   };
 
   handleCancelModifyingTagFilters = () => {
-    const input = document.getElementById(TAG_FILTERS_INPUT_ID);
-    input.value = this.state.currentTagFiltersStr;
+    const tag_input = document.getElementById(TAG_FILTERS_INPUT_ID);
+    if (tag_input !== null) {
+      tag_input.value = this.state.currentTagFiltersStr;
+    }
     this.setState({ modifyingTagFilters: false });
   };
 
   handleStartModifyingTagFilters = () => {
     this.setState({ modifyingTagFilters: true });
     defer(() => {
-      const input = document.getElementById(TAG_FILTERS_INPUT_ID);
-      input.focus();
-      input.setSelectionRange(input.value.length, input.value.length);
+      const tag_input = document.getElementById(TAG_FILTERS_INPUT_ID);
+      if (tag_input !== null) {
+        tag_input.focus();
+        tag_input.setSelectionRange(
+          tag_input.value.length,
+          tag_input.value.length
+        );
+      }
     });
   };
 
@@ -224,21 +230,24 @@ class Navbar extends React.Component {
 
   handleApplyTagFilters = () => {
     let tagFilters = null;
-    const tagFiltersStr = document
-      .getElementById(TAG_FILTERS_INPUT_ID)
-      .value.trim();
-    if (tagFiltersStr) {
-      tagFilters = parseTagFilters(tagFiltersStr);
-      if (!tagFilters) {
-        this.props.dispatchSetToastAction({
-          message: "Invalid tag filters",
-          severity: TOAST_SEVERITY.ERROR,
-          open: true,
-        });
-        return false;
+    let tagFiltersStr = "";
+    const tag_input = document.getElementById(TAG_FILTERS_INPUT_ID);
+    if (tag_input !== null) {
+      tagFiltersStr = tag_input.value.trim();
+      if (tagFiltersStr) {
+        tagFilters = parseTagFilters(tagFiltersStr);
+        if (!tagFilters) {
+          this.props.dispatchSetToastAction({
+            message: "Invalid tag filters",
+            severity: TOAST_SEVERITY.ERROR,
+            open: true,
+          });
+          return false;
+        }
       }
+      tag_input.value = tagFiltersStr;
     }
-    document.getElementById(TAG_FILTERS_INPUT_ID).value = tagFiltersStr;
+
     const parsedTagFiltersStr = JSON.stringify(tagFilters);
     const oldParsedTagFiltersStr = this.state.currentParsedTagFiltersStr;
     this.setState({
@@ -309,7 +318,10 @@ class Navbar extends React.Component {
       prevProps.currentOpenFileId.sourceId !==
         this.props.currentOpenFileId.sourceId
     ) {
-      document.getElementById(TAG_FILTERS_INPUT_ID).value = "";
+      const tag_input = document.getElementById(TAG_FILTERS_INPUT_ID);
+      if (tag_input !== null) {
+        tag_input.value = "";
+      }
       this.handleApplyTagFilters();
       this.setState({ sourceSavedTagFilters: {} });
       this.changeFile();
@@ -339,42 +351,34 @@ class Navbar extends React.Component {
     );
     return (
       <div className={"sticky-navbar scrolled"}>
-        <AppBar class="custom-navbar">
-          <Toolbar style={{ justifyContent: "space-between" }}>
+        <AppBar className="custom-navbar">
+          <Toolbar>
             <div style={{ width: "275px" }}>
               <Grid container>
-                <Grid item xs={2}>
-                  <img
-                    className={"menuButton"}
-                    src={require("../images/logo.png")}
-                    style={{ width: "40px", marginRight: "10px" }}
-                    alt={"MENU"}
-                  />
-                </Grid>
-                <Grid item xs={10}>
-                  <Typography
-                    variant="h5"
-                    style={{
-                      fontFamily: "Bungee",
-                      color: "#F5F0E1",
-                      marginTop: "5px",
-                    }}
-                  >
-                    YADA
-                  </Typography>
-                </Grid>
+                <img
+                  className={"menuButton"}
+                  src={require("../images/logo.png")}
+                  style={{ width: "40px", marginRight: "10px" }}
+                  alt={"MENU"}
+                />
+                <Typography
+                  variant="h5"
+                  style={{
+                    fontFamily: "Bungee",
+                    color: "#F5F0E1",
+                    marginTop: "5px",
+                  }}
+                >
+                  YADA
+                </Typography>
               </Grid>
             </div>
             <Grid container style={{ width: "80vw" }}>
-              <Grid
-                item
-                xs={this.props.currentOpenFileName.viewName === "" ? 3 : 5}
-              >
-                <Grid container spacing={0}>
-                  <Grid item xs={6} s={6} xl={4}>
-                    {this.props.currentOpenFileName.sourceName === "" ? null : (
-                      <Breadcrumbs
-                        aria-label="breadcrumb"
+              {this.props.currentOpenFileName.sourceName === "" ? null : (
+                <Grid item xs={4}>
+                  <Grid container spacing={0}>
+                    <Grid item xs={6} sm={6} xl={4}>
+                      <div
                         color="secondary"
                         style={{
                           marginRight: "10px",
@@ -383,27 +387,8 @@ class Navbar extends React.Component {
                           padding: "8px",
                         }}
                       >
-                        <Link
-                          underline="none"
-                          color="inherit"
-                          style={{
-                            color: "#F5F0E1",
-                            textOverflow: "ellipsis",
-                            overflow: "hidden",
-                            whiteSpace: "nowrap",
-                            display: "block",
-                            maxWidth: "100%",
-                          }}
-                        >
-                          <DescriptionIcon color="secondary" />
-                          {this.state.windowWidth < 1000
-                            ? ""
-                            : this.props.currentOpenFileName.sourceName}
-                        </Link>
-                        {this.props.currentOpenFileName.viewName ===
-                        "" ? null : (
-                          <Link
-                            underline="none"
+                        {this.props.currentOpenFileName.viewName === "" ? (
+                          <div
                             color="inherit"
                             style={{
                               color: "#F5F0E1",
@@ -412,6 +397,23 @@ class Navbar extends React.Component {
                               whiteSpace: "nowrap",
                               display: "block",
                               maxWidth: "100%",
+                              textAlign: "center",
+                            }}
+                          >
+                            <DescriptionIcon color="secondary" />
+                            {this.props.currentOpenFileName.sourceName}
+                          </div>
+                        ) : (
+                          <div
+                            color="inherit"
+                            style={{
+                              color: "#F5F0E1",
+                              textOverflow: "ellipsis",
+                              overflow: "hidden",
+                              whiteSpace: "nowrap",
+                              display: "block",
+                              maxWidth: "100%",
+                              textAlign: "center",
                             }}
                           >
                             {this.props.currentOpenFileId.viewType ===
@@ -421,60 +423,58 @@ class Navbar extends React.Component {
                               FILE_TYPE.TEXT_VIEW ? (
                               <TextFieldsIcon color="secondary" />
                             ) : null}
-                            {this.state.windowWidth < 1000
-                              ? ""
-                              : this.props.currentOpenFileName.viewName}
-                          </Link>
+                            {this.props.currentOpenFileName.viewName}
+                          </div>
                         )}
-                      </Breadcrumbs>
-                    )}
-                  </Grid>
-                  <Grid item xs={5}>
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      title="save"
-                      disabled={noOpenFileIdCheck || !this.props.saveDirtyFlag}
-                      onClick={this.handleSave}
-                      startIcon={<SaveIcon />}
-                      style={{
-                        borderRadius: "10px",
-                        paddingTop: "8px",
-                        paddingBottom: "8px",
-                        textOverflow: "ellipsis",
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                        display: "inline-block",
-                        maxWidth: "45px",
-                        minWidth: "45px",
-                        zIndex: 0,
-                      }}
-                    >
-                      <CircularProgress
-                        hidden={!this.props.saveInProgress}
+                      </div>
+                    </Grid>
+                    <Grid item xs={5}>
+                      <Button
+                        variant="outlined"
                         color="secondary"
+                        title="save"
+                        disabled={
+                          noOpenFileIdCheck || !this.props.saveDirtyFlag
+                        }
+                        onClick={this.handleSave}
+                        startIcon={<SaveIcon />}
                         style={{
-                          position: "absolute",
-                          top: "0%",
-                          left: "0%",
-                          height: "40px",
-                          width: "40px",
-                          paddingTop: "4px",
-                          paddingBottom: "4px",
-                          paddingLeft: "4px",
-                          paddingRight: "4px",
-                          zIndex: 1,
+                          borderRadius: "10px",
+                          paddingTop: "8px",
+                          paddingBottom: "8px",
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                          display: "inline-block",
+                          maxWidth: "45px",
+                          minWidth: "45px",
+                          zIndex: 0,
                         }}
-                      />
-                    </Button>
+                      >
+                        <CircularProgress
+                          hidden={!this.props.saveInProgress}
+                          color="secondary"
+                          style={{
+                            position: "absolute",
+                            top: "0%",
+                            left: "0%",
+                            height: "40px",
+                            width: "40px",
+                            paddingTop: "4px",
+                            paddingBottom: "4px",
+                            paddingLeft: "4px",
+                            paddingRight: "4px",
+                            zIndex: 1,
+                          }}
+                        />
+                      </Button>
+                    </Grid>
                   </Grid>
                 </Grid>
-              </Grid>
-              <Grid
-                item
-                xs={this.props.currentOpenFileName.viewName === "" ? 6 : 1}
-              >
-                {this.props.currentOpenFileName.viewName === "" ? (
+              )}
+              {this.props.currentOpenFileName.sourceName !== "" &&
+              this.props.currentOpenFileName.viewName === "" ? (
+                <Grid item xs={6}>
                   <div
                     id="searchBar"
                     style={{
@@ -518,8 +518,12 @@ class Navbar extends React.Component {
                         this.setState({ currentTagFiltersStr: value });
                         this.handleStartModifyingTagFilters();
                         if (reason === "clear") {
-                          document.getElementById(TAG_FILTERS_INPUT_ID).value =
-                            "";
+                          const tag_input = document.getElementById(
+                            TAG_FILTERS_INPUT_ID
+                          );
+                          if (tag_input !== null) {
+                            tag_input.value = "";
+                          }
                           this.handleApplyTagFilters();
                         }
                       }}
@@ -586,8 +590,8 @@ class Navbar extends React.Component {
                       )}
                     </div>
                   </div>
-                ) : null}
-              </Grid>
+                </Grid>
+              ) : null}
             </Grid>
             <IconButton
               title="Report a Bug"
