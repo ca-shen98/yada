@@ -118,11 +118,10 @@ class ViewEditor extends React.Component {
             color="primary"
             style={{
               position: "absolute",
-              top: "0%",
-              left: "0%",
-              zIndex: 1,
-              height: "500px",
-              width: "500px",
+              top: "40%",
+              left: "45%",
+              height: "100px",
+              width: "100px",
             }}
           />
         ) : this.state.fileType === FILE_TYPE.CARD_VIEW ? (
