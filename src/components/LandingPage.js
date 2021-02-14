@@ -23,7 +23,7 @@ const CLIENT_ID =
 class LandingPage extends React.Component {
   handleLoginSuccess = async ({
     profileObj: { name, email },
-    tokenObj: { id_token: token, expiresAt: expiry },
+    tokenObj: { id_token: token, expires_at: expiry },
   }) => {
     let response = null;
     try {
