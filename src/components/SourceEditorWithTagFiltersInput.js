@@ -20,6 +20,8 @@ import {
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   SET_FILE_LOADING,
   CLEAR_FILE_LOADING,
+  SET_SAVE_IN_PROGRESS,
+  CLEAR_SAVE_IN_PROGRESS,
 } from "../reducers/CurrentOpenFileState";
 
 export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = "initialTagFilters";
@@ -45,10 +47,12 @@ class SourceEditorWithTagFiltersInput extends React.Component {
         BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
       ) {
         if (checkSourceFileId(this.props.currentOpenFileId)) {
+          store.dispatch({ type: SET_SAVE_IN_PROGRESS });
           FileStorageSystemClient.doSaveSourceContent(
             BlockTaggingEditorExtension.editor.value(true),
             this.props.currentOpenFileId.sourceId
           ).then((success) => {
+            store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
             if (success) {
               this.props.dispatchSetToastAction({
                 message: "Saved source file",

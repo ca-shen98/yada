@@ -81,20 +81,19 @@ class Navbar extends React.Component {
         BlockTaggingEditorExtension.editor.value(true),
         this.props.currentOpenFileId.sourceId
       ).then((success) => {
+        store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
         if (success) {
           this.props.dispatchSetToastAction({
             message: "Saved source file",
             severity: TOAST_SEVERITY.SUCCESS,
             open: true,
           });
-          store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
         } else {
           this.props.dispatchSetToastAction({
             message: "Failed to save source file",
             severity: TOAST_SEVERITY.ERROR,
             open: true,
           });
-          store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
           store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
         }
       });
