@@ -10,7 +10,7 @@ import {
 } from "../util/FileIdAndTypeUtils";
 import Editor from "./Editor";
 import { handleSetCurrentOpenFileId } from "./Navigator";
-
+import CircularProgress from "@material-ui/core/CircularProgress";
 import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import BlockTaggingEditorExtension from "../editor_extension/BlockTagging";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
@@ -118,7 +118,18 @@ class SourceEditorWithTagFiltersInput extends React.Component {
   };
 
   render = () => {
-    return (
+    return this.props.fileLoading ? (
+      <CircularProgress
+        color="primary"
+        style={{
+          position: "absolute",
+          top: "40%",
+          left: "45%",
+          height: "100px",
+          width: "100px",
+        }}
+      />
+    ) : (
       <Editor
         fileIdKeyStr={this.state.fileIdKeyStr}
         fileContent={this.state.fileContent}
@@ -131,6 +142,7 @@ export default connect(
   (state) => ({
     currentOpenFileId: state.currentOpenFileId,
     currentOpenFileName: state.currentOpenFileName,
+    fileLoading: state.fileLoading,
   }),
   (dispatch) => ({
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
