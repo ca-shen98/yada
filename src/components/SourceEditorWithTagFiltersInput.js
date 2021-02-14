@@ -17,6 +17,7 @@ import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import { BACKEND_MODE_SIGNED_IN_STATUS } from "../reducers/BackendModeSignedInStatus";
 import store from "../store";
 import {
+  SET_SAVE_DIRTY_FLAG_ACTION_TYPE,
   CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
   SET_FILE_LOADING,
   CLEAR_FILE_LOADING,
@@ -46,8 +47,12 @@ class SourceEditorWithTagFiltersInput extends React.Component {
         this.props.backendModeSignedInStatus !==
         BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
       ) {
-        if (checkSourceFileId(this.props.currentOpenFileId)) {
+        if (
+          this.props.saveDirtyFlag &&
+          checkSourceFileId(this.props.currentOpenFileId)
+        ) {
           store.dispatch({ type: SET_SAVE_IN_PROGRESS });
+          store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
           FileStorageSystemClient.doSaveSourceContent(
             BlockTaggingEditorExtension.editor.value(true),
             this.props.currentOpenFileId.sourceId
@@ -59,8 +64,8 @@ class SourceEditorWithTagFiltersInput extends React.Component {
                 severity: TOAST_SEVERITY.SUCCESS,
                 open: true,
               });
-              store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
             } else {
+              store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
               this.props.dispatchSetToastAction({
                 message: "Failed to save source file",
                 severity: TOAST_SEVERITY.ERROR,
@@ -147,6 +152,7 @@ export default connect(
     currentOpenFileId: state.currentOpenFileId,
     currentOpenFileName: state.currentOpenFileName,
     fileLoading: state.fileLoading,
+    saveDirtyFlag: state.saveDirtyFlag,
   }),
   (dispatch) => ({
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
