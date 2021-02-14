@@ -81,7 +81,6 @@ class Navbar extends React.Component {
         BlockTaggingEditorExtension.editor.value(true),
         this.props.currentOpenFileId.sourceId
       ).then((success) => {
-        // TODO: stop progress bar
         if (success) {
           this.props.dispatchSetToastAction({
             message: "Saved source file",
