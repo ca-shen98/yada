@@ -24,6 +24,7 @@ import {
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import BugReportIcon from "@material-ui/icons/BugReport";
 import IconButton from "@material-ui/core/IconButton";
 import SearchIcon from "@material-ui/icons/Search";
 import { parse as parseTagFilters } from "../lib/TagFiltersGrammar";
@@ -71,6 +72,27 @@ class Navbar extends React.Component {
   handleResize = (e) => {
     console.log(window.innerWidth);
     this.setState({ windowWidth: window.innerWidth });
+  };
+
+  handleBugReport = (event) => {
+    const emailTo = "yada.bugs@gmail.com";
+    const emailSub = "[BUG]%20User%20Report";
+
+    // Get device info to help with debugging
+    const nl = "%0D%0A"; // HTML escaped newline
+    const device_info =
+      nl +
+      nl +
+      "Device Info:" +
+      nl +
+      [window.navigator.userAgent, window.navigator.platform].join(nl);
+    const emailBody =
+      "Enter information about your bug report here." + device_info;
+
+    window.open(
+      "mailto:" + emailTo + "?subject=" + emailSub + "&body=" + emailBody,
+      "_blank"
+    );
   };
 
   handleSave = () => {
@@ -567,6 +589,17 @@ class Navbar extends React.Component {
                 ) : null}
               </Grid>
             </Grid>
+            <IconButton
+              title="Report a Bug"
+              edge="end"
+              aria-label="bug report"
+              aria-haspopup="true"
+              color="inherit"
+              style={{ float: "right" }}
+              onClick={this.handleBugReport}
+            >
+              <BugReportIcon color="secondary" />
+            </IconButton>
             <IconButton
               edge="end"
               aria-label="account of current user"
