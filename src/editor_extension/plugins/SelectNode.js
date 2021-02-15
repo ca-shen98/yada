@@ -20,8 +20,11 @@ export default new Plugin({
           list_item = true;
         }
         if (node.hasOwnProperty("attrs") && node.attrs["tags"]) {
+          console.log(list_item + " " + node.type.name);
+          // if(bullet_list && (node.type.name === "paragraph" || node.type.name == "list_item")){
+          //   return true;
+          // }
           if (!list_item || (list_item && node.type.name !== "paragraph")) {
-            console.log(list_item + " " + node.type.name);
             console.log(node.attrs["tags"]);
             newState = { node, pos };
           }

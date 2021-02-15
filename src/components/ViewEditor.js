@@ -62,6 +62,17 @@ class ViewEditor extends React.Component {
           });
           handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
         } else {
+          let items = value["tags"]["items"];
+          Object.keys(items).forEach(function (tagId) {
+            if (items[tagId]["content"].type === "list_item") {
+              console.log("getting here");
+              let list_item_content = items[tagId]["content"];
+              items[tagId]["content"] = {
+                type: "bullet_list",
+                content: [list_item_content],
+              };
+            }
+          });
           this.props.setTagsInView([]); // clear any tagsInView currently stored
           this.setState({
             sourceId: this.props.currentOpenFileId.sourceId,
