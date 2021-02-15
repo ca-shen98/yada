@@ -48,7 +48,7 @@ export default new Plugin({
           decoration = Decoration.node(
             selectNode.pos,
             selectNode.pos + selectNode.node.nodeSize,
-            { style: "background: #FAFAFA; outline: 10px solid #DCDCDC;" }
+            { style: "background: #FAFAFA; outline: 1px solid black;" }
           );
         } else {
           decoration = Decoration.node(
