@@ -2,7 +2,7 @@ import React from "react";
 
 export default class TermsAndConditionsPage extends React.Component {
   render = () => (
-    <div className={"container vertical-spacing"}>
+    <div className={"container landing-container"}>
       <h1>Terms and Conditions</h1>
       <p>Last updated: February 15, 2021</p>
       <p>
@@ -75,7 +75,7 @@ export default class TermsAndConditionsPage extends React.Component {
               <strong>Website</strong> refers to YADA, accessible from{" "}
               <a
                 href="https://yada.dev/"
-                rel="external nofollow noopener"
+                rel="external nofollow noopener noreferrer"
                 target="_blank"
               >
                 https://yada.dev/

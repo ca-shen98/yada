@@ -45,6 +45,9 @@ export default class LandingPage extends React.Component {
       case ENDPOINTS.TERMS_AND_CONDITIONS:
         component = <TermsAndConditionsPage />;
         break;
+      default:
+        component = <LoginPage />;
+        break;
     }
     return component;
   }

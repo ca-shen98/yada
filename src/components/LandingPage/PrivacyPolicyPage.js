@@ -2,7 +2,7 @@ import React from "react";
 
 export default class PrivacyPolicyPage extends React.Component {
   render = () => (
-    <div className={"container vertical-spacing"}>
+    <div className={"container landing-container"}>
       <h1>Privacy Policy</h1>
       <p>Last updated: February 15, 2021</p>
       <p>
@@ -102,7 +102,7 @@ export default class PrivacyPolicyPage extends React.Component {
               <strong>Website</strong> refers to YADA, accessible from{" "}
               <a
                 href="https://yada.dev/"
-                rel="external nofollow noopener"
+                rel="external nofollow noopener noreferrer"
                 target="_blank"
               >
                 https://yada.dev/
@@ -179,22 +179,6 @@ export default class PrivacyPolicyPage extends React.Component {
             it will refuse Cookies, our Service may use Cookies.
           </li>
           <li>
-            <strong>Flash Cookies.</strong> Certain features of our Service may
-            use local stored objects (or Flash Cookies) to collect and store
-            information about Your preferences or Your activity on our Service.
-            Flash Cookies are not managed by the same browser settings as those
-            used for Browser Cookies. For more information on how You can delete
-            Flash Cookies, please read &quot;Where can I change the settings for
-            disabling, or deleting local shared objects?&quot; available at{" "}
-            <a
-              href="https://helpx.adobe.com/flash-player/kb/disable-local-shared-objects-flash.html#main_Where_can_I_change_the_settings_for_disabling__or_deleting_local_shared_objects_"
-              rel="external nofollow noopener"
-              target="_blank"
-            >
-              https://helpx.adobe.com/flash-player/kb/disable-local-shared-objects-flash.html#main_Where_can_I_change_the_settings_for_disabling__or_deleting_local_shared_objects_
-            </a>
-          </li>
-          <li>
             <strong>Web Beacons.</strong> Certain sections of our Service and
             our emails may contain small electronic files known as web beacons
             (also referred to as clear gifs, pixel tags, and single-pixel gifs)
@@ -209,7 +193,11 @@ export default class PrivacyPolicyPage extends React.Component {
           Persistent Cookies remain on Your personal computer or mobile device
           when You go offline, while Session Cookies are deleted as soon as You
           close Your web browser. You can learn more about cookies here:{" "}
-          <a href="https://www.termsfeed.com/blog/cookies/" target="_blank">
+          <a
+            href="https://www.termsfeed.com/blog/cookies/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             All About Cookies by TermsFeed
           </a>
           .
@@ -479,7 +467,7 @@ export default class PrivacyPolicyPage extends React.Component {
               Their Privacy Policy can be viewed at{" "}
               <a
                 href="https://docs.graphenedb.com/docs/privacy-policy-v20"
-                rel="external nofollow noopener"
+                rel="external nofollow noopener noreferrer"
                 target="_blank"
               >
                 https://docs.graphenedb.com/docs/privacy-policy-v20
@@ -494,7 +482,7 @@ export default class PrivacyPolicyPage extends React.Component {
               Their Privacy Policy can be viewed at{" "}
               <a
                 href="https://cloud.google.com/terms/cloud-privacy-notice"
-                rel="external nofollow noopener"
+                rel="external nofollow noopener noreferrer"
                 target="_blank"
               >
                 https://cloud.google.com/terms/cloud-privacy-notice

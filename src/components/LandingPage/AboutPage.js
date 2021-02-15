@@ -3,7 +3,7 @@ import Grid from "@material-ui/core/Grid";
 
 export default class AboutPage extends React.Component {
   render = () => (
-    <div className={"container vertical-spacing"}>
+    <div className={"container landing-container"}>
       <h1>About Yada</h1>
       <div className={"paragraph"}>
         <h3>Our Team</h3>
