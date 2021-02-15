@@ -14,22 +14,17 @@ export default new Plugin({
       let head = tr.selection.head;
       let newState = null;
       let list_item = false;
-      console.log("==================================");
-      if (tr.doc.nodeAt(head) != null) {
-        console.log(tr.doc.nodeAt(head).type);
-      }
+
       tr.doc.nodesBetween(head, head, (node, pos) => {
         if (node.type.name === "list_item") {
           list_item = true;
         }
         if (node.hasOwnProperty("attrs") && node.attrs["tags"]) {
           if (!list_item || (list_item && node.type.name !== "paragraph")) {
-            console.log(node.type.name);
             newState = { node, pos };
           }
         }
       });
-      console.log("==================================");
       if (
         (!oldState && newState) ||
         (oldState && !newState) ||
