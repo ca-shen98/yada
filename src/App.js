@@ -48,45 +48,47 @@ class App extends React.Component {
         title: "Definitions 📚",
         intro:
           "Before we start here are some useful definitions <br>" +
-          "<b>Document</b>: A source of truth document in our app <br>" +
-          "<b>View</b>: Card View or Text View you can create from a document <br>" +
-          "<b>Block</b>: A piece of content in the document seperated by a space which you can add a tag to",
+          "<b>Document</b>: A text document where you write all your content. <br>" +
+          "<b>Block</b>: Each line in a document is taggable, which we refer to as blocks. <br>" +
+          "<b>View</b>: Using several tags, we can make other files (views) that show the same content as what's in the tagged blocks. <br>",
       },
       {
         title: "Navigator",
         element: ".SidePane",
         intro:
-          "This is the navigator. Here you can create, update, rename and delete new views and documents. <br>" +
-          '<b>Click on the "Welcome to Yada! " document to get started!</b>',
+          "This is the navigator. Here you can create, rename, and delete views and documents. <br>" +
+          '<b>Click on the "Welcome to Yada!" document to get started!</b>',
       },
     ],
     documentTourSteps: [
       {
         title: "Editor 📝",
         element: ".editor",
-        intro: "This is the main editor where you can use Markdown Syntax",
+        intro:
+          "This is the main text editor where you can add bullet points, check lists, tables, code blocks, and much more! We even support Markdown!",
       },
       {
         title: "Views",
         element: ".fileList-iconButton",
-        intro: "Use this menu to create new views, rename and delete documents",
+        intro:
+          "Click this button to open a menu that lets you rename, delete, and create new views for this document ",
       },
       {
         title: "Tag Menu 🏷",
         element: "#tag_menu_wrapper",
         intro:
-          "This is the tag menu. After selecting a block from the editor you can add tags from here.",
+          "This is the tag menu. After selecting a block from the editor, you can add tags from here.",
       },
       {
         title: "Search Menu 🔍",
         element: "#searchBar",
         intro:
-          "In this search menu you can filter your document by tags. It can understand complex grammmar 🧠. Try (#{tag1} | !#{tag2}) & #{tag3}",
+          "In this search menu you can filter your document by tags. It supports logical expressions with a simple grammar 🧠. Try (#{tag1} | !#{tag2}) & #{tag3}",
       },
       {
         title: "Finally ✌",
         intro:
-          "Follow the steps in the welcome doc, to make your own blocks, tags, views and much more. You can refer to the Example documents to further see how to use Yada!",
+          "Follow the steps in the welcome doc to make your own blocks, tags, views, and much more. You can refer to the Example documents to further see how to use Yada!",
       },
     ],
     initialTourStart: this.props.newUser,
