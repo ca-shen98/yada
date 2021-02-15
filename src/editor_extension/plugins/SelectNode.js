@@ -14,17 +14,21 @@ export default new Plugin({
       let head = tr.selection.head;
       let newState = null;
       let list_item = false;
-
+      console.log("============================");
       tr.doc.nodesBetween(head, head, (node, pos) => {
         if (node.type.name === "list_item") {
           list_item = true;
         }
         if (node.hasOwnProperty("attrs") && node.attrs["tags"]) {
           if (!list_item || (list_item && node.type.name !== "paragraph")) {
+            console.log(list_item + " " + node.type.name);
+            console.log(node.attrs["tags"]);
             newState = { node, pos };
           }
         }
+        // return true;
       });
+      console.log("============================");
       if (
         (!oldState && newState) ||
         (oldState && !newState) ||
@@ -44,13 +48,21 @@ export default new Plugin({
       const selectDecorations = [];
       const selectNode = SelectNodePluginKey.getState(state);
       if (selectNode) {
-        selectDecorations.push(
-          Decoration.node(
+        let decoration = null;
+        if (selectNode.node.type.name === "code_block") {
+          decoration = Decoration.node(
+            selectNode.pos,
+            selectNode.pos + selectNode.node.nodeSize,
+            { style: "background: #FAFAFA; outline: 10px solid #DCDCDC;" }
+          );
+        } else {
+          decoration = Decoration.node(
             selectNode.pos,
             selectNode.pos + selectNode.node.nodeSize,
             { style: "background: #FAFAFA; outline: 1px solid #DCDCDC;" }
-          )
-        );
+          );
+        }
+        selectDecorations.push(decoration);
       }
       return DecorationSet.create(state.doc, selectDecorations);
     },
