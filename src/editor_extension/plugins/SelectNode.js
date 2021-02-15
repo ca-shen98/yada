@@ -19,9 +19,7 @@ export default new Plugin({
           list_item = true;
         }
         if (node.hasOwnProperty("attrs") && node.attrs["tags"]) {
-          console.log(list_item + " " + node.type.name);
           if (!list_item || (list_item && node.type.name !== "paragraph")) {
-            console.log(node.attrs["tags"]);
             newState = { node, pos };
           }
         }
