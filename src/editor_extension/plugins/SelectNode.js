@@ -14,24 +14,18 @@ export default new Plugin({
       let head = tr.selection.head;
       let newState = null;
       let list_item = false;
-      console.log("============================");
       tr.doc.nodesBetween(head, head, (node, pos) => {
         if (node.type.name === "list_item") {
           list_item = true;
         }
         if (node.hasOwnProperty("attrs") && node.attrs["tags"]) {
           console.log(list_item + " " + node.type.name);
-          // if(bullet_list && (node.type.name === "paragraph" || node.type.name == "list_item")){
-          //   return true;
-          // }
           if (!list_item || (list_item && node.type.name !== "paragraph")) {
             console.log(node.attrs["tags"]);
             newState = { node, pos };
           }
         }
-        // return true;
       });
-      console.log("============================");
       if (
         (!oldState && newState) ||
         (oldState && !newState) ||
