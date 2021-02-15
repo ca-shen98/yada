@@ -105,3 +105,8 @@
 .MuiBreadcrumbs-ol {
   justify-content: center;
 }
+
+.title {
+  flex-grow: 1;
+  font-family: Bungee, serif;
+}

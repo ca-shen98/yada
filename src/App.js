@@ -7,11 +7,10 @@ import {
   getUserSignedInStatus,
   setBackendModeSignedInStatusAction,
 } from "./reducers/BackendModeSignedInStatus";
-import LandingPage from "./components/LandingPage";
+import LandingPage from "./components/LandingPage/LandingPage";
 import Navigator from "./components/Navigator";
 import Navbar from "./components/Navbar";
 import EditorManager from "./components/EditorManager";
-import "./components/LandingPage.css";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from "@material-ui/lab/Alert";
