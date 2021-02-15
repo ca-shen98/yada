@@ -45,7 +45,7 @@ class App extends React.Component {
         intro: "Hello 👋",
       },
       {
-        title: "Definitions 📚", //TODO: all of these need to be changed
+        title: "Definitions 📚",
         intro:
           "Before we start here are some useful definitions <br>" +
           "<b>Document</b>: A text document where you write all your content. <br>" +
