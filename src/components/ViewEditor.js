@@ -32,7 +32,7 @@ class ViewEditor extends React.Component {
         title: "View Editor ⌨️",
         element: ".dragDrop",
         intro:
-          "This is a drag and drop interface. Simply Drag a tag from the Available Tags to your Tags in View to include it!",
+          "This is a <b>drag and drop</b> interface. Simply drag a tag from the Available Tags column to the Tags in View one to include it!",
       },
       {
         title: "View Preview 👀",
