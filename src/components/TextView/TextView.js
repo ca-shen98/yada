@@ -10,7 +10,12 @@ import { FILE_TYPE } from "../../util/FileIdAndTypeUtils";
 import RichMarkdownEditor from "rich-markdown-editor";
 import { setToastAction, TOAST_SEVERITY } from "../../reducers/Toast";
 import store from "../../store";
-import { CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../../reducers/CurrentOpenFileState";
+import {
+  SET_SAVE_DIRTY_FLAG_ACTION_TYPE,
+  CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE,
+  CLEAR_SAVE_IN_PROGRESS,
+  SET_SAVE_IN_PROGRESS,
+} from "../../reducers/CurrentOpenFileState";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 
@@ -32,28 +37,34 @@ class TextView extends React.Component {
       event.keyCode === 83
     ) {
       event.preventDefault();
-      FileStorageSystemClient.doSaveViewSpec(
-        this.props.tagsInView,
-        this.props.currentOpenFileId.sourceId,
-        this.props.currentOpenFileId.viewId,
-        FILE_TYPE.TEXT_VIEW,
-        false
-      )
-        .then(() => {
-          this.props.dispatchSetToastAction({
-            message: "Saved view",
-            severity: TOAST_SEVERITY.SUCCESS,
-            open: true,
-          });
-          store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
-        })
-        .catch(() =>
-          this.props.dispatchSetToastAction({
-            message: "Failed to save view",
-            severity: TOAST_SEVERITY.ERROR,
-            open: true,
+      if (this.props.saveDirtyFlag) {
+        store.dispatch({ type: SET_SAVE_IN_PROGRESS });
+        store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+        FileStorageSystemClient.doSaveViewSpec(
+          this.props.tagsInView,
+          this.props.currentOpenFileId.sourceId,
+          this.props.currentOpenFileId.viewId,
+          FILE_TYPE.TEXT_VIEW,
+          false
+        )
+          .then(() => {
+            store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
+            this.props.dispatchSetToastAction({
+              message: "Saved view",
+              severity: TOAST_SEVERITY.SUCCESS,
+              open: true,
+            });
           })
-        );
+          .catch(() => {
+            store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
+            store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
+            this.props.dispatchSetToastAction({
+              message: "Failed to save view",
+              severity: TOAST_SEVERITY.ERROR,
+              open: true,
+            });
+          });
+      }
     }
   };
 
@@ -128,6 +139,7 @@ export default connect(
   (state) => ({
     tagsInView: state.tagsInView,
     currentOpenFileId: state.currentOpenFileId,
+    saveDirtyFlag: state.saveDirtyFlag,
   }),
   (dispatch) => ({
     setTagsInView: (tagsInView) => dispatch(setTagsInViewAction(tagsInView)),
