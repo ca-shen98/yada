@@ -19,7 +19,7 @@ export default new Plugin({
           list_item = true;
         }
         if (node.hasOwnProperty("attrs") && node.attrs["tags"]) {
-          if (!list_item || (list_item && node.type.name !== "paragraph")) {
+          if (!list_item || node.type.name !== "paragraph") {
             newState = { node, pos };
           }
         }

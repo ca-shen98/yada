@@ -65,7 +65,6 @@ class ViewEditor extends React.Component {
           let items = value["tags"]["items"];
           Object.keys(items).forEach(function (tagId) {
             if (items[tagId]["content"].type === "list_item") {
-              console.log("getting here");
               let list_item_content = items[tagId]["content"];
               items[tagId]["content"] = {
                 type: "bullet_list",
