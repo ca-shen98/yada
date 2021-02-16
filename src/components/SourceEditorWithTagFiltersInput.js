@@ -124,7 +124,6 @@ class SourceEditorWithTagFiltersInput extends React.Component {
         this.props.currentOpenFileId.sourceId ||
       prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
     ) {
-      this.props.dispatchSetFileLoading();
       this.changeFile();
     }
   };
