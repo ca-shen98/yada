@@ -24,6 +24,7 @@ import {
   SET_SAVE_IN_PROGRESS,
   CLEAR_SAVE_IN_PROGRESS,
 } from "../reducers/CurrentOpenFileState";
+import { setFileOpenedAction } from "../reducers/Steps";
 
 export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = "initialTagFilters";
 
@@ -99,6 +100,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
           });
           handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
         } else {
+          this.props.dispatchSetFileOpenedAction(true);
           this.setState({ fileIdKeyStr, fileContent: value ?? "" });
         }
       });
@@ -122,6 +124,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
         this.props.currentOpenFileId.sourceId ||
       prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
     ) {
+      this.props.dispatchSetFileLoading();
       this.changeFile();
     }
   };
@@ -158,5 +161,7 @@ export default connect(
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
     dispatchSetFileLoading: () => dispatch({ type: SET_FILE_LOADING }),
     dispatchClearFileLoading: () => dispatch({ type: CLEAR_FILE_LOADING }),
+    dispatchSetFileOpenedAction: (fileOpened) =>
+      dispatch(setFileOpenedAction(fileOpened)),
   })
 )(SourceEditorWithTagFiltersInput);
