@@ -76,7 +76,7 @@ export default class LandingPage extends React.Component {
           >
             <img
               src={require("../../images/logo.png")}
-              style={{ width: "50px" }}
+              style={{ width: "40px", height: "45px" }}
               alt={"MENU"}
             />
             <Typography

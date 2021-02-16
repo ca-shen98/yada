@@ -356,7 +356,7 @@ class Navbar extends React.Component {
                 <img
                   className={"menuButton"}
                   src={require("../images/logo.png")}
-                  style={{ width: "40px", marginRight: "10px" }}
+                  style={{ width: "40px", height: "45px", marginRight: "10px" }}
                   alt={"MENU"}
                 />
                 <Typography
@@ -591,65 +591,72 @@ class Navbar extends React.Component {
                 </Grid>
               ) : null}
             </Grid>
-            <IconButton
-              title="Report a Bug"
-              edge="end"
-              aria-label="bug report"
-              aria-haspopup="true"
-              color="inherit"
-              style={{ float: "right" }}
-              onClick={this.handleBugReport}
-            >
-              <BugReportIcon color="secondary" />
-            </IconButton>
-            <IconButton
-              edge="end"
-              aria-label="account of current user"
-              aria-haspopup="true"
-              color="inherit"
-              style={{ float: "right" }}
-              onClick={this.handleUserMenuOpen}
-            >
-              <AccountCircleIcon color="secondary" />
-            </IconButton>
-            {this.props.backendModeSignedInStatus ===
-            BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN ? (
-              <Menu
-                id="userMenu"
-                anchorEl={this.state.userIconElement}
-                keepMounted
-                open={Boolean(this.state.userIconElement)}
-                onClose={() => this.handleUserMenuClose()}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "center",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "center",
-                }}
+            <div style={{ width: "20vw", float: "right" }}>
+              <IconButton
+                edge="end"
+                aria-label="account of current user"
+                aria-haspopup="true"
+                color="inherit"
+                style={{ float: "right" }}
+                onClick={this.handleUserMenuOpen}
               >
-                <MenuItem
-                  onClick={() => {
-                    if (
-                      this.props.dispatchSetBackendModeSignedInStatusAction(
-                        BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
-                      )
-                    ) {
-                      Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
-                      this.props.dispatchNewUserAction(false);
-                      localStorage.clear();
-                      this.props.dispatchSignOutAction();
-                    }
+                <AccountCircleIcon color="secondary" />
+              </IconButton>
+              <IconButton
+                title="Report a Bug"
+                edge="end"
+                aria-label="bug report"
+                aria-haspopup="true"
+                color="inherit"
+                style={{ float: "right" }}
+                onClick={this.handleBugReport}
+              >
+                <BugReportIcon color="secondary" />
+              </IconButton>
+              {this.props.backendModeSignedInStatus ===
+              BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN ? (
+                <Menu
+                  id="userMenu"
+                  anchorEl={this.state.userIconElement}
+                  keepMounted
+                  open={Boolean(this.state.userIconElement)}
+                  onClose={() => this.handleUserMenuClose()}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  transformOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
                   }}
                 >
-                  <ListItemIcon>
-                    <ExitToAppIcon fontSize="small" color="primary" />
-                  </ListItemIcon>
-                  <ListItemText primary="Sign Out" color="primary" />
-                </MenuItem>
-              </Menu>
-            ) : null}
+                  <MenuItem
+                    onClick={() => {
+                      if (
+                        !this.props.saveDirtyFlag ||
+                        window.confirm("confirm discard unsaved changes")
+                      ) {
+                        if (
+                          this.props.dispatchSetBackendModeSignedInStatusAction(
+                            BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
+                          )
+                        ) {
+                          Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
+                          this.props.dispatchNewUserAction(false);
+                          localStorage.clear();
+                          this.props.dispatchSignOutAction();
+                        }
+                      }
+                    }}
+                  >
+                    <ListItemIcon>
+                      <ExitToAppIcon fontSize="small" color="primary" />
+                    </ListItemIcon>
+                    <ListItemText primary="Sign Out" color="primary" />
+                  </MenuItem>
+                </Menu>
+              ) : null}
+            </div>
           </Toolbar>
         </AppBar>
       </div>
