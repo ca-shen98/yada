@@ -14,3 +14,8 @@
   margin-right: 200px;
   width: 5%;
 }
+
+.custom-navbar {
+  background-color: #1e3d59;
+  height: 64px;
+}
