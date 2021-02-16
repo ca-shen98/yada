@@ -1,12 +1,10 @@
-export const SET_TAG_MENU_OPENED_ACTION_TYPE = "tagMenuOpened/set";
-export const setTagMenuOpenedAction = (tagMenuOpened) => ({
-  type: SET_TAG_MENU_OPENED_ACTION_TYPE,
-  tagMenuOpened,
+export const SET_FILE_OPENED_ACTION_TYPE = "fileOpened/set";
+export const setFileOpenedAction = (fileOpened) => ({
+  type: SET_FILE_OPENED_ACTION_TYPE,
+  fileOpened,
 });
-export const setTagMenuOpenedReducer = (state = false, action) =>
-  action.type !== SET_TAG_MENU_OPENED_ACTION_TYPE
-    ? state
-    : action.tagMenuOpened;
+export const setFileOpenedReducer = (state = false, action) =>
+  action.type !== SET_FILE_OPENED_ACTION_TYPE ? state : action.fileOpened;
 
 export const SET_TAG_EDITOR_OPENED_ACTION_TYPE = "tagEditorOpened/set";
 export const setTagEditorOpenedAction = (tagEditorOpened) => ({

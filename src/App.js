@@ -171,9 +171,7 @@ class App extends React.Component {
                 }}
               />
               <Steps
-                enabled={
-                  this.state.documentStepsStart && this.props.tagMenuOpened
-                }
+                enabled={this.state.documentStepsStart && this.props.fileOpened}
                 steps={this.state.documentTourSteps}
                 initialStep={0}
                 onExit={this.onDocumentStepsExit}
@@ -214,7 +212,7 @@ export default connect(
     currentOpenFileId: state.currentOpenFileId,
     currentOpenFileName: state.currentOpenFileName,
     toast: state.toast,
-    tagMenuOpened: state.tagMenuOpened,
+    fileOpened: state.fileOpened,
     stepsNavigator: state.stepsNavigator,
     newUser: state.newUser,
   }),

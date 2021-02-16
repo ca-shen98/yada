@@ -13,9 +13,9 @@ import { backendModeSignedInStatusReducer } from "./reducers/BackendModeSignedIn
 import { setTagsInViewReducer } from "./reducers/SetTagsInView";
 import { setToastReducer } from "./reducers/Toast";
 import {
-  setTagMenuOpenedReducer,
   setNewUserReducer,
   setTagEditorOpenedReducer,
+  setFileOpenedReducer,
 } from "./reducers/Steps";
 
 const reducers = combineReducers({
@@ -28,7 +28,7 @@ const reducers = combineReducers({
   backendModeSignedInStatus: backendModeSignedInStatusReducer,
   tagsInView: setTagsInViewReducer,
   toast: setToastReducer,
-  tagMenuOpened: setTagMenuOpenedReducer,
+  fileOpened: setFileOpenedReducer,
   newUser: setNewUserReducer,
   tagEditorOpened: setTagEditorOpenedReducer,
 });
