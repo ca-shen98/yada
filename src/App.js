@@ -107,15 +107,14 @@ class App extends React.Component {
     window.addEventListener("resize", this.handleWindowSizeChange);
   }
 
-  // make sure to remove the listener
-  // when the component is not mounted anymore
+  // Make sure to remove the listener when the component is not mounted anymore
   componentWillUnmount() {
     window.removeEventListener("resize", this.handleWindowSizeChange);
   }
 
   componentDidMount = () => {
     ReactGA.initialize("UA-166709979-1");
-    ReactGA.pageview(window.location.pathname + window.location.search); // report page view
+    ReactGA.pageview(window.location.pathname + window.location.search); // Report page view
     if (
       this.props.backendModeSignedInStatus !==
       BACKEND_MODE_SIGNED_IN_STATUS.LOCAL_STORAGE
