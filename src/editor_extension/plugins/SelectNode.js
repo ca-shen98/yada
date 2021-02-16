@@ -13,9 +13,15 @@ export default new Plugin({
     apply: (tr, _value, oldState) => {
       let head = tr.selection.head;
       let newState = null;
+      let list_item = false;
       tr.doc.nodesBetween(head, head, (node, pos) => {
+        if (node.type.name === "list_item") {
+          list_item = true;
+        }
         if (node.hasOwnProperty("attrs") && node.attrs["tags"]) {
-          newState = { node, pos };
+          if (!list_item || node.type.name !== "paragraph") {
+            newState = { node, pos };
+          }
         }
       });
       if (
@@ -37,13 +43,21 @@ export default new Plugin({
       const selectDecorations = [];
       const selectNode = SelectNodePluginKey.getState(state);
       if (selectNode) {
-        selectDecorations.push(
-          Decoration.node(
+        let decoration = null;
+        if (selectNode.node.type.name === "code_block") {
+          decoration = Decoration.node(
+            selectNode.pos,
+            selectNode.pos + selectNode.node.nodeSize,
+            { style: "background: #FAFAFA; outline: 1px solid black;" }
+          );
+        } else {
+          decoration = Decoration.node(
             selectNode.pos,
             selectNode.pos + selectNode.node.nodeSize,
             { style: "background: #FAFAFA; outline: 1px solid #DCDCDC;" }
-          )
-        );
+          );
+        }
+        selectDecorations.push(decoration);
       }
       return DecorationSet.create(state.doc, selectDecorations);
     },
