@@ -61,19 +61,6 @@
   margin-bottom: 10px;
 }
 
-#file_list::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
-}
-
-#file_list {
-  margin: 2em auto;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  white-space: pre-wrap;
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
-}
-
 #file_list,
 #no_files_placeholder,
 #filtered_files_placeholder {
