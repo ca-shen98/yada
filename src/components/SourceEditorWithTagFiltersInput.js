@@ -134,6 +134,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
     return this.props.fileLoading ? (
       <CircularProgress
         color="primary"
+        name="source_progress"
         style={{
           position: "absolute",
           top: "40%",

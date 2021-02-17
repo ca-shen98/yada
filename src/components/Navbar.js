@@ -455,6 +455,7 @@ class Navbar extends React.Component {
                         variant="outlined"
                         color="secondary"
                         title="save"
+                        name="save_btn"
                         disabled={
                           noOpenFileIdCheck || !this.props.saveDirtyFlag
                         }
@@ -476,6 +477,7 @@ class Navbar extends React.Component {
                         <CircularProgress
                           hidden={!this.props.saveInProgress}
                           color="secondary"
+                          name="save_progress"
                           style={{
                             position: "absolute",
                             top: "0%",
