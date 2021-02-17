@@ -52,6 +52,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { setNewUserAction } from "../reducers/Steps";
+import ConfirmDialog from "./ConfirmDialog";
 
 const TAG_FILTERS_INPUT_ID = "tag_filters_input";
 
@@ -65,6 +66,8 @@ class Navbar extends React.Component {
       sourceSavedTagFilters: {},
       windowWidth: window.innerWidth,
       userIconElement: null,
+      confirmDialogOpen: false,
+      confirmDialogCallback: null,
     };
   }
   handleResize = (e) => {
@@ -340,6 +343,26 @@ class Navbar extends React.Component {
     this.setState({
       userIconElement: null,
     });
+  };
+
+  handleConfirmDialogClose = () => {
+    this.setState({
+      confirmDialogOpen: false,
+      confirmDialogCallback: null,
+    });
+  };
+
+  handleSignOut = () => {
+    if (
+      this.props.dispatchSetBackendModeSignedInStatusAction(
+        BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
+      )
+    ) {
+      Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
+      this.props.dispatchNewUserAction(false);
+      localStorage.clear();
+      this.props.dispatchSignOutAction();
+    }
   };
 
   render = () => {
@@ -632,20 +655,13 @@ class Navbar extends React.Component {
                 >
                   <MenuItem
                     onClick={() => {
-                      if (
-                        !this.props.saveDirtyFlag ||
-                        window.confirm("confirm discard unsaved changes")
-                      ) {
-                        if (
-                          this.props.dispatchSetBackendModeSignedInStatusAction(
-                            BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
-                          )
-                        ) {
-                          Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
-                          this.props.dispatchNewUserAction(false);
-                          localStorage.clear();
-                          this.props.dispatchSignOutAction();
-                        }
+                      if (this.props.saveDirtyFlag) {
+                        this.setState({
+                          confirmDialogOpen: true,
+                          confirmDialogCallback: this.handleSignOut,
+                        });
+                      } else {
+                        this.handleSignOut();
                       }
                     }}
                   >
@@ -657,6 +673,13 @@ class Navbar extends React.Component {
                 </Menu>
               ) : null}
             </div>
+            <ConfirmDialog
+              open={this.state.confirmDialogOpen}
+              handleClose={() => this.handleConfirmDialogClose()}
+              onConfirm={this.state.confirmDialogCallback}
+              title="Unsaved Changes"
+              content="You have some unsaved changes. Are you sure you want to continue and discard unsaved changes?"
+            />
           </Toolbar>
         </AppBar>
       </div>
