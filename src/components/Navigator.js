@@ -761,7 +761,6 @@ class Navigator extends React.Component {
   };
 
   handleConfirmDialogClose = () => {
-    console.log("got here to close");
     this.setState({
       confirmDialogOpen: false,
       confirmDialogCallback: null,
