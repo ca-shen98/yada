@@ -59,6 +59,7 @@ import AddIcon from "@material-ui/icons/Add";
 import TextFieldsIcon from "@material-ui/icons/TextFields";
 import AmpStoriesIcon from "@material-ui/icons/AmpStories";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
+import ConfirmDialog from "./ConfirmDialog";
 import CreateIcon from "@material-ui/icons/Create";
 
 export const handleSetCurrentOpenFileId = (
@@ -75,28 +76,23 @@ export const handleSetCurrentOpenFileId = (
   ) {
     return true;
   }
-  if (
-    !store.getState().saveDirtyFlag ||
-    window.confirm("confirm discard unsaved changes")
-  ) {
-    batch(() => {
-      store.dispatch(setCurrentOpenFileIdAction(fileId));
-      store.dispatch(setCurrentOpenFileNameAction(fileName));
-      store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
-      store.dispatch(setSelectNodeAction(null));
-    });
-    localStorage.setItem(
-      INITIAL_FILE_ID_LOCAL_STORAGE_KEY,
-      JSON.stringify(fileId)
-    );
-    localStorage.setItem(
-      INITIAL_FILE_NAME_LOCAL_STORAGE_KEY,
-      JSON.stringify(fileName)
-    );
-    localStorage.removeItem(INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY);
-    return true;
-  }
-  return false;
+
+  batch(() => {
+    store.dispatch(setCurrentOpenFileIdAction(fileId));
+    store.dispatch(setCurrentOpenFileNameAction(fileName));
+    store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
+    store.dispatch(setSelectNodeAction(null));
+  });
+  localStorage.setItem(
+    INITIAL_FILE_ID_LOCAL_STORAGE_KEY,
+    JSON.stringify(fileId)
+  );
+  localStorage.setItem(
+    INITIAL_FILE_NAME_LOCAL_STORAGE_KEY,
+    JSON.stringify(fileName)
+  );
+  localStorage.removeItem(INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY);
+  return true;
 };
 
 const convertFilesListStateToFileIdNamesList = (filesListState) =>
@@ -150,6 +146,8 @@ const DEFAULT_STATE = {
   editMenuAnchorElement: null,
   newViewAnchorElement: null,
   renamePopoverElement: null,
+  confirmDialogOpen: false,
+  confirmDialogCallback: null,
 };
 
 class FileListItem extends React.Component {
@@ -763,6 +761,13 @@ class Navigator extends React.Component {
     });
   };
 
+  handleConfirmDialogClose = () => {
+    this.setState({
+      confirmDialogOpen: false,
+      confirmDialogCallback: null,
+    });
+  };
+
   handleFeedback = (event) => {
     const emailTo = "yada.bugs@gmail.com";
     const emailSub = "[Feedback]%20User%20Feedback";
@@ -783,6 +788,13 @@ class Navigator extends React.Component {
     const numFilteredFiles = countNumFiles(filteredFilesList);
     return (
       <div className="SidePane">
+        <ConfirmDialog
+          open={this.state.confirmDialogOpen}
+          handleClose={() => this.handleConfirmDialogClose()}
+          onConfirm={this.state.confirmDialogCallback}
+          title="Unsaved Changes"
+          content="You have some unsaved changes. Are you sure you want to continue and discard unsaved changes?"
+        />
         <div id="file_list_container">
           <Button
             variant="outlined"
@@ -791,7 +803,15 @@ class Navigator extends React.Component {
             disableElevation
             id="new_document_button"
             onClick={() => {
-              this.handleCreateNewFile(FILE_TYPE.SOURCE);
+              if (this.props.saveDirtyFlag) {
+                this.setState({
+                  confirmDialogOpen: true,
+                  confirmDialogCallback: () =>
+                    this.handleCreateNewFile(FILE_TYPE.SOURCE),
+                });
+              } else {
+                this.handleCreateNewFile(FILE_TYPE.SOURCE);
+              }
             }}
           >
             New Document
@@ -848,7 +868,19 @@ class Navigator extends React.Component {
                       divider={true}
                       style={{ padding: "0px" }}
                       onClick={() => {
-                        this.handleFileListClick(sourceId);
+                        if (
+                          this.props.saveDirtyFlag &&
+                          (this.props.currentOpenFileId.sourceId !== sourceId ||
+                            this.props.currentOpenFileId.viewId !== 0)
+                        ) {
+                          this.setState({
+                            confirmDialogOpen: true,
+                            confirmDialogCallback: () =>
+                              this.handleFileListClick(sourceId),
+                          });
+                        } else {
+                          this.handleFileListClick(sourceId);
+                        }
                       }}
                     >
                       <FileListItem
@@ -901,7 +933,21 @@ class Navigator extends React.Component {
                                   backgroundColor: "transparent",
                                 }}
                                 onClick={() => {
-                                  this.handleViewListClick(fileId);
+                                  if (
+                                    this.props.saveDirtyFlag &&
+                                    (this.props.currentOpenFileId.sourceId !==
+                                      fileId.sourceId ||
+                                      this.props.currentOpenFileId.viewId !==
+                                        fileId.viewId)
+                                  ) {
+                                    this.setState({
+                                      confirmDialogOpen: true,
+                                      confirmDialogCallback: () =>
+                                        this.handleViewListClick(fileId),
+                                    });
+                                  } else {
+                                    this.handleViewListClick(fileId);
+                                  }
                                 }}
                               >
                                 <FileListItem
@@ -1098,6 +1144,7 @@ export default connect(
   (state) => ({
     currentOpenFileId: state.currentOpenFileId,
     backendModeSignedInStatus: state.backendModeSignedInStatus,
+    saveDirtyFlag: state.saveDirtyFlag,
   }),
   (dispatch) => ({
     dispatchSetBackendModeSignedInStatusAction: (mode) =>
