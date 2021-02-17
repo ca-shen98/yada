@@ -94,8 +94,8 @@ class CardDeck extends React.Component {
     console.log("Cards Mounted");
   };
   componentDidUpdate = (prevProps) => {
-    if (prevProps.tagsInView !== this.props.tagsInView) {
-      this.props.setTagsInView(this.props.tagsInView);
+    if (prevProps.data.tagsInView !== this.props.data.tagsInView) {
+      this.props.setTagsInView(this.props.data.tagsInView);
     }
   };
   componentWillUnmount = () => {

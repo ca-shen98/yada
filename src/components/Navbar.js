@@ -53,6 +53,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { setNewUserAction } from "../reducers/Steps";
 import ConfirmDialog from "./ConfirmDialog";
+import Tooltip from "@material-ui/core/Tooltip";
 
 const TAG_FILTERS_INPUT_ID = "tag_filters_input";
 
@@ -625,20 +626,22 @@ class Navbar extends React.Component {
               >
                 <AccountCircleIcon color="secondary" />
               </IconButton>
-              <IconButton
-                title="Report a Bug"
-                edge="end"
-                aria-label="bug report"
-                aria-haspopup="true"
-                color="inherit"
-                style={{ float: "right" }}
-                onClick={this.handleBugReport}
-              >
-                <BugReportIcon color="secondary" />
-              </IconButton>
+              <Tooltip title="Report a Bug">
+                <IconButton
+                  edge="end"
+                  aria-label="bug report"
+                  aria-haspopup="true"
+                  color="inherit"
+                  style={{ float: "right" }}
+                  onClick={this.handleBugReport}
+                >
+                  <BugReportIcon color="secondary" />
+                </IconButton>
+              </Tooltip>
               {this.props.backendModeSignedInStatus ===
               BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN ? (
                 <Menu
+                  style={{ marginTop: "40px" }}
                   id="userMenu"
                   anchorEl={this.state.userIconElement}
                   keepMounted

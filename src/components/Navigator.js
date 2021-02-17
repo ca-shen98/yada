@@ -60,6 +60,7 @@ import TextFieldsIcon from "@material-ui/icons/TextFields";
 import AmpStoriesIcon from "@material-ui/icons/AmpStories";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import ConfirmDialog from "./ConfirmDialog";
+import CreateIcon from "@material-ui/icons/Create";
 
 export const handleSetCurrentOpenFileId = (
   fileId,
@@ -766,6 +767,19 @@ class Navigator extends React.Component {
       confirmDialogCallback: null,
     });
   };
+
+  handleFeedback = (event) => {
+    const emailTo = "yada.bugs@gmail.com";
+    const emailSub = "[Feedback]%20User%20Feedback";
+
+    const emailBody = "Give us your feedback here!";
+
+    window.open(
+      "mailto:" + emailTo + "?subject=" + emailSub + "&body=" + emailBody,
+      "_blank"
+    );
+  };
+
   render = () => {
     const numFiles = countNumFiles(this.state.filesList);
     const filteredFilesList = this.state.searching
@@ -1112,6 +1126,15 @@ class Navigator extends React.Component {
               " files hidden by search"}
           </div>
         </div>
+        <Button
+          style={{ margin: "15px" }}
+          variant="outlined"
+          startIcon={<CreateIcon />}
+          color="primary"
+          onClick={this.handleFeedback}
+        >
+          Give Us Feedback
+        </Button>
       </div>
     );
   };
