@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import React from "react";
+import Grid from "@material-ui/core/Grid";
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import { THEME } from "../../App";
 import { FILE_TYPE } from "../../util/FileIdAndTypeUtils";
@@ -17,8 +18,12 @@ class Tag extends React.Component {
           ? THEME.palette.secondary.dark
           : THEME.palette.secondary.light};
     `;
-    const TagId = styled.h5``;
-    const Content = styled.div``;
+    const TagId = styled.h6``;
+    const Content = styled.div`
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    `;
     return (
       <Draggable draggableId={this.props.tagId} index={this.props.index}>
         {(provided, snapshot) => (
@@ -28,8 +33,14 @@ class Tag extends React.Component {
             {...provided.dragHandleProps}
             isDragging={snapshot.isDragging}
           >
-            <TagId>{this.props.tagInfo["tag_name"]}</TagId>
-            <Content>{this.props.tagInfo.preview}</Content>
+            <Grid container spacing={1}>
+              <Grid item xs={4}>
+                <TagId>{this.props.tagInfo["tag_name"]}</TagId>
+              </Grid>
+              <Grid item xs={8}>
+                <Content>{this.props.tagInfo.preview}</Content>
+              </Grid>
+            </Grid>
           </Container>
         )}
       </Draggable>
@@ -118,7 +129,7 @@ class DragDropColumn extends React.Component {
     const TagList = styled.div`
       overflow-x: hidden;
       overflow-y: auto;
-      height: 200px;
+      height: 400px;
       padding-bottom: 30px;
     `;
 
