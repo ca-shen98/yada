@@ -82,7 +82,9 @@ class SourceEditorWithTagFiltersInput extends React.Component {
   changeFile = async () => {
     if (!checkNoOpenFileId(this.props.currentOpenFileId)) {
       defer(() => {
-        BlockTaggingEditorExtension.editor.focusAtStart();
+        if (BlockTaggingEditorExtension.editor) {
+          BlockTaggingEditorExtension.editor.focusAtStart();
+        }
       });
     }
     const fileIdKeyStr = getFileIdKeyStr(this.props.currentOpenFileId);
