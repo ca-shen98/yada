@@ -124,6 +124,7 @@ class ViewEditor extends React.Component {
         {this.props.fileLoading ? (
           <CircularProgress
             color="primary"
+            name="view_progress"
             style={{
               position: "absolute",
               top: "40%",

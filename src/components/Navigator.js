@@ -157,6 +157,7 @@ class FileListItem extends React.Component {
       return (
         <div
           className={"fileList-viewRoot"}
+          name={this.props.fileId.viewId}
           style={
             this.props.selected
               ? {
@@ -200,6 +201,7 @@ class FileListItem extends React.Component {
       return (
         <div
           className={"fileList-viewRoot"}
+          name={this.props.fileId.sourceId}
           style={
             this.props.selected
               ? {
