@@ -14,6 +14,7 @@ import {
 import Cookies from "js-cookie";
 import { connect } from "react-redux";
 import { setNewUserAction } from "../../reducers/Steps";
+import Wave from "react-wavify";
 
 const CLIENT_ID =
   "709358329925-gic89ini15sgaenfrta1gshej1ik72jg.apps.googleusercontent.com";
@@ -52,78 +53,145 @@ class LoginPage extends React.Component {
   };
 
   render = () => (
-    <Grid container alignItems="center">
-      <Hidden smDown>
-        <Grid item md={1} />
-      </Hidden>
-      <Grid item sm={12} md={5} alignItems="center">
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs={3}>
-            <img
-              src={require("../../images/darkLogo.png")}
-              style={{ width: "90%", marginLeft: "20%" }}
-              alt={"YADA"}
+    <div className="foreground" style={{ position: "relative" }}>
+      <section className="home center foreground">
+        <Grid container>
+          <Grid item xs={1} />
+          <Grid container xs={10} alignItems="center">
+            <Grid item sm={12} md={8} alignItems="center">
+              <Grid container spacing={3} alignItems="center">
+                <Grid item xs={3}>
+                  <img
+                    src={require("../../images/darkLogo.png")}
+                    style={{ width: "90%" }}
+                    alt={"YADA"}
+                  />
+                </Grid>
+                <Grid item xs={9}>
+                  <Typography
+                    variant="h1"
+                    className={"title"}
+                    style={{ fontFamily: "Bungee", color: "#1E3D59" }}
+                  >
+                    YADA
+                    <ReactTypingEffect
+                      text=""
+                      style={{ fontFamily: "Signika" }}
+                      speed={10000}
+                    />
+                  </Typography>
+                  <Typography
+                    variant="h3"
+                    className={"title"}
+                    style={{ fontFamily: "Signika", color: "#1E3D59" }}
+                  >
+                    Yet Another Docs App
+                  </Typography>
+                </Grid>
+              </Grid>
+              <br />
+              <div align="center">
+                <GoogleLogin
+                  clientId={CLIENT_ID}
+                  buttonText="Sign in with Google"
+                  onSuccess={(response) => {
+                    this.handleLoginSuccess(response);
+                  }}
+                  onFailure={(response) => {
+                    console.log(response);
+                  }}
+                  cookiePolicy="single_host_origin"
+                  responseType="code,token"
+                  style={{ float: "left" }}
+                />
+              </div>
+            </Grid>
+            <Hidden smDown>
+              <Grid item md={4}>
+                <img
+                  src={require("../../images/graphic.png")}
+                  style={{ width: "100%" }}
+                  alt={"Document Graphic"}
+                />
+              </Grid>
+            </Hidden>
+          </Grid>
+          <Grid item xs={1} />
+          <Grid
+            item
+            xs={12}
+            style={{ position: "absolute", width: "100%", bottom: 0 }}
+          >
+            <Wave
+              fill="#FAF8F2"
+              paused={false}
+              options={{
+                height: 20,
+                amplitude: 75,
+                speed: 0.1,
+                points: 2,
+              }}
             />
           </Grid>
-          <Grid item xs={9}>
-            <Typography
-              variant="h1"
-              className={"title"}
-              style={{ fontFamily: "Bungee", color: "#1E3D59" }}
-            >
-              YADA
-              <ReactTypingEffect
-                text=""
-                style={{ fontFamily: "Signika" }}
-                speed={10000}
-              />
-            </Typography>
-            <Typography
-              variant="h3"
-              className={"title"}
-              style={{ fontFamily: "Signika", color: "#1E3D59" }}
-            >
-              Yet Another Docs App
-            </Typography>
-          </Grid>
         </Grid>
-        <br />
-        <div align="center">
-          <GoogleLogin
-            clientId={CLIENT_ID}
-            buttonText="Sign in with Google"
-            onSuccess={(response) => {
-              this.handleLoginSuccess(response);
-            }}
-            onFailure={(response) => {
-              console.log(response);
-            }}
-            cookiePolicy="single_host_origin"
-            responseType="code,token"
-            style={{ float: "left" }}
-          />
-        </div>
-      </Grid>
-      <Hidden mdUp>
-        <Grid item sm={3} />
-      </Hidden>
-      <Hidden smDown>
-        <Grid item md={1} />
-      </Hidden>
-      <Grid item sm={6} md={4}>
-        <img
-          src={require("../../images/graphic.png")}
-          style={{ width: "100%" }}
-          alt={"Document Graphic"}
-        />
-      </Grid>
-      <Hidden smDown>
-        <Grid item md={1} />
-      </Hidden>
-      <Hidden mdUp>
-        <Grid item sm={3} />
-      </Hidden>
-    </Grid>
+      </section>
+      {/*Showing Views*/}
+      <section className="explanation center foreground">
+        <Grid container alignItems="center">
+          <Grid item xs={1} />
+          <Grid container alignItems="center" xs={10} spacing={3}>
+            <Grid item xs={12}>
+              <h1>Build views with ease</h1>
+            </Grid>
+            <Grid item md={5}>
+              <img
+                className={"gif"}
+                src={require("../../media/images/showing_views_pre.png")}
+                alt="Source Content"
+              />
+            </Grid>
+            <Grid item md={2} className={"arrow-holder"}>
+              <img
+                className={"arrow"}
+                src={require("../../media/images/arrow.png")}
+                alt="right arrow"
+              />
+            </Grid>
+            <Grid item md={5} className="gif-holder">
+              <img
+                className={"gif"}
+                src={require("../../media/gifs/showing_views_post_final.gif")}
+                alt=""
+              />
+            </Grid>
+          </Grid>
+          <Grid item xs={1} />
+        </Grid>
+      </section>
+      {/*Change Propagation*/}
+      <section className="explanation center foreground">
+        <Grid container alignItems="center">
+          <Grid item xs={1} />
+          <Grid container alignItems="center" xs={10} spacing={3}>
+            <Grid item md={4}>
+              <h1>Never rewrite anything ever again</h1>
+              <p>
+                Here is Akshay Kumar Pall! Our finest engineer. He loves
+                JavaScript.
+              </p>
+            </Grid>
+            <Grid item md={8} className="gif-holder">
+              <img
+                className={"gif"}
+                src={require("../../media/gifs/change_propagation_final.gif")}
+                alt=""
+              />
+            </Grid>
+          </Grid>
+          <Grid item xs={1} />
+        </Grid>
+      </section>
+    </div>
   );
 }
 

@@ -143,7 +143,7 @@ class TagEditor extends React.Component {
   render = () => {
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
-        <Container>
+        <Container style={{ padding: 0 }}>
           <Row className="justify-content-md-center dragDrop">
             {this.state.columnOrder.map((columnId) => {
               const column = this.state.columns[columnId];
