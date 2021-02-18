@@ -143,7 +143,14 @@ class LoginPage extends React.Component {
             <Grid container alignItems="center" xs={10} spacing={3}>
               <Grid item md={4}>
                 <h1>Never rewrite anything ever again</h1>
-                <p>Copy and paste is a thing of the past</p>
+                <p>
+                  Yada is an all-in-one solution that allows you to brainstorm,
+                  edit, and present your ideas. Start by writing your document,
+                  choose how to present your content with <em>views</em>.
+                  Iterate on the source content or the structure of the views in
+                  any order and at any time. Everything stays up to date so you{" "}
+                  <b>never have to rewrite anything again</b>.
+                </p>
               </Grid>
               <Grid item md={8}>
                 <img
@@ -213,13 +220,11 @@ class LoginPage extends React.Component {
                 />
               </Grid>
               <Grid item md={4}>
-                <h1>
-                  Watch as changes in your content appear in your presentations
-                </h1>
+                <h1>Changes to your content appear in your presentations</h1>
                 <p>
-                  Iterate on the source material and the various views in a
-                  natural manner. Your slide shows, flash cards and text
-                  summaries will never be out of date.
+                  Update the source material and various views in a natural
+                  manner. Your slide shows, flash cards and text summaries will{" "}
+                  <b>never be out of date</b>.
                 </p>
               </Grid>
             </Grid>
