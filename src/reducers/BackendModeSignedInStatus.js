@@ -24,6 +24,10 @@ export const getAccessToken = () => {
   return Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
 };
 
+export const clearAccessToken = () => {
+  Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
+};
+
 export const getUserSignedInStatus = async () => {
   const token = getAccessToken();
   if (token) {
