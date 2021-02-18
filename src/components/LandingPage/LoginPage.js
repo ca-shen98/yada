@@ -185,7 +185,7 @@ class LoginPage extends React.Component {
                   <p className="landing-paragraph-font">
                     Yada is an all-in-one solution that allows you to
                     brainstorm, edit, and present your ideas. Start by writing
-                    your document, choose how to present your content with{" "}
+                    your document and choose how to present your content with{" "}
                     <em>views</em>. Iterate on the source content or the
                     structure of the views in any order and at any time.
                     Everything stays up to date so you{" "}
