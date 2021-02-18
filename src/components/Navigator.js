@@ -182,12 +182,9 @@ class FileListItem extends React.Component {
               <TextFieldsIcon color="primary" />
             ) : null}
           </IconButton>
-          <InputBase
-            value={this.props.fileName}
-            className="file_list_input"
-            disabled={true}
-            style={{ color: "#1E3D59" }}
-          />
+          <div className="file_list_input" style={{ color: "#1E3D59" }}>
+            {this.props.fileName}
+          </div>
           <Divider className={"fileList-divider"} orientation="vertical" />
           <IconButton
             className={"fileList-iconButton"}
@@ -882,17 +879,36 @@ class Navigator extends React.Component {
                         }
                       }}
                     >
-                      <FileListItem
-                        fileId={{ sourceId, viewId: 0 }}
-                        selected={sourceId === this.state.selectedFileId}
-                        open={
-                          sourceId === this.state.selectedFileId &&
-                          this.state.selectedFileOpen
-                        }
-                        handleEditMenuClick={this.handleEditMenuClick}
-                        childViewsExist={Object.keys(views).length > 0}
-                        fileName={this.getFileName({ sourceId, viewId: 0 })}
-                      />
+                      <div
+                        onClick={() => {
+                          if (
+                            this.props.saveDirtyFlag &&
+                            (this.props.currentOpenFileId.sourceId !==
+                              sourceId ||
+                              this.props.currentOpenFileId.viewId !== 0)
+                          ) {
+                            this.setState({
+                              confirmDialogOpen: true,
+                              confirmDialogCallback: () =>
+                                this.handleFileListClick(sourceId),
+                            });
+                          } else {
+                            this.handleFileListClick(sourceId);
+                          }
+                        }}
+                      >
+                        <FileListItem
+                          fileId={{ sourceId, viewId: 0 }}
+                          selected={sourceId === this.state.selectedFileId}
+                          open={
+                            sourceId === this.state.selectedFileId &&
+                            this.state.selectedFileOpen
+                          }
+                          handleEditMenuClick={this.handleEditMenuClick}
+                          childViewsExist={Object.keys(views).length > 0}
+                          fileName={this.getFileName({ sourceId, viewId: 0 })}
+                        />
+                      </div>
                     </ListItem>
                     {Object.keys(views).length > 0 ? (
                       <Collapse
@@ -1028,7 +1044,15 @@ class Navigator extends React.Component {
             <MenuItem
               onClick={() => {
                 this.handleViewMenuClose();
-                this.handleCreateNewFile(FILE_TYPE.TEXT_VIEW);
+                if (this.props.saveDirtyFlag) {
+                  this.setState({
+                    confirmDialogOpen: true,
+                    confirmDialogCallback: () =>
+                      this.handleCreateNewFile(FILE_TYPE.TEXT_VIEW),
+                  });
+                } else {
+                  this.handleCreateNewFile(FILE_TYPE.TEXT_VIEW);
+                }
               }}
             >
               <ListItemIcon>
@@ -1039,7 +1063,15 @@ class Navigator extends React.Component {
             <MenuItem
               onClick={() => {
                 this.handleViewMenuClose();
-                this.handleCreateNewFile(FILE_TYPE.CARD_VIEW);
+                if (this.props.saveDirtyFlag) {
+                  this.setState({
+                    confirmDialogOpen: true,
+                    confirmDialogCallback: () =>
+                      this.handleCreateNewFile(FILE_TYPE.CARD_VIEW),
+                  });
+                } else {
+                  this.handleCreateNewFile(FILE_TYPE.CARD_VIEW);
+                }
               }}
             >
               <ListItemIcon>
