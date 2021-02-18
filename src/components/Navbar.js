@@ -548,7 +548,20 @@ class Navbar extends React.Component {
                           if (tag_input !== null) {
                             tag_input.value = "";
                           }
-                          this.handleApplyTagFilters();
+                          if (this.handleApplyTagFilters()) {
+                            this.setState({ modifyingTagFilters: false });
+                          }
+                        }
+                        if (reason === "select-option") {
+                          const tag_input = document.getElementById(
+                            TAG_FILTERS_INPUT_ID
+                          );
+                          if (tag_input !== null) {
+                            tag_input.value = value;
+                          }
+                          if (this.handleApplyTagFilters()) {
+                            this.setState({ modifyingTagFilters: false });
+                          }
                         }
                       }}
                       onBlur={(event) => {
