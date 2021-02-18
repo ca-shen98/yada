@@ -18,7 +18,9 @@ class Tag extends React.Component {
           ? THEME.palette.secondary.dark
           : THEME.palette.secondary.light};
     `;
-    const TagId = styled.h6``;
+    const TagId = styled.h6`
+      word-break: break-word;
+    `;
     const Content = styled.div`
       white-space: nowrap;
       overflow: hidden;
