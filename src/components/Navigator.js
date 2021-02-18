@@ -1037,7 +1037,15 @@ class Navigator extends React.Component {
             <MenuItem
               onClick={() => {
                 this.handleViewMenuClose();
-                this.handleCreateNewFile(FILE_TYPE.TEXT_VIEW);
+                if (this.props.saveDirtyFlag) {
+                  this.setState({
+                    confirmDialogOpen: true,
+                    confirmDialogCallback: () =>
+                      this.handleCreateNewFile(FILE_TYPE.TEXT_VIEW),
+                  });
+                } else {
+                  this.handleCreateNewFile(FILE_TYPE.TEXT_VIEW);
+                }
               }}
             >
               <ListItemIcon>
@@ -1048,7 +1056,15 @@ class Navigator extends React.Component {
             <MenuItem
               onClick={() => {
                 this.handleViewMenuClose();
-                this.handleCreateNewFile(FILE_TYPE.CARD_VIEW);
+                if (this.props.saveDirtyFlag) {
+                  this.setState({
+                    confirmDialogOpen: true,
+                    confirmDialogCallback: () =>
+                      this.handleCreateNewFile(FILE_TYPE.CARD_VIEW),
+                  });
+                } else {
+                  this.handleCreateNewFile(FILE_TYPE.CARD_VIEW);
+                }
               }}
             >
               <ListItemIcon>
