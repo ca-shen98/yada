@@ -658,10 +658,7 @@ class Navigator extends React.Component {
       document.getElementById("rename_field") != null &&
       this.state.renamePopoverElement != null
     ) {
-      console.log("Setting focus field");
-      // document.getElementById("rename_field").select();
       document.getElementById("rename_field").focus();
-      // document.getElementById("rename_field").autofocus = true;
     }
   };
 

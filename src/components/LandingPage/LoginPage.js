@@ -44,7 +44,7 @@ class LoginPage extends React.Component {
         { withCredentials: true }
       );
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
     this.setState({ userSignInLoading: false });
     if (response && response.status === 201) {
@@ -79,6 +79,8 @@ class LoginPage extends React.Component {
               text="Getting things ready for you..."
               style={{ fontFamily: "Signika" }}
               speed={15}
+              typingDelay={50}
+              eraseSpeed={15}
             />
           </h2>
         </div>
@@ -130,7 +132,7 @@ class LoginPage extends React.Component {
                       this.handleLoginSuccess(response);
                     }}
                     onFailure={(response) => {
-                      console.log(response);
+                      console.error(response);
                     }}
                     cookiePolicy="single_host_origin"
                     responseType="code,token"

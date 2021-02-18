@@ -10,9 +10,9 @@ export const convertStrValueOrDefault = (
       value = convertFromString(valueStr);
     } catch (e) {
       if (failureMessage) {
-        console.log(failureMessage);
+        console.error(failureMessage);
       }
-      console.log(e);
+      console.error(e);
     }
   }
   return value;
@@ -32,9 +32,9 @@ export const convertStrValueOrDefaultIfFalsy = (
     value = convertFromString(valueStr);
   } catch (e) {
     if (failureMessage) {
-      console.log(failureMessage);
+      console.error(failureMessage);
     }
-    console.log(e);
+    console.error(e);
   }
   return value;
 };

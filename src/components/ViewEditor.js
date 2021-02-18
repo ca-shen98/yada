@@ -72,6 +72,7 @@ class ViewEditor extends React.Component {
               };
             }
           });
+          this.props.setTagsInView([]); // clear any tagsInView currently stored
           this.setState({
             sourceId: this.props.currentOpenFileId.sourceId,
             viewId: this.props.currentOpenFileId.viewId,
@@ -87,7 +88,7 @@ class ViewEditor extends React.Component {
   };
 
   componentDidMount = () => {
-    this.changeFile().then(() => console.log("Mounted view file"));
+    this.changeFile().then(() => {});
   };
   componentDidUpdate = (prevProps) => {
     if (
@@ -95,7 +96,7 @@ class ViewEditor extends React.Component {
         this.props.currentOpenFileId.sourceId ||
       prevProps.currentOpenFileId.viewId !== this.props.currentOpenFileId.viewId
     ) {
-      this.changeFile().then(() => console.log("Updated view file"));
+      this.changeFile().then(() => {});
     }
     if (prevProps.newUser !== this.props.newUser) {
       this.setState({ cardTourStart: this.props.newUser });

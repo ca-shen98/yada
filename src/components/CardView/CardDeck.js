@@ -91,7 +91,6 @@ class CardDeck extends React.Component {
   };
   componentDidMount = () => {
     document.addEventListener("keydown", this.keydownHandler);
-    console.log("Cards Mounted");
   };
   componentDidUpdate = (prevProps) => {
     if (prevProps.data.tagsInView !== this.props.data.tagsInView) {
