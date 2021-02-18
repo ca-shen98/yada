@@ -125,6 +125,7 @@ export default class LandingPage extends React.Component {
           flex: "1 1 auto",
           display: "flex",
           overflowY: "scroll",
+          overflowX: "hidden",
         }}
       >
         {this.getPage()}

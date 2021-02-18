@@ -15,6 +15,70 @@
   width: 100px;
 }
 
+.bottom-padding {
+  padding-bottom: 300px;
+}
+
+.small-bottom-padding {
+  padding-bottom: 100px;
+}
+
+.center {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.home {
+  height: fit-content;
+  min-height: 100%;
+}
+
+.explanation {
+  background-color: #faf8f2;
+  color: #1e3d59;
+  height: fit-content;
+}
+
+.title-padding {
+  padding-bottom: 0.5em;
+}
+
+.gif-holder {
+  display: flex;
+}
+
+.arrow-holder {
+  display: flex;
+  align-content: center;
+}
+
+.arrow {
+  width: 70%;
+  margin: auto;
+}
+
+.down_arrow {
+  width: 20px;
+  margin: auto;
+}
+
+.intro-gif {
+  width: 100%;
+  margin: auto;
+}
+
+.gif {
+  width: 100%;
+  margin: auto;
+  -o-box-shadow: 6px 6px 20px #919191;
+  -icab-box-shadow: 6px 6px 20px #919191;
+  -khtml-box-shadow: 6px 6px 20px #919191;
+  -moz-box-shadow: 6px 6px 20px #919191;
+  -webkit-box-shadow: 6px 6px 20px #919191;
+  box-shadow: 6px 6px 20px #919191;
+}
+
 .landing-container {
   margin: 2em auto;
   overflow-x: hidden;
@@ -40,4 +104,36 @@
   width: 80%;
   border-radius: 50%;
   margin-bottom: 1em;
+}
+
+.light-bg {
+  background-color: #faf8f2;
+}
+
+.landing-title-font {
+  font-family: Calistoga;
+}
+
+.landing-paragraph-font {
+  font-family: Signika;
+}
+
+footer {
+  border-top: #1e3d59 1px;
+  color: #1e3d59;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  margin: 5rem auto 0;
+}
+
+.footer-container {
+  padding-top: 0.5em;
+  border-top: 1px solid #1e3d59;
+  display: flex;
+  justify-content: space-between;
+}
+
+.footer-container p {
+  text-align: left;
 }
