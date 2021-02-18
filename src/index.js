@@ -25,6 +25,10 @@ render(
       href="https://fonts.googleapis.com/css2?family=Signika:wght@300&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Calistoga&display=swap"
+      rel="stylesheet"
+    />
     <Provider store={store}>
       <App />
     </Provider>

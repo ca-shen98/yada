@@ -135,62 +135,117 @@ class LoginPage extends React.Component {
           </Grid>
         </Grid>
       </section>
-      {/*Showing Views*/}
-      <section className="explanation center foreground">
-        <Grid container alignItems="center">
-          <Grid item xs={1} />
-          <Grid container alignItems="center" xs={10} spacing={3}>
-            <Grid item xs={12}>
-              <h1>Build views with ease</h1>
+      <div className="light-bg">
+        {/*Slogan*/}
+        <section className="explanation center foreground bottom-padding">
+          <Grid container alignItems="center">
+            <Grid item xs={1} />
+            <Grid container alignItems="center" xs={10} spacing={3}>
+              <Grid item md={4}>
+                <h1>Never rewrite anything ever again</h1>
+                <p>Copy and paste is a thing of the past</p>
+              </Grid>
+              <Grid item md={8}>
+                <img
+                  className={"intro-gif"}
+                  src={require("../../media/gifs/introGraphic.gif")}
+                  alt="Source Content"
+                />
+              </Grid>
             </Grid>
-            <Grid item md={5}>
-              <img
-                className={"gif"}
-                src={require("../../media/images/showing_views_pre.png")}
-                alt="Source Content"
-              />
-            </Grid>
-            <Grid item md={2} className={"arrow-holder"}>
-              <img
-                className={"arrow"}
-                src={require("../../media/images/arrow.png")}
-                alt="right arrow"
-              />
-            </Grid>
-            <Grid item md={5} className="gif-holder">
-              <img
-                className={"gif"}
-                src={require("../../media/gifs/showing_views_post_final.gif")}
-                alt=""
-              />
-            </Grid>
+            <Grid item xs={1} />
           </Grid>
-          <Grid item xs={1} />
-        </Grid>
-      </section>
-      {/*Change Propagation*/}
-      <section className="explanation center foreground">
-        <Grid container alignItems="center">
-          <Grid item xs={1} />
-          <Grid container alignItems="center" xs={10} spacing={3}>
-            <Grid item md={4}>
-              <h1>Never rewrite anything ever again</h1>
-              <p>
-                Here is Akshay Kumar Pall! Our finest engineer. He loves
-                JavaScript.
-              </p>
+        </section>
+
+        {/*Showing Views*/}
+        <section className="explanation center foreground bottom-padding">
+          <Grid container alignItems="center">
+            <Grid item xs={1} />
+            <Grid container alignItems="center" xs={10} spacing={3}>
+              <Grid item md={5}>
+                <h1 className="title-padding">Document Creation</h1>
+                <img
+                  className={"gif"}
+                  src={require("../../media/images/showing_views_pre.png")}
+                  alt="Source Content"
+                />
+              </Grid>
+              <Hidden smDown>
+                <Grid item md={2} className={"arrow-holder"}>
+                  <img
+                    className={"arrow"}
+                    src={require("../../media/images/arrow.png")}
+                    alt="right arrow"
+                  />
+                </Grid>
+              </Hidden>
+              <Hidden mdUp>
+                <Grid item xs={12} className={"arrow-holder"}>
+                  <img
+                    className={"down_arrow"}
+                    src={require("../../media/images/arrow_down.png")}
+                    alt="right arrow"
+                  />
+                </Grid>
+              </Hidden>
+              <Grid item md={5}>
+                <h1 className="title-padding">Dynamic Presentation</h1>
+                <img
+                  className={"gif"}
+                  src={require("../../media/gifs/showing_views_post_final.gif")}
+                  alt=""
+                />
+              </Grid>
             </Grid>
-            <Grid item md={8} className="gif-holder">
-              <img
-                className={"gif"}
-                src={require("../../media/gifs/change_propagation_final.gif")}
-                alt=""
-              />
-            </Grid>
+            <Grid item xs={1} />
           </Grid>
-          <Grid item xs={1} />
-        </Grid>
-      </section>
+        </section>
+        {/*Change Propagation*/}
+        <section className="explanation center foreground small-bottom-padding">
+          <Grid container alignItems="center">
+            <Grid item xs={1} />
+            <Grid container alignItems="center" xs={10} spacing={10}>
+              <Grid item md={8} className="gif-holder">
+                <img
+                  className={"gif"}
+                  src={require("../../media/gifs/change_propagation_final.gif")}
+                  alt=""
+                />
+              </Grid>
+              <Grid item md={4}>
+                <h1>
+                  Watch as changes in your content appear in your presentations
+                </h1>
+                <p>
+                  Iterate on the source material and the various views in a
+                  natural manner. Your slide shows, flash cards and text
+                  summaries will never be out of date.
+                </p>
+              </Grid>
+            </Grid>
+            <Grid item xs={1} />
+          </Grid>
+        </section>
+        <footer>
+          <Grid container>
+            <Grid item xs={1} />
+            <Grid
+              container
+              className="footer-container"
+              alignItems="center"
+              xs={10}
+              spacing={3}
+            >
+              <Grid item xs={4}>
+                <small>
+                  <p>Copyright © 2021 Yada.&nbsp;&nbsp;All rights reserved.</p>
+                </small>
+              </Grid>
+            </Grid>
+            <Grid item xs={1} />
+          </Grid>
+        </footer>
+      </div>
     </div>
   );
 }
