@@ -62,7 +62,6 @@ export const setCurrentOpenFileIdAction = (fileId) => ({
 });
 export const currentOpenFileIdReducer = (state = initialFileId, action) => {
   if (action.type === SIGNOUT) {
-    console.log("setting to empty file id");
     return emptyFileId;
   } else {
     return action.type !== SET_CURRENT_OPEN_FILE_ID_ACTION_TYPE ||

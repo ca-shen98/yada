@@ -6,7 +6,7 @@ export const fetchWithTimeout = async (uri, options, time = 7500) => {
   return await fetch(uri, { ...options, signal: controller.signal }).then(
     (response) => {
       if (!response.ok) {
-        console.log(response);
+        console.error(response);
       }
       return response;
     }

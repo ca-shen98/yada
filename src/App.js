@@ -65,7 +65,7 @@ class App extends React.Component {
         title: "Editor 📝",
         element: ".editor",
         intro:
-          "This is the main text editor where you can add bullet points, check lists, tables, code blocks, and much more! We even support Markdown!",
+          "This is the main text editor where you can add bullet points, check lists, tables, code blocks, and much more! We even support <b>Markdown</b>!",
       },
       {
         title: "Views",

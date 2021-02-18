@@ -25,7 +25,7 @@ export const getUserSignedInStatus = async () => {
         return BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN;
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
   return BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT;
