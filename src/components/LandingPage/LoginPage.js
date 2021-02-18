@@ -14,6 +14,7 @@ import {
 import { connect } from "react-redux";
 import { setNewUserAction } from "../../reducers/Steps";
 import Wave from "react-wavify";
+import { setToastAction, TOAST_SEVERITY } from "../../reducers/Toast";
 
 const CLIENT_ID =
   "709358329925-gic89ini15sgaenfrta1gshej1ik72jg.apps.googleusercontent.com";
@@ -129,8 +130,12 @@ class LoginPage extends React.Component {
                       this.handleLoginSuccess(response);
                     }}
                     onFailure={(response) => {
-                      console.log("FAILURE");
                       console.error(response);
+                      this.props.dispatchSetToastAction({
+                        message: "Sorry! Yada requires cookies to be enabled.",
+                        severity: TOAST_SEVERITY.ERROR,
+                        open: true,
+                      });
                     }}
                     cookiePolicy="single_host_origin"
                     responseType="code,token"
@@ -305,5 +310,6 @@ export default connect(
     dispatchSetBackendModeSignedInStatusAction: (mode) =>
       dispatch(setBackendModeSignedInStatusAction(mode)),
     dispatchNewUserAction: (newUser) => dispatch(setNewUserAction(newUser)),
+    dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
   })
 )(LoginPage);
