@@ -38,7 +38,7 @@ class ConfirmDialog extends React.Component {
         </DialogContent>
         <DialogActions style={{ backgroundColor: "#F5F0E1" }}>
           <Button onClick={this.props.handleClose} color="primary">
-            Cancel
+            NO
           </Button>
           <Button
             onClick={() => {
@@ -47,7 +47,7 @@ class ConfirmDialog extends React.Component {
             }}
             color="primary"
           >
-            OK
+            YES
           </Button>
         </DialogActions>
       </Dialog>
