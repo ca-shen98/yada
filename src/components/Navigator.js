@@ -44,7 +44,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Collapse from "@material-ui/core/Collapse";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import InputBase from "@material-ui/core/InputBase";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
@@ -182,12 +181,17 @@ class FileListItem extends React.Component {
               <TextFieldsIcon color="primary" />
             ) : null}
           </IconButton>
-          <InputBase
-            value={this.props.fileName}
+          <div
             className="file_list_input"
-            disabled={true}
-            style={{ color: "#1E3D59" }}
-          />
+            style={{
+              color: "#1E3D59",
+              textOverflow: "ellipsis",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {this.props.fileName}
+          </div>
           <Divider className={"fileList-divider"} orientation="vertical" />
           <IconButton
             className={"fileList-iconButton"}
@@ -220,12 +224,17 @@ class FileListItem extends React.Component {
                 }
           }
         >
-          <InputBase
-            value={this.props.fileName}
+          <div
             className="file_list_input"
-            disabled={true}
-            style={{ color: "#1E3D59" }}
-          />
+            style={{
+              color: "#1E3D59",
+              textOverflow: "ellipsis",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {this.props.fileName}
+          </div>
           {this.props.childViewsExist ? (
             this.props.open ? (
               <ExpandLess />
