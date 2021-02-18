@@ -142,8 +142,10 @@ class LoginPage extends React.Component {
             <Grid item xs={1} />
             <Grid container alignItems="center" xs={10} spacing={3}>
               <Grid item md={4}>
-                <h1>Never rewrite anything ever again</h1>
-                <p>
+                <h1 className="landing-title-font">
+                  Never rewrite anything ever again
+                </h1>
+                <p className="landing-paragraph-font">
                   Yada is an all-in-one solution that allows you to brainstorm,
                   edit, and present your ideas. Start by writing your document,
                   choose how to present your content with <em>views</em>.
@@ -170,7 +172,9 @@ class LoginPage extends React.Component {
             <Grid item xs={1} />
             <Grid container alignItems="center" xs={10} spacing={3}>
               <Grid item md={5}>
-                <h1 className="title-padding">Document Creation</h1>
+                <h1 className="title-padding landing-title-font">
+                  Document Creation
+                </h1>
                 <img
                   className={"gif"}
                   src={require("../../media/images/showing_views_pre.png")}
@@ -196,7 +200,9 @@ class LoginPage extends React.Component {
                 </Grid>
               </Hidden>
               <Grid item md={5}>
-                <h1 className="title-padding">Dynamic Presentation</h1>
+                <h1 className="title-padding landing-title-font">
+                  Dynamic Presentation
+                </h1>
                 <img
                   className={"gif"}
                   src={require("../../media/gifs/showing_views_post_final.gif")}
@@ -220,8 +226,10 @@ class LoginPage extends React.Component {
                 />
               </Grid>
               <Grid item md={4}>
-                <h1>Changes to your content appear in your presentations</h1>
-                <p>
+                <h1 className="landing-title-font">
+                  Changes to your content appear in your presentations
+                </h1>
+                <p className="landing-paragraph-font">
                   Update the source material and various views in a natural
                   manner. Your slide shows, flash cards and text summaries will{" "}
                   <b>never be out of date</b>.
@@ -243,7 +251,9 @@ class LoginPage extends React.Component {
             >
               <Grid item xs={4}>
                 <small>
-                  <p>Copyright © 2021 Yada.&nbsp;&nbsp;All rights reserved.</p>
+                  <p className="landing-paragraph-font">
+                    Copyright © 2021 Yada.&nbsp;&nbsp;All rights reserved.
+                  </p>
                 </small>
               </Grid>
             </Grid>

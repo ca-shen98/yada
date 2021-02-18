@@ -30,7 +30,6 @@
 }
 
 .home {
-  padding-top: 70px;
   height: fit-content;
   min-height: 100%;
 }
@@ -111,26 +110,11 @@
   background-color: #faf8f2;
 }
 
-h1 {
-  font-family: Calistoga;
-}
-h2 {
-  font-family: Calistoga;
-}
-h3 {
-  font-family: Calistoga;
-}
-h4 {
-  font-family: Calistoga;
-}
-h5 {
-  font-family: Calistoga;
-}
-h6 {
+.landing-title-font {
   font-family: Calistoga;
 }
 
-p {
+.landing-paragraph-font {
   font-family: Signika;
 }
 
