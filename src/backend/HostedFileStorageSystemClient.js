@@ -1,8 +1,7 @@
-import Cookies from "js-cookie";
 import { fetchWithTimeout } from "../util/FetchWithTimeout";
 import { convertStrValueOrDefaultIfFalsy } from "../util/ConvertStrValueOrDefault";
 import {
-  ACCESS_TOKEN_COOKIE_KEY,
+  getAccessToken,
   SERVER_BASE_URL,
 } from "../reducers/BackendModeSignedInStatus";
 
@@ -13,7 +12,7 @@ const EMPTY_SOURCE_CONTENT = {
 
 export default {
   doGetFilesList: async () => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const response = await fetchWithTimeout(SERVER_BASE_URL + `documents`, {
         headers: new Headers({ "Set-Cookie": `token=${token}` }),
@@ -27,7 +26,7 @@ export default {
     return null;
   },
   doSaveViewSpec: async (tagsList, sourceId, viewId, type, createNew) => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     const response = await fetchWithTimeout(
       SERVER_BASE_URL +
         `view?docID=${sourceId}&viewType=${type}` +
@@ -52,7 +51,7 @@ export default {
     throw new Error("Failed to save view");
   },
   doGetView: async (fileId) => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const viewResponse = await fetchWithTimeout(
         SERVER_BASE_URL +
@@ -81,7 +80,7 @@ export default {
     return null;
   },
   doGetSourceTaggedBlocks: async (sourceId) => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const response = await fetchWithTimeout(
         SERVER_BASE_URL + `tags?docID=${sourceId}`,
@@ -111,7 +110,7 @@ export default {
     if (!saveValue) {
       return null;
     }
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const response = await fetchWithTimeout(
         SERVER_BASE_URL + "document" + (!createNew ? `?docID=${sourceId}` : ""),
@@ -134,7 +133,7 @@ export default {
     return null;
   },
   doGetSourceContent: async (sourceId) => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const response = await fetchWithTimeout(
         SERVER_BASE_URL + `document?docID=${sourceId}`,
@@ -149,7 +148,7 @@ export default {
     return null;
   },
   doSetSourceSavedTagFilters: async (sourceId, sourceSavedTagFilters) => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     const filters = Object.keys(sourceSavedTagFilters);
     try {
       const response = await fetchWithTimeout(
@@ -173,7 +172,7 @@ export default {
   },
   doGetSourceSavedTagFilters: async (sourceId) => {
     // TODO
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const response = await fetchWithTimeout(
         SERVER_BASE_URL + `filters?docID=${sourceId}`,
@@ -188,7 +187,7 @@ export default {
     return null;
   },
   doDeleteSource: async (sourceId) => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const { ok } = await fetchWithTimeout(
         SERVER_BASE_URL + `document?docID=${sourceId}`,
@@ -204,7 +203,7 @@ export default {
     return false;
   },
   doDeleteView: async (sourceId, viewId) => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const { ok } = await fetchWithTimeout(
         SERVER_BASE_URL + `view?docID=${sourceId}&viewID=${viewId}`,
@@ -220,7 +219,7 @@ export default {
     return false;
   },
   doRenameSource: async (sourceId, name) => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const { ok } = await fetchWithTimeout(
         SERVER_BASE_URL + `document?docID=${sourceId}&name=${name}`,
@@ -236,7 +235,7 @@ export default {
     return false;
   },
   doRenameView: async (sourceId, viewId, name) => {
-    const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+    const token = getAccessToken();
     try {
       const { ok } = await fetchWithTimeout(
         SERVER_BASE_URL +

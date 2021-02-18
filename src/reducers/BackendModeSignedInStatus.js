@@ -14,8 +14,26 @@ export const BACKEND_MODE_SIGNED_IN_STATUS = {
 
 export const ACCESS_TOKEN_COOKIE_KEY = "access_token";
 
+export const setAccessToken = (token, expiry) => {
+  try {
+    Cookies.set(ACCESS_TOKEN_COOKIE_KEY, token, {
+      expires: new Date(expiry),
+    });
+  } catch (e) {
+    localStorage.setItem(ACCESS_TOKEN_COOKIE_KEY, token);
+  }
+};
+
+export const getAccessToken = () => {
+  try {
+    return Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+  } catch (e) {
+    return localStorage.getItem(ACCESS_TOKEN_COOKIE_KEY);
+  }
+};
+
 export const getUserSignedInStatus = async () => {
-  const token = Cookies.get(ACCESS_TOKEN_COOKIE_KEY);
+  const token = getAccessToken();
   if (token) {
     try {
       const { ok } = await fetchWithTimeout(SERVER_BASE_URL + `auth`, {

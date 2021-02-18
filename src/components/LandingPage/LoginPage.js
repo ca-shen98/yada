@@ -6,12 +6,11 @@ import ReactTypingEffect from "react-typing-effect";
 import { GoogleLogin } from "react-google-login";
 import axios from "axios";
 import {
-  ACCESS_TOKEN_COOKIE_KEY,
   BACKEND_MODE_SIGNED_IN_STATUS,
   SERVER_BASE_URL,
+  setAccessToken,
   setBackendModeSignedInStatusAction,
 } from "../../reducers/BackendModeSignedInStatus";
-import Cookies from "js-cookie";
 import { connect } from "react-redux";
 import { setNewUserAction } from "../../reducers/Steps";
 import Wave from "react-wavify";
@@ -49,9 +48,7 @@ class LoginPage extends React.Component {
     this.setState({ userSignInLoading: false });
     if (response && response.status === 201) {
       this.props.dispatchNewUserAction(response.data.is_new);
-      Cookies.set(ACCESS_TOKEN_COOKIE_KEY, token, {
-        expires: new Date(expiry),
-      });
+      setAccessToken(token, expiry);
       this.props.dispatchSetBackendModeSignedInStatusAction(
         BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN
       );
@@ -132,6 +129,7 @@ class LoginPage extends React.Component {
                       this.handleLoginSuccess(response);
                     }}
                     onFailure={(response) => {
+                      console.log("FAILURE");
                       console.error(response);
                     }}
                     cookiePolicy="single_host_origin"
