@@ -3,15 +3,14 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { connect } from "react-redux";
-import { setBackendModeSignedInStatusAction } from "../reducers/BackendModeSignedInStatus";
+import {
+  clearAccessToken,
+  setBackendModeSignedInStatusAction,
+} from "../reducers/BackendModeSignedInStatus";
 import DescriptionIcon from "@material-ui/icons/Description";
 import TextFieldsIcon from "@material-ui/icons/TextFields";
 import AmpStoriesIcon from "@material-ui/icons/AmpStories";
-import Cookies from "js-cookie";
-import {
-  ACCESS_TOKEN_COOKIE_KEY,
-  BACKEND_MODE_SIGNED_IN_STATUS,
-} from "../reducers/BackendModeSignedInStatus";
+import { BACKEND_MODE_SIGNED_IN_STATUS } from "../reducers/BackendModeSignedInStatus";
 import {
   FILE_TYPE,
   checkNoOpenFileId,
@@ -359,7 +358,7 @@ class Navbar extends React.Component {
         BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_OUT
       )
     ) {
-      Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
+      clearAccessToken();
       this.props.dispatchNewUserAction(false);
       localStorage.clear();
       this.props.dispatchSignOutAction();

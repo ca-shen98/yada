@@ -6,15 +6,15 @@ import ReactTypingEffect from "react-typing-effect";
 import { GoogleLogin } from "react-google-login";
 import axios from "axios";
 import {
-  ACCESS_TOKEN_COOKIE_KEY,
   BACKEND_MODE_SIGNED_IN_STATUS,
   SERVER_BASE_URL,
+  setAccessToken,
   setBackendModeSignedInStatusAction,
 } from "../../reducers/BackendModeSignedInStatus";
-import Cookies from "js-cookie";
 import { connect } from "react-redux";
 import { setNewUserAction } from "../../reducers/Steps";
 import Wave from "react-wavify";
+import { setToastAction, TOAST_SEVERITY } from "../../reducers/Toast";
 
 const CLIENT_ID =
   "709358329925-gic89ini15sgaenfrta1gshej1ik72jg.apps.googleusercontent.com";
@@ -49,9 +49,7 @@ class LoginPage extends React.Component {
     this.setState({ userSignInLoading: false });
     if (response && response.status === 201) {
       this.props.dispatchNewUserAction(response.data.is_new);
-      Cookies.set(ACCESS_TOKEN_COOKIE_KEY, token, {
-        expires: new Date(expiry),
-      });
+      setAccessToken(token, expiry);
       this.props.dispatchSetBackendModeSignedInStatusAction(
         BACKEND_MODE_SIGNED_IN_STATUS.USER_SIGNED_IN
       );
@@ -133,6 +131,11 @@ class LoginPage extends React.Component {
                     }}
                     onFailure={(response) => {
                       console.error(response);
+                      this.props.dispatchSetToastAction({
+                        message: "Sorry! Yada requires cookies to be enabled.",
+                        severity: TOAST_SEVERITY.ERROR,
+                        open: true,
+                      });
                     }}
                     cookiePolicy="single_host_origin"
                     responseType="code,token"
@@ -307,5 +310,6 @@ export default connect(
     dispatchSetBackendModeSignedInStatusAction: (mode) =>
       dispatch(setBackendModeSignedInStatusAction(mode)),
     dispatchNewUserAction: (newUser) => dispatch(setNewUserAction(newUser)),
+    dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
   })
 )(LoginPage);
