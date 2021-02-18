@@ -87,6 +87,11 @@ class TagEditor extends React.Component {
           [newColumn.id]: newColumn,
         },
       };
+
+      if (column.id === TAG_HOLDERS.IN_VIEW) {
+        // set dirty flag when tags are re-ordered within Tags In View Holder
+        this.props.dispatchSetSaveDirtyFlagAction();
+      }
     } else {
       const start = this.state.columns[source.droppableId];
       const finish = this.state.columns[destination.droppableId];
