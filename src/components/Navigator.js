@@ -60,6 +60,7 @@ import AmpStoriesIcon from "@material-ui/icons/AmpStories";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import ConfirmDialog from "./ConfirmDialog";
 import CreateIcon from "@material-ui/icons/Create";
+import { getDefaultMetadata } from "./ViewEditor";
 
 export const handleSetCurrentOpenFileId = (
   fileId,
@@ -384,7 +385,8 @@ class Navigator extends React.Component {
           this.props.currentOpenFileId.sourceId,
           localStorageNextNewFileId,
           fileType,
-          true
+          true,
+          getDefaultMetadata(fileType)
         );
     try {
       const newFile = await newFilePromise;

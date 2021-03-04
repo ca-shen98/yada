@@ -25,7 +25,14 @@ export default {
     }
     return null;
   },
-  doSaveViewSpec: async (tagsList, sourceId, viewId, type, createNew) => {
+  doSaveViewSpec: async (
+    tagsList,
+    sourceId,
+    viewId,
+    type,
+    createNew,
+    metadata = {}
+  ) => {
     const token = getAccessToken();
     const response = await fetchWithTimeout(
       SERVER_BASE_URL +
@@ -33,7 +40,7 @@ export default {
         (!createNew ? `&viewID=${viewId}` : ""),
       {
         method: "PUT",
-        body: JSON.stringify({ tags: tagsList }),
+        body: JSON.stringify({ tags: tagsList, metadata: metadata }),
         headers: new Headers({
           "Content-Type": "application/json",
           "Set-Cookie": `token=${token}`,

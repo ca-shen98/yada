@@ -4,11 +4,18 @@ import Grid from "@material-ui/core/Grid";
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import { THEME } from "../../App";
 import { FILE_TYPE } from "../../util/FileIdAndTypeUtils";
-import { TAG_HOLDERS } from "./TagEditor";
+import { SEPARATOR_PREFIX, TAG_HOLDERS } from "./TagEditor";
 import AddIcon from "@material-ui/icons/Add";
 import Button from "@material-ui/core/Button";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { connect } from "react-redux";
+import {
+  setMetadataInViewAction,
+  setTagsInViewAction,
+} from "../../reducers/SetTagsInView";
+import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../../reducers/CurrentOpenFileState";
+import { setTagEditorOpenedAction } from "../../reducers/Steps";
 
 class Tag extends React.Component {
   render = () => {
@@ -139,7 +146,8 @@ class InnerTagList extends React.Component {
       this.props.viewType === FILE_TYPE.SLIDE_VIEW
     ) {
       let j = 0;
-      let separators = this.props.metadataInView["separators"] || [0, 1];
+      console.log(this.props.metadataInView["separators"]);
+      let separators = this.props.metadataInView["separators"] || [];
       for (let i = 0; i < tagIds.length; ++i) {
         const tagId = tagIds[i];
         tagList.push(
@@ -153,8 +161,8 @@ class InnerTagList extends React.Component {
         if (j < separators.length && i === separators[j]) {
           tagList.push(
             <Separator
-              key={`separator_${j}`}
-              separatorId={`separator_${j}`}
+              key={`${SEPARATOR_PREFIX}_${j}`}
+              separatorId={`${SEPARATOR_PREFIX}_${j}`}
               index={i + j + 1}
               tagInfo={this.props.tagData[tagId]}
             />
@@ -198,6 +206,25 @@ class DragDropColumn extends React.Component {
     }
   }
 
+  addSlideSeparator() {
+    const tagsInViewLength = this.props.column.tagIds.length || 0;
+    const metadataInView = {
+      separators: [...this.props.metadataInView["separators"]],
+    };
+    console.log(metadataInView);
+
+    const newSeparator = tagsInViewLength - 1;
+    if (
+      newSeparator >= 0 &&
+      metadataInView["separators"][-1] !== newSeparator
+    ) {
+      metadataInView["separators"].push(newSeparator);
+    }
+    console.log(metadataInView);
+    console.log(this.props.metadataInView);
+    this.props.setMetadataInView(metadataInView);
+  }
+
   render = () => {
     const Container = styled.div`
       border: 1px solid lightgrey;
@@ -236,11 +263,7 @@ class DragDropColumn extends React.Component {
                     <Title>{this.props.column.title}</Title>
                   </Col>
                   <Col xs="6" className="tag-editor-button-container">
-                    <Button
-                      onClick={() => {
-                        console.log("new slide");
-                      }}
-                    >
+                    <Button onClick={() => this.addSlideSeparator()}>
                       Split Slide
                       <AddIcon />
                     </Button>
@@ -271,4 +294,12 @@ class DragDropColumn extends React.Component {
   };
 }
 
-export default DragDropColumn;
+export default connect(
+  (state) => ({
+    metadataInView: state.metadataInView,
+  }),
+  (dispatch) => ({
+    setMetadataInView: (metadataInView) =>
+      dispatch(setMetadataInViewAction(metadataInView)),
+  })
+)(DragDropColumn);

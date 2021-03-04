@@ -20,6 +20,13 @@ import {
 import CircularProgress from "@material-ui/core/CircularProgress";
 import SlideView from "./SlideView/SlideView";
 
+export function getDefaultMetadata(fileType) {
+  if (fileType === FILE_TYPE.SLIDE_VIEW) {
+    return { separators: [] };
+  }
+  return {};
+}
+
 class ViewEditor extends React.Component {
   state = {
     sourceId: 0,
@@ -78,6 +85,7 @@ class ViewEditor extends React.Component {
           });
           this.props.setTagsInView([]); // clear any tagsInView currently stored
           this.props.setMetadataInView({}); // clear any metadataInView currently stored
+          console.log(value);
           this.setState({
             sourceId: this.props.currentOpenFileId.sourceId,
             viewId: this.props.currentOpenFileId.viewId,

@@ -128,7 +128,8 @@ class Navbar extends React.Component {
         this.props.currentOpenFileId.sourceId,
         this.props.currentOpenFileId.viewId,
         this.props.currentOpenFileId.viewType,
-        false
+        false,
+        this.props.metadataInView
       )
         .then(() => {
           this.props.dispatchSetToastAction({
@@ -714,6 +715,7 @@ export default connect(
     currentOpenFileName: state.currentOpenFileName,
     backendModeSignedInStatus: state.backendModeSignedInStatus,
     tagsInView: state.tagsInView,
+    metadataInView: state.metadataInView,
     saveDirtyFlag: state.saveDirtyFlag,
     saveInProgress: state.saveInProgress,
   }),

@@ -52,7 +52,8 @@ class SlideView extends React.Component {
           this.props.currentOpenFileId.sourceId,
           this.props.currentOpenFileId.viewId,
           FILE_TYPE.SLIDE_VIEW,
-          false
+          false,
+          this.props.metadataInView
         )
           .then(() => {
             store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });

@@ -5,7 +5,10 @@ import DragDropColumn from "./DragDropColumn";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { DragDropContext } from "react-beautiful-dnd";
-import { setTagsInViewAction } from "../../reducers/SetTagsInView";
+import {
+  setMetadataInViewAction,
+  setTagsInViewAction,
+} from "../../reducers/SetTagsInView";
 import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../../reducers/CurrentOpenFileState";
 import { setTagEditorOpenedAction } from "../../reducers/Steps";
 import "./TagEditor.css";
@@ -14,6 +17,8 @@ export const TAG_HOLDERS = {
   AVAILABLE: "tags_available",
   IN_VIEW: "tags_in_view",
 };
+
+export const SEPARATOR_PREFIX = "separator";
 
 class TagEditor extends React.Component {
   constructor(props) {
@@ -65,65 +70,95 @@ class TagEditor extends React.Component {
   onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;
+    // no change made
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     )
       return;
 
-    let newState = {};
-    if (destination.droppableId === source.droppableId) {
-      const column = this.state.columns[source.droppableId];
-      const newTagIds = Array.from(column.tagIds);
-      newTagIds.splice(source.index, 1);
-      newTagIds.splice(destination.index, 0, draggableId);
+    const isSeparator = draggableId.startsWith(SEPARATOR_PREFIX);
+    if (isSeparator) {
+      // only allow separators to move in "Tags in View"
+      if (destination.droppableId === TAG_HOLDERS.IN_VIEW) {
+        const column = this.state.columns[TAG_HOLDERS.IN_VIEW];
+        console.log(column);
+        const separators = Array.from(column.metadataInView["separators"]);
 
-      const newColumn = {
-        ...column,
-        tagIds: newTagIds,
-      };
+        const newColumn = {
+          ...column,
+          metadataInView: {
+            separators: separators,
+          },
+        };
 
-      newState = {
-        ...this.state,
-        columns: {
-          ...this.state.columns,
-          [newColumn.id]: newColumn,
-        },
-      };
-
-      if (column.id === TAG_HOLDERS.IN_VIEW) {
-        // set dirty flag when tags are re-ordered within Tags In View Holder
-        this.props.dispatchSetSaveDirtyFlagAction();
+        let newState = {
+          ...this.state,
+          columns: {
+            ...this.state.columns,
+            [newColumn.id]: newColumn,
+          },
+        };
+        this.props.setMetadataInView(newState.columns.tags_in_view.tagIds);
+        this.setState(newState);
       }
     } else {
-      const start = this.state.columns[source.droppableId];
-      const finish = this.state.columns[destination.droppableId];
-      const startTagIds = Array.from(start.tagIds);
-      startTagIds.splice(source.index, 1);
-      const newStart = {
-        ...start,
-        tagIds: startTagIds,
-      };
+      let newState = {};
+      if (destination.droppableId === source.droppableId) {
+        // reorder within same list
+        const column = this.state.columns[source.droppableId];
+        const newTagIds = Array.from(column.tagIds);
+        newTagIds.splice(source.index, 1);
+        newTagIds.splice(destination.index, 0, draggableId);
 
-      const finishTagIds = Array.from(finish.tagIds);
-      finishTagIds.splice(destination.index, 0, draggableId);
-      const newFinish = {
-        ...finish,
-        tagIds: finishTagIds,
-      };
+        const newColumn = {
+          ...column,
+          tagIds: newTagIds,
+        };
 
-      newState = {
-        ...this.state,
-        columns: {
-          ...this.state.columns,
-          [newStart.id]: newStart,
-          [newFinish.id]: newFinish,
-        },
-      };
-      this.props.dispatchSetSaveDirtyFlagAction();
+        newState = {
+          ...this.state,
+          columns: {
+            ...this.state.columns,
+            [newColumn.id]: newColumn,
+          },
+        };
+
+        if (column.id === TAG_HOLDERS.IN_VIEW) {
+          // set dirty flag when tags are re-ordered within Tags In View Holder
+          this.props.dispatchSetSaveDirtyFlagAction();
+        }
+      } else {
+        // move to another list
+        const start = this.state.columns[source.droppableId];
+        const finish = this.state.columns[destination.droppableId];
+        const startTagIds = Array.from(start.tagIds);
+        startTagIds.splice(source.index, 1);
+        const newStart = {
+          ...start,
+          tagIds: startTagIds,
+        };
+
+        const finishTagIds = Array.from(finish.tagIds);
+        finishTagIds.splice(destination.index, 0, draggableId);
+        const newFinish = {
+          ...finish,
+          tagIds: finishTagIds,
+        };
+
+        newState = {
+          ...this.state,
+          columns: {
+            ...this.state.columns,
+            [newStart.id]: newStart,
+            [newFinish.id]: newFinish,
+          },
+        };
+        this.props.dispatchSetSaveDirtyFlagAction();
+      }
+      this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
+      this.setState(newState);
     }
-    this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
-    this.setState(newState);
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -133,7 +168,7 @@ class TagEditor extends React.Component {
         (t) => !tagsInView.has(t)
       );
       const newState = Object.assign({}, this.state);
-      newState.columns.tags_in_view.tagIds = tagsInView;
+      newState.columns.tags_in_view.tagIds = this.props.tagsInView;
       newState.columns.tags_available.tagIds = availableTags;
       this.setState(newState);
     }
@@ -182,6 +217,8 @@ export default connect(
   }),
   (dispatch) => ({
     setTagsInView: (tagsInView) => dispatch(setTagsInViewAction(tagsInView)),
+    setMetadataInView: (metadataInView) =>
+      dispatch(setMetadataInViewAction(metadataInView)),
     dispatchSetSaveDirtyFlagAction: () =>
       dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
     dispatchSetTagEditorOpenedAction: (tagMenuEditor) =>
