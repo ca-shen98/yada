@@ -6,7 +6,10 @@ import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import { handleSetCurrentOpenFileId } from "./Navigator";
 import CardDeck from "./CardView/CardView";
 import TextView from "./TextView/TextView";
-import { setTagsInViewAction } from "../reducers/SetTagsInView";
+import {
+  setMetadataInViewAction,
+  setTagsInViewAction,
+} from "../reducers/SetTagsInView";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import { Steps } from "intro.js-react";
 import { setNewUserAction } from "../reducers/Steps";
@@ -74,10 +77,12 @@ class ViewEditor extends React.Component {
             }
           });
           this.props.setTagsInView([]); // clear any tagsInView currently stored
+          this.props.setMetadataInView({}); // clear any metadataInView currently stored
           this.setState({
             sourceId: this.props.currentOpenFileId.sourceId,
             viewId: this.props.currentOpenFileId.viewId,
             data: {
+              metadataInView: value["view"]["metadata"],
               tagsInView: value["view"]["order"],
               allTagsData: value["tags"]["items"],
             },
@@ -156,6 +161,8 @@ export default connect(
   }),
   (dispatch) => ({
     setTagsInView: (tagsInView) => dispatch(setTagsInViewAction(tagsInView)),
+    setMetadataInView: (metadataInView) =>
+      dispatch(setMetadataInViewAction(metadataInView)),
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
     dispatchNewUserAction: (newUser) => dispatch(setNewUserAction(newUser)),
     dispatchSetFileLoading: () => dispatch({ type: SET_FILE_LOADING }),

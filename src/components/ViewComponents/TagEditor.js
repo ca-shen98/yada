@@ -8,6 +8,7 @@ import { DragDropContext } from "react-beautiful-dnd";
 import { setTagsInViewAction } from "../../reducers/SetTagsInView";
 import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../../reducers/CurrentOpenFileState";
 import { setTagEditorOpenedAction } from "../../reducers/Steps";
+import "./TagEditor.css";
 
 export const TAG_HOLDERS = {
   AVAILABLE: "tags_available",
@@ -48,11 +49,13 @@ class TagEditor extends React.Component {
           id: TAG_HOLDERS.IN_VIEW,
           title: "Tags in View",
           tagIds: this.props.tagsInView,
+          metadataInView: this.props.metadataInView,
         },
         tags_available: {
           id: TAG_HOLDERS.AVAILABLE,
           title: "Available Tags",
           tagIds: availableTags,
+          metadataInView: {},
         },
       },
       columnOrder: ["tags_in_view", "tags_available"],
@@ -159,6 +162,7 @@ class TagEditor extends React.Component {
                     key={column.id}
                     column={column}
                     tagData={tagDataInColumn}
+                    metadataInView={column.metadataInView}
                   />
                 </Col>
               );
@@ -173,6 +177,7 @@ class TagEditor extends React.Component {
 export default connect(
   (state) => ({
     tagsInView: state.tagsInView,
+    metadataInView: state.metadataInView,
     saveDirtyFlag: state.saveDirtyFlag,
   }),
   (dispatch) => ({

@@ -8,7 +8,10 @@ import Col from "react-bootstrap/Col";
 import Slide from "./Slide";
 import PresentationView from "./PresentationView";
 import TagEditor from "../ViewComponents/TagEditor";
-import { setTagsInViewAction } from "../../reducers/SetTagsInView";
+import {
+  setMetadataInViewAction,
+  setTagsInViewAction,
+} from "../../reducers/SetTagsInView";
 import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
 import { FILE_TYPE } from "../../util/FileIdAndTypeUtils";
 import { setToastAction, TOAST_SEVERITY } from "../../reducers/Toast";
@@ -30,6 +33,7 @@ class SlideView extends React.Component {
       presentationSwitch: false,
     };
     this.props.setTagsInView(props.data.tagsInView);
+    this.props.setMetadataInView(props.data.metadataInView);
   }
 
   keydownHandler = (event) => {
@@ -93,6 +97,9 @@ class SlideView extends React.Component {
     if (prevProps.data.tagsInView !== this.props.data.tagsInView) {
       this.props.setTagsInView(this.props.data.tagsInView);
     }
+    if (prevProps.data.metadataInView !== this.props.data.metadataInView) {
+      this.props.setMetadataInView(this.props.data.metadataInView);
+    }
   };
   componentWillUnmount = () => {
     document.removeEventListener("keydown", this.keydownHandler);
@@ -153,11 +160,14 @@ class SlideView extends React.Component {
 export default connect(
   (state) => ({
     tagsInView: state.tagsInView,
+    metadataInView: state.metadataInView,
     currentOpenFileId: state.currentOpenFileId,
     saveDirtyFlag: state.saveDirtyFlag,
   }),
   (dispatch) => ({
     setTagsInView: (tagsInView) => dispatch(setTagsInViewAction(tagsInView)),
+    setMetadataInView: (metadataInView) =>
+      dispatch(setMetadataInViewAction(metadataInView)),
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
   })
 )(SlideView);

@@ -1,0 +1,6 @@
+.tag-editor-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: right;
+}
