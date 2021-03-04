@@ -1,0 +1,14 @@
+.BootstrapSlide {
+  max-width: 50em;
+  height: 28em;
+  margin: 10px auto;
+}
+
+.Slide {
+  padding: 25px;
+}
+
+/*make rich markdown editor background transparent*/
+.Slide div {
+  background: transparent;
+}

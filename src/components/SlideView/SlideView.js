@@ -1,12 +1,12 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./CardDeck.css";
+import "./SlideView.css";
 import React from "react";
 import { connect } from "react-redux";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import Card from "./Card";
-import StudyView from "./StudyView";
+import Slide from "./Slide";
+import PresentationView from "./PresentationView";
 import TagEditor from "../ViewComponents/TagEditor";
 import { setTagsInViewAction } from "../../reducers/SetTagsInView";
 import FileStorageSystemClient from "../../backend/FileStorageSystemClient";
@@ -22,12 +22,12 @@ import {
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 
-class CardDeck extends React.Component {
+class SlideView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       allTagsData: props.data.allTagsData,
-      displaySwitch: false,
+      presentationSwitch: false,
     };
     this.props.setTagsInView(props.data.tagsInView);
   }
@@ -47,7 +47,7 @@ class CardDeck extends React.Component {
           this.props.tagsInView,
           this.props.currentOpenFileId.sourceId,
           this.props.currentOpenFileId.viewId,
-          FILE_TYPE.CARD_VIEW,
+          FILE_TYPE.SLIDE_VIEW,
           false
         )
           .then(() => {
@@ -79,15 +79,12 @@ class CardDeck extends React.Component {
     };
   };
 
-  constructCard = (index) => {
-    const cardContent = { index: index };
-    cardContent["front"] = this.constructDoc(this.props.tagsInView[index]);
-    if (index + 1 < this.props.tagsInView.length) {
-      cardContent["back"] = this.constructDoc(this.props.tagsInView[index + 1]);
-    } else {
-      cardContent["back"] = null;
-    }
-    return <Card content={cardContent} />;
+  constructSlide = (index) => {
+    const slideContent = {
+      index: index,
+      doc: this.constructDoc(this.props.tagsInView[index]),
+    };
+    return <Slide content={slideContent} />;
   };
   componentDidMount = () => {
     document.addEventListener("keydown", this.keydownHandler);
@@ -105,56 +102,46 @@ class CardDeck extends React.Component {
     if (!this.state.allTagsData || this.props.tagsInView == null) {
       return (
         <Container>
-          <h5>Loading Card Deck ...</h5>
+          <h5>Loading Slide Deck ...</h5>
         </Container>
       );
     } else {
-      const cards = [];
-      if (this.state.displaySwitch) {
-        for (let i = 0; i < this.props.tagsInView.length; i += 2) {
-          cards.push(this.constructCard(i));
-        }
-      } else {
-        for (let i = 0; i < this.props.tagsInView.length; i += 4) {
-          cards.push(
-            <Row key={`row_${i % 4}`} className="justify-content-md-center">
-              <Col lg="12" xl="6">
-                {this.constructCard(i)}
-              </Col>
-              <Col lg="12" xl="6">
-                {i + 2 < this.props.tagsInView.length &&
-                  this.constructCard(i + 2)}
-              </Col>
-            </Row>
-          );
-        }
+      const slides = [];
+      for (let i = 0; i < this.props.tagsInView.length; ++i) {
+        slides.push(
+          <Row key={`row_${i}`} className="justify-content-md-center">
+            <Col sm="12">{this.constructSlide(i)}</Col>
+          </Row>
+        );
       }
       return (
         <Container>
           <FormControlLabel
             control={
               <Switch
-                checked={this.state.displaySwitch}
+                checked={this.state.presentationSwitch}
                 onChange={() => {
-                  this.setState({ displaySwitch: !this.state.displaySwitch });
+                  this.setState({
+                    presentationSwitch: !this.state.presentationSwitch,
+                  });
                 }}
                 name="checkedB"
                 color="primary"
-                className="displayModeSwitch"
+                className="presentationModeSwitch"
               />
             }
-            label="Display Mode"
+            label="Presentation Mode"
           />
-          {this.state.displaySwitch ? (
-            <StudyView cards={cards} />
+          {this.state.presentationSwitch ? (
+            <PresentationView slides={slides} />
           ) : (
             <div>
               <TagEditor
-                viewType={FILE_TYPE.CARD_VIEW}
+                viewType={FILE_TYPE.SLIDE_VIEW}
                 allTagsData={this.state.allTagsData}
                 tagsInView={this.props.tagsInView}
               />
-              <div className="viewContent">{cards}</div>
+              <div className="viewContent">{slides}</div>
             </div>
           )}
         </Container>
@@ -173,4 +160,4 @@ export default connect(
     setTagsInView: (tagsInView) => dispatch(setTagsInViewAction(tagsInView)),
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
   })
-)(CardDeck);
+)(SlideView);

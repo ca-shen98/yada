@@ -179,6 +179,9 @@ class FileListItem extends React.Component {
               <AmpStoriesIcon color="primary" />
             ) : viewType === FILE_TYPE.TEXT_VIEW ? (
               <TextFieldsIcon color="primary" />
+            ) : viewType === FILE_TYPE.SLIDE_VIEW ? (
+              // TODO: change icon
+              <TextFieldsIcon color="primary" />
             ) : null}
           </IconButton>
           <div
@@ -1071,6 +1074,27 @@ class Navigator extends React.Component {
                 <AmpStoriesIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText primary="Card View" />
+            </MenuItem>
+
+            <MenuItem
+              onClick={() => {
+                this.handleViewMenuClose();
+                if (this.props.saveDirtyFlag) {
+                  this.setState({
+                    confirmDialogOpen: true,
+                    confirmDialogCallback: () =>
+                      this.handleCreateNewFile(FILE_TYPE.SLIDE_VIEW),
+                  });
+                } else {
+                  this.handleCreateNewFile(FILE_TYPE.SLIDE_VIEW);
+                }
+              }}
+            >
+              <ListItemIcon>
+                {/*TODO: change icon*/}
+                <TextFieldsIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Slide View" />
             </MenuItem>
           </Menu>
           <Popover

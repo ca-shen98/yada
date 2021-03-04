@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { FILE_TYPE, NO_OPEN_FILE_ID } from "../util/FileIdAndTypeUtils";
 import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import { handleSetCurrentOpenFileId } from "./Navigator";
-import CardDeck from "./CardView/CardDeck";
+import CardDeck from "./CardView/CardView";
 import TextView from "./TextView/TextView";
 import { setTagsInViewAction } from "../reducers/SetTagsInView";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
@@ -15,6 +15,7 @@ import {
   CLEAR_FILE_LOADING,
 } from "../reducers/CurrentOpenFileState";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import SlideView from "./SlideView/SlideView";
 
 class ViewEditor extends React.Component {
   state = {
@@ -138,6 +139,8 @@ class ViewEditor extends React.Component {
           <CardDeck data={this.state.data} />
         ) : this.state.fileType === FILE_TYPE.TEXT_VIEW ? (
           <TextView data={this.state.data} />
+        ) : this.state.fileType === FILE_TYPE.SLIDE_VIEW ? (
+          <SlideView data={this.state.data} />
         ) : null}
       </div>
     );

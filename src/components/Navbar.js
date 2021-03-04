@@ -443,6 +443,10 @@ class Navbar extends React.Component {
                             ) : this.props.currentOpenFileId.viewType ===
                               FILE_TYPE.TEXT_VIEW ? (
                               <TextFieldsIcon color="secondary" />
+                            ) : this.props.currentOpenFileId.viewType ===
+                              FILE_TYPE.SLIDE_VIEW ? (
+                              // TODO: change icon
+                              <TextFieldsIcon color="secondary" />
                             ) : null}
                             {this.props.currentOpenFileName.viewName}
                           </div>
