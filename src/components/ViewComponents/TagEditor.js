@@ -74,16 +74,49 @@ class TagEditor extends React.Component {
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
-    )
+    ) {
       return;
+    }
 
     const isSeparator = draggableId.startsWith(SEPARATOR_PREFIX);
     if (isSeparator) {
       // only allow separators to move in "Tags in View"
       if (destination.droppableId === TAG_HOLDERS.IN_VIEW) {
+        // don't allow separator to be moved to top
+        if (destination.index === 0) {
+          return;
+        }
         const column = this.state.columns[TAG_HOLDERS.IN_VIEW];
-        console.log(column);
-        const separators = Array.from(column.metadataInView["separators"]);
+        const separators = Array.from(this.props.metadataInView["separators"]);
+
+        // replace source index with destination index
+        let oldSeparator = source.index;
+        for (let i = 0; i < separators.length; ++i) {
+          if (separators[i] === oldSeparator) {
+            separators.splice(i, 1);
+            break;
+          }
+          // decrement oldSeparator since current separator pushes next separators up an index
+          --oldSeparator;
+        }
+        if (separators.length === 0) {
+          separators.push(destination.index);
+        } else {
+          let insertionPoint = 0;
+          while (insertionPoint < separators.length) {
+            if (separators[insertionPoint] > destination.index) {
+              break;
+            }
+            ++insertionPoint;
+          }
+          // need to subtract number of separators in order to insert the actual index of the separator with respect to the tagIds
+          separators.splice(
+            insertionPoint,
+            0,
+            destination.index - insertionPoint
+          );
+          console.log(separators);
+        }
 
         const newColumn = {
           ...column,
@@ -99,11 +132,12 @@ class TagEditor extends React.Component {
             [newColumn.id]: newColumn,
           },
         };
-        this.props.setMetadataInView(newState.columns.tags_in_view.tagIds);
+        this.props.setMetadataInView(newColumn.metadataInView);
         this.setState(newState);
       }
     } else {
       let newState = {};
+      // TODO: fix this for slides + tags in view
       if (destination.droppableId === source.droppableId) {
         // reorder within same list
         const column = this.state.columns[source.droppableId];

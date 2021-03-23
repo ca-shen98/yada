@@ -76,21 +76,48 @@ class SlideView extends React.Component {
     }
   };
 
-  constructDoc = (tagId) => {
-    const node = this.state.allTagsData[tagId]["content"];
+  constructDoc = (tagIds) => {
     return {
       type: "doc",
-      content: [node],
+      content: tagIds.map((t) => this.state.allTagsData[t]["content"]),
     };
   };
 
-  constructSlide = (index) => {
+  constructSlide = (slideIndex, startIndex, endIndex) => {
+    const tagIds = [];
+    for (let i = startIndex; i < endIndex; ++i) {
+      tagIds.push(this.props.tagsInView[i]);
+    }
     const slideContent = {
-      index: index,
-      doc: this.constructDoc(this.props.tagsInView[index]),
+      index: slideIndex,
+      doc: tagIds.length === 0 ? null : this.constructDoc(tagIds),
     };
     return <Slide content={slideContent} />;
   };
+
+  generateSlides = () => {
+    const slides = [];
+    let slideIndex = 0;
+    let tagsIndex = 0;
+    let separatorIndex = 0;
+    const separators = this.props.metadataInView["separators"];
+    while (tagsIndex < this.props.tagsInView.length) {
+      const splitIndex =
+        separatorIndex < separators.length
+          ? separators[separatorIndex++]
+          : this.props.tagsInView.length;
+      slides.push(
+        <Row key={`row_${slideIndex}`} className="justify-content-md-center">
+          <Col sm="12">
+            {this.constructSlide(slideIndex++, tagsIndex, splitIndex)}
+          </Col>
+        </Row>
+      );
+      tagsIndex = splitIndex;
+    }
+    return slides;
+  };
+
   componentDidMount = () => {
     document.addEventListener("keydown", this.keydownHandler);
   };
@@ -114,14 +141,7 @@ class SlideView extends React.Component {
         </Container>
       );
     } else {
-      const slides = [];
-      for (let i = 0; i < this.props.tagsInView.length; ++i) {
-        slides.push(
-          <Row key={`row_${i}`} className="justify-content-md-center">
-            <Col sm="12">{this.constructSlide(i)}</Col>
-          </Row>
-        );
-      }
+      const slides = this.generateSlides();
       return (
         <Container>
           <FormControlLabel

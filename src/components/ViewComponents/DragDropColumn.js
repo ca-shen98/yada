@@ -10,12 +10,7 @@ import Button from "@material-ui/core/Button";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { connect } from "react-redux";
-import {
-  setMetadataInViewAction,
-  setTagsInViewAction,
-} from "../../reducers/SetTagsInView";
-import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../../reducers/CurrentOpenFileState";
-import { setTagEditorOpenedAction } from "../../reducers/Steps";
+import { setMetadataInViewAction } from "../../reducers/SetTagsInView";
 
 class Tag extends React.Component {
   render = () => {
@@ -145,29 +140,32 @@ class InnerTagList extends React.Component {
       this.props.columnId === TAG_HOLDERS.IN_VIEW &&
       this.props.viewType === FILE_TYPE.SLIDE_VIEW
     ) {
-      let j = 0;
+      let separatorIndex = 0;
       console.log(this.props.metadataInView["separators"]);
       let separators = this.props.metadataInView["separators"] || [];
-      for (let i = 0; i < tagIds.length; ++i) {
-        const tagId = tagIds[i];
+      for (let tagIndex = 0; tagIndex < tagIds.length; ++tagIndex) {
+        const tagId = tagIds[tagIndex];
         tagList.push(
           <Tag
             key={tagId}
             tagId={tagId}
-            index={i + j}
+            index={tagIndex + separatorIndex}
             tagInfo={this.props.tagData[tagId]}
           />
         );
-        if (j < separators.length && i === separators[j]) {
+        while (
+          separatorIndex < separators.length &&
+          tagIndex + 1 === separators[separatorIndex]
+        ) {
           tagList.push(
             <Separator
-              key={`${SEPARATOR_PREFIX}_${j}`}
-              separatorId={`${SEPARATOR_PREFIX}_${j}`}
-              index={i + j + 1}
+              key={`${SEPARATOR_PREFIX}_${separatorIndex}`}
+              separatorId={`${SEPARATOR_PREFIX}_${separatorIndex}`}
+              index={tagIndex + separatorIndex + 1}
               tagInfo={this.props.tagData[tagId]}
             />
           );
-          ++j;
+          ++separatorIndex;
         }
       }
     } else {
@@ -207,22 +205,18 @@ class DragDropColumn extends React.Component {
   }
 
   addSlideSeparator() {
-    const tagsInViewLength = this.props.column.tagIds.length || 0;
+    const newSeparator = this.props.column.tagIds.length || 0;
     const metadataInView = {
       separators: [...this.props.metadataInView["separators"]],
     };
-    console.log(metadataInView);
-
-    const newSeparator = tagsInViewLength - 1;
     if (
-      newSeparator >= 0 &&
-      metadataInView["separators"][-1] !== newSeparator
+      newSeparator > 0 &&
+      metadataInView["separators"][metadataInView["separators"].length - 1] !==
+        newSeparator
     ) {
       metadataInView["separators"].push(newSeparator);
+      this.props.setMetadataInView(metadataInView);
     }
-    console.log(metadataInView);
-    console.log(this.props.metadataInView);
-    this.props.setMetadataInView(metadataInView);
   }
 
   render = () => {

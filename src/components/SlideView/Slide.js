@@ -6,17 +6,10 @@ class Slide extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isFlipped: false,
       key: this.props.content["index"],
       doc: this.props.content["doc"],
     };
-    this.handleClick = this.handleClick.bind(this);
     this.createBootstrapSlide = this.createBootstrapSlide.bind(this);
-  }
-
-  handleClick(e) {
-    e.preventDefault();
-    this.setState((prevState) => ({ isFlipped: !prevState.isFlipped }));
   }
 
   createBootstrapSlide(key, json) {
@@ -43,6 +36,7 @@ class Slide extends React.Component {
   render = () => {
     const content = this.props.content;
     if (content !== undefined) {
+      console.log(content);
       return this.createBootstrapSlide(content["index"], content["doc"]);
     } else {
       return null;
