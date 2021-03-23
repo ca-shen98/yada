@@ -140,9 +140,22 @@ class InnerTagList extends React.Component {
       this.props.columnId === TAG_HOLDERS.IN_VIEW &&
       this.props.viewType === FILE_TYPE.SLIDE_VIEW
     ) {
-      let separatorIndex = 0;
       console.log(this.props.metadataInView["separators"]);
+      let separatorIndex = 0;
       let separators = this.props.metadataInView["separators"] || [];
+      while (
+        separatorIndex < separators.length &&
+        separators[separatorIndex] === 0
+      ) {
+        tagList.push(
+          <Separator
+            key={`${SEPARATOR_PREFIX}_${separatorIndex}`}
+            separatorId={`${SEPARATOR_PREFIX}_${separatorIndex}`}
+            index={separatorIndex}
+          />
+        );
+        ++separatorIndex;
+      }
       for (let tagIndex = 0; tagIndex < tagIds.length; ++tagIndex) {
         const tagId = tagIds[tagIndex];
         tagList.push(
@@ -162,7 +175,6 @@ class InnerTagList extends React.Component {
               key={`${SEPARATOR_PREFIX}_${separatorIndex}`}
               separatorId={`${SEPARATOR_PREFIX}_${separatorIndex}`}
               index={tagIndex + separatorIndex + 1}
-              tagInfo={this.props.tagData[tagId]}
             />
           );
           ++separatorIndex;

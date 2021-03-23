@@ -90,8 +90,8 @@ class LoginPage extends React.Component {
           <Grid container>
             <Grid item xs={1} />
             <Grid container xs={10} alignItems="center">
-              <Grid item sm={12} md={8} alignItems="center">
-                <Grid container spacing={3} alignItems="center">
+              <Grid item sm={12} md={8}>
+                <Grid container spacing={3}>
                   <Grid item xs={3}>
                     <img
                       src={require("../../images/darkLogo.png")}

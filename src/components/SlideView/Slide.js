@@ -36,7 +36,6 @@ class Slide extends React.Component {
   render = () => {
     const content = this.props.content;
     if (content !== undefined) {
-      console.log(content);
       return this.createBootstrapSlide(content["index"], content["doc"]);
     } else {
       return null;

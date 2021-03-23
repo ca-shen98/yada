@@ -12,6 +12,7 @@ import {
 import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../../reducers/CurrentOpenFileState";
 import { setTagEditorOpenedAction } from "../../reducers/Steps";
 import "./TagEditor.css";
+import { FILE_TYPE } from "../../util/FileIdAndTypeUtils";
 
 export const TAG_HOLDERS = {
   AVAILABLE: "tags_available",
@@ -19,6 +20,92 @@ export const TAG_HOLDERS = {
 };
 
 export const SEPARATOR_PREFIX = "separator";
+
+// Helper functions to Deal with Tag Id and Separator shifting at the end of a drag action
+function removeTagIdWithSep(start, source_index, separators) {
+  // Remove tagId and adjust separators from source
+  const startTagIds = Array.from(start.tagIds);
+  // count number of separators prior to `source.index`
+  let offset = 0;
+  for (let i = 0; i < separators.length; ++i) {
+    if (separators[i] >= source_index - i) {
+      break;
+    }
+    ++offset;
+  }
+  const tagIdToRemove = source_index - offset;
+  // remove source tagId
+  startTagIds.splice(tagIdToRemove, 1);
+  // adjust separators
+  for (let i = offset; i < separators.length; ++i) {
+    --separators[i];
+  }
+  return {
+    ...start,
+    tagIds: startTagIds,
+    metadataInView: {
+      separators: separators,
+    },
+  };
+}
+function insertTagIdWithSep(
+  finish,
+  destination_index,
+  separators,
+  draggableId
+) {
+  // Insert tagId and adjust separators from source
+  const finishTagIds = Array.from(finish.tagIds);
+  // count number of separators prior to `destination_index`
+  let offset = 0;
+  for (let i = 0; i < separators.length; ++i) {
+    if (separators[i] >= destination_index - i) {
+      break;
+    }
+    ++offset;
+  }
+  const tagIdInsertion = destination_index - offset;
+  // insert destination tagId
+  finishTagIds.splice(tagIdInsertion, 0, draggableId);
+  // adjust separators
+  for (let i = offset; i < separators.length; ++i) {
+    ++separators[i];
+  }
+  return {
+    ...finish,
+    tagIds: finishTagIds,
+    metadataInView: {
+      separators: separators,
+    },
+  };
+}
+
+function insertTagId(finish, destination_index, draggableId) {
+  const finishTagIds = Array.from(finish.tagIds);
+  finishTagIds.splice(destination_index, 0, draggableId);
+  return {
+    ...finish,
+    tagIds: finishTagIds,
+  };
+}
+function removeTagId(start, source_index) {
+  const startTagIds = Array.from(start.tagIds);
+  startTagIds.splice(source_index, 1);
+  return {
+    ...start,
+    tagIds: startTagIds,
+  };
+}
+function createNewState(state, newStart, newFinish) {
+  return {
+    ...state,
+    columns: {
+      ...state.columns,
+      [newStart.id]: newStart,
+      [newFinish.id]: newFinish,
+    },
+  };
+}
 
 class TagEditor extends React.Component {
   constructor(props) {
@@ -82,10 +169,6 @@ class TagEditor extends React.Component {
     if (isSeparator) {
       // only allow separators to move in "Tags in View"
       if (destination.droppableId === TAG_HOLDERS.IN_VIEW) {
-        // don't allow separator to be moved to top
-        if (destination.index === 0) {
-          return;
-        }
         const column = this.state.columns[TAG_HOLDERS.IN_VIEW];
         const separators = Array.from(this.props.metadataInView["separators"]);
 
@@ -115,7 +198,6 @@ class TagEditor extends React.Component {
             0,
             destination.index - insertionPoint
           );
-          console.log(separators);
         }
 
         const newColumn = {
@@ -136,62 +218,117 @@ class TagEditor extends React.Component {
         this.setState(newState);
       }
     } else {
-      let newState = {};
-      // TODO: fix this for slides + tags in view
-      if (destination.droppableId === source.droppableId) {
-        // reorder within same list
-        const column = this.state.columns[source.droppableId];
-        const newTagIds = Array.from(column.tagIds);
-        newTagIds.splice(source.index, 1);
-        newTagIds.splice(destination.index, 0, draggableId);
-
-        const newColumn = {
-          ...column,
-          tagIds: newTagIds,
-        };
-
-        newState = {
-          ...this.state,
-          columns: {
-            ...this.state.columns,
-            [newColumn.id]: newColumn,
-          },
-        };
-
-        if (column.id === TAG_HOLDERS.IN_VIEW) {
-          // set dirty flag when tags are re-ordered within Tags In View Holder
+      if (
+        this.props.viewType === FILE_TYPE.SLIDE_VIEW &&
+        (source.droppableId === TAG_HOLDERS.IN_VIEW ||
+          destination.droppableId === TAG_HOLDERS.IN_VIEW)
+      ) {
+        // special handling for tags in slide view due to changing offsets with separators
+        // TODO: fix this for slides + tags in view
+        if (
+          source.droppableId === TAG_HOLDERS.IN_VIEW &&
+          destination.droppableId === TAG_HOLDERS.AVAILABLE
+        ) {
+          const start = this.state.columns[source.droppableId];
+          const finish = this.state.columns[destination.droppableId];
+          const newStart = removeTagIdWithSep(
+            start,
+            source.index,
+            Array.from(this.props.metadataInView["separators"])
+          );
+          const newFinish = insertTagId(finish, destination.index, draggableId);
+          const newState = createNewState(this.state, newStart, newFinish);
           this.props.dispatchSetSaveDirtyFlagAction();
+          this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
+          this.props.setMetadataInView(newStart.metadataInView);
+          this.setState(newState);
+        } else if (
+          source.droppableId === TAG_HOLDERS.AVAILABLE &&
+          destination.droppableId === TAG_HOLDERS.IN_VIEW
+        ) {
+          const start = this.state.columns[source.droppableId];
+          const finish = this.state.columns[destination.droppableId];
+          const newStart = removeTagId(start, source.index);
+          const newFinish = insertTagIdWithSep(
+            finish,
+            destination.index,
+            Array.from(this.props.metadataInView["separators"]),
+            draggableId
+          );
+          const newState = createNewState(this.state, newStart, newFinish);
+          this.props.dispatchSetSaveDirtyFlagAction();
+          this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
+          this.props.setMetadataInView(newFinish.metadataInView);
+          this.setState(newState);
+        } else if (
+          source.droppableId === TAG_HOLDERS.IN_VIEW &&
+          destination.droppableId === TAG_HOLDERS.IN_VIEW
+        ) {
+          let tags_in_view_column = this.state.columns[source.droppableId];
+          const separators = Array.from(
+            this.props.metadataInView["separators"]
+          );
+          tags_in_view_column = removeTagIdWithSep(
+            tags_in_view_column,
+            source.index,
+            separators
+          );
+          tags_in_view_column = insertTagIdWithSep(
+            tags_in_view_column,
+            destination.index,
+            tags_in_view_column.metadataInView.separators,
+            draggableId
+          );
+          const newState = {
+            ...this.state,
+            columns: {
+              ...this.state.columns,
+              [tags_in_view_column.id]: tags_in_view_column,
+            },
+          };
+          this.props.dispatchSetSaveDirtyFlagAction();
+          this.props.setTagsInView(tags_in_view_column.tagIds);
+          this.props.setMetadataInView(tags_in_view_column.metadataInView);
+          this.setState(newState);
         }
       } else {
-        // move to another list
-        const start = this.state.columns[source.droppableId];
-        const finish = this.state.columns[destination.droppableId];
-        const startTagIds = Array.from(start.tagIds);
-        startTagIds.splice(source.index, 1);
-        const newStart = {
-          ...start,
-          tagIds: startTagIds,
-        };
+        let newState;
+        if (destination.droppableId === source.droppableId) {
+          // reorder within same list
+          const column = this.state.columns[source.droppableId];
+          const newTagIds = Array.from(column.tagIds);
+          newTagIds.splice(source.index, 1);
+          newTagIds.splice(destination.index, 0, draggableId);
 
-        const finishTagIds = Array.from(finish.tagIds);
-        finishTagIds.splice(destination.index, 0, draggableId);
-        const newFinish = {
-          ...finish,
-          tagIds: finishTagIds,
-        };
+          const newColumn = {
+            ...column,
+            tagIds: newTagIds,
+          };
 
-        newState = {
-          ...this.state,
-          columns: {
-            ...this.state.columns,
-            [newStart.id]: newStart,
-            [newFinish.id]: newFinish,
-          },
-        };
-        this.props.dispatchSetSaveDirtyFlagAction();
+          newState = {
+            ...this.state,
+            columns: {
+              ...this.state.columns,
+              [newColumn.id]: newColumn,
+            },
+          };
+
+          if (column.id === TAG_HOLDERS.IN_VIEW) {
+            // set dirty flag when tags are re-ordered within Tags In View Holder
+            this.props.dispatchSetSaveDirtyFlagAction();
+          }
+        } else {
+          // move to another list
+          const start = this.state.columns[source.droppableId];
+          const finish = this.state.columns[destination.droppableId];
+          const newStart = removeTagId(start, source.index);
+          const newFinish = insertTagId(finish, destination.index);
+          newState = createNewState(this.state, newStart, newFinish);
+          this.props.dispatchSetSaveDirtyFlagAction();
+        }
+        this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
+        this.setState(newState);
       }
-      this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
-      this.setState(newState);
     }
   };
 
