@@ -2,6 +2,13 @@
   max-width: 50em;
   height: 28em;
   margin: 10px auto;
+  overflow-y: scroll;
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+
+.BootstrapSlide::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .Slide {

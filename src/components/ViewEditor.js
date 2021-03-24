@@ -85,7 +85,6 @@ class ViewEditor extends React.Component {
           });
           this.props.setTagsInView([]); // clear any tagsInView currently stored
           this.props.setMetadataInView({}); // clear any metadataInView currently stored
-          console.log(value);
           this.setState({
             sourceId: this.props.currentOpenFileId.sourceId,
             viewId: this.props.currentOpenFileId.viewId,
