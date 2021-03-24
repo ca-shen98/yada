@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import React from "react";
-import Grid from "@material-ui/core/Grid";
-import { Droppable, Draggable } from "react-beautiful-dnd";
+import { Tag } from "./Tag";
+import Separator from "./Separator";
+import { Droppable } from "react-beautiful-dnd";
 import { THEME } from "../../App";
 import { FILE_TYPE } from "../../util/FileIdAndTypeUtils";
 import { SEPARATOR_PREFIX, TAG_HOLDERS } from "./TagEditor";
@@ -11,95 +12,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { connect } from "react-redux";
 import { setMetadataInViewAction } from "../../reducers/SetTagsInView";
-
-class Tag extends React.Component {
-  render = () => {
-    const Container = styled.div`
-      border: 1px solid lightgrey;
-      border-radius: 10px;
-      padding: 8px;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      background-color: ${(props) =>
-        props.isDragging
-          ? THEME.palette.secondary.dark
-          : THEME.palette.secondary.light};
-    `;
-    const TagId = styled.h6`
-      word-break: break-word;
-    `;
-    const Content = styled.div`
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    `;
-    return (
-      <Draggable draggableId={this.props.tagId} index={this.props.index}>
-        {(provided, snapshot) => (
-          <Container
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            isDragging={snapshot.isDragging}
-          >
-            <Grid container spacing={1}>
-              <Grid item xs={4}>
-                <TagId>{this.props.tagInfo["tag_name"]}</TagId>
-              </Grid>
-              <Grid item xs={8}>
-                <Content>{this.props.tagInfo.preview}</Content>
-              </Grid>
-            </Grid>
-          </Container>
-        )}
-      </Draggable>
-    );
-  };
-}
-
-class Separator extends React.Component {
-  render = () => {
-    const Container = styled.div`
-      height: 30px;
-      padding: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    `;
-    return (
-      <Draggable draggableId={this.props.separatorId} index={this.props.index}>
-        {(provided, snapshot) => (
-          <Container
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            isDragging={snapshot.isDragging}
-          >
-            <hr
-              style={{
-                color: THEME.palette.primary.main,
-                backgroundColor: THEME.palette.primary.main,
-                height: 1,
-                width: "100%",
-                position: "absolute",
-              }}
-            />
-            <div
-              style={{
-                borderRadius: 5,
-                backgroundColor: THEME.palette.primary.main,
-                height: 10,
-                width: 50,
-                position: "absolute",
-              }}
-            />
-          </Container>
-        )}
-      </Draggable>
-    );
-  };
-}
+import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../../reducers/CurrentOpenFileState";
 
 class InnerTagList extends React.Component {
   // performance optimization to prevent unnecessary renders
@@ -140,7 +53,6 @@ class InnerTagList extends React.Component {
       this.props.columnId === TAG_HOLDERS.IN_VIEW &&
       this.props.viewType === FILE_TYPE.SLIDE_VIEW
     ) {
-      console.log(this.props.metadataInView["separators"]);
       let separatorIndex = 0;
       let separators = this.props.metadataInView["separators"] || [];
       while (
@@ -221,14 +133,9 @@ class DragDropColumn extends React.Component {
     const metadataInView = {
       separators: [...this.props.metadataInView["separators"]],
     };
-    if (
-      newSeparator > 0 &&
-      metadataInView["separators"][metadataInView["separators"].length - 1] !==
-        newSeparator
-    ) {
-      metadataInView["separators"].push(newSeparator);
-      this.props.setMetadataInView(metadataInView);
-    }
+    metadataInView["separators"].push(newSeparator);
+    this.props.setMetadataInView(metadataInView);
+    this.props.dispatchSetSaveDirtyFlagAction();
   }
 
   render = () => {
@@ -307,5 +214,7 @@ export default connect(
   (dispatch) => ({
     setMetadataInView: (metadataInView) =>
       dispatch(setMetadataInViewAction(metadataInView)),
+    dispatchSetSaveDirtyFlagAction: () =>
+      dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE }),
   })
 )(DragDropColumn);

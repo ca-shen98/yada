@@ -56,6 +56,7 @@ import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import CheckIcon from "@material-ui/icons/Check";
 import AddIcon from "@material-ui/icons/Add";
 import TextFieldsIcon from "@material-ui/icons/TextFields";
+import ViewDayIcon from "@material-ui/icons/ViewDay";
 import AmpStoriesIcon from "@material-ui/icons/AmpStories";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import ConfirmDialog from "./ConfirmDialog";
@@ -181,8 +182,7 @@ class FileListItem extends React.Component {
             ) : viewType === FILE_TYPE.TEXT_VIEW ? (
               <TextFieldsIcon color="primary" />
             ) : viewType === FILE_TYPE.SLIDE_VIEW ? (
-              // TODO: change icon
-              <TextFieldsIcon color="primary" />
+              <ViewDayIcon color="primary" />
             ) : null}
           </IconButton>
           <div
@@ -1093,8 +1093,7 @@ class Navigator extends React.Component {
               }}
             >
               <ListItemIcon>
-                {/*TODO: change icon*/}
-                <TextFieldsIcon fontSize="small" />
+                <ViewDayIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText primary="Slide View" />
             </MenuItem>

@@ -32,6 +32,7 @@
     "react-wavify": "^1.5.2",
     "redux": "^4.0.5",
     "rich-markdown-editor": "github:fydp-saac/rich-markdown-editor#build-1.0.0",
+    "styled-components": "^5.2.1",
     "uuid": "^8.3.1"
   },
   "devDependencies": {

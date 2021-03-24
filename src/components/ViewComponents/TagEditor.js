@@ -216,6 +216,7 @@ class TagEditor extends React.Component {
         };
         this.props.setMetadataInView(newColumn.metadataInView);
         this.setState(newState);
+        this.props.dispatchSetSaveDirtyFlagAction();
       }
     } else {
       if (
@@ -224,7 +225,6 @@ class TagEditor extends React.Component {
           destination.droppableId === TAG_HOLDERS.IN_VIEW)
       ) {
         // special handling for tags in slide view due to changing offsets with separators
-        // TODO: fix this for slides + tags in view
         if (
           source.droppableId === TAG_HOLDERS.IN_VIEW &&
           destination.droppableId === TAG_HOLDERS.AVAILABLE
@@ -238,10 +238,10 @@ class TagEditor extends React.Component {
           );
           const newFinish = insertTagId(finish, destination.index, draggableId);
           const newState = createNewState(this.state, newStart, newFinish);
-          this.props.dispatchSetSaveDirtyFlagAction();
           this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
           this.props.setMetadataInView(newStart.metadataInView);
           this.setState(newState);
+          this.props.dispatchSetSaveDirtyFlagAction();
         } else if (
           source.droppableId === TAG_HOLDERS.AVAILABLE &&
           destination.droppableId === TAG_HOLDERS.IN_VIEW
@@ -256,10 +256,10 @@ class TagEditor extends React.Component {
             draggableId
           );
           const newState = createNewState(this.state, newStart, newFinish);
-          this.props.dispatchSetSaveDirtyFlagAction();
           this.props.setTagsInView(newState.columns.tags_in_view.tagIds);
           this.props.setMetadataInView(newFinish.metadataInView);
           this.setState(newState);
+          this.props.dispatchSetSaveDirtyFlagAction();
         } else if (
           source.droppableId === TAG_HOLDERS.IN_VIEW &&
           destination.droppableId === TAG_HOLDERS.IN_VIEW
@@ -286,10 +286,10 @@ class TagEditor extends React.Component {
               [tags_in_view_column.id]: tags_in_view_column,
             },
           };
-          this.props.dispatchSetSaveDirtyFlagAction();
           this.props.setTagsInView(tags_in_view_column.tagIds);
           this.props.setMetadataInView(tags_in_view_column.metadataInView);
           this.setState(newState);
+          this.props.dispatchSetSaveDirtyFlagAction();
         }
       } else {
         let newState;

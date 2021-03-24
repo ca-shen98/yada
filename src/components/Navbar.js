@@ -9,6 +9,7 @@ import {
 } from "../reducers/BackendModeSignedInStatus";
 import DescriptionIcon from "@material-ui/icons/Description";
 import TextFieldsIcon from "@material-ui/icons/TextFields";
+import ViewDayIcon from "@material-ui/icons/ViewDay";
 import AmpStoriesIcon from "@material-ui/icons/AmpStories";
 import { BACKEND_MODE_SIGNED_IN_STATUS } from "../reducers/BackendModeSignedInStatus";
 import {
@@ -446,8 +447,7 @@ class Navbar extends React.Component {
                               <TextFieldsIcon color="secondary" />
                             ) : this.props.currentOpenFileId.viewType ===
                               FILE_TYPE.SLIDE_VIEW ? (
-                              // TODO: change icon
-                              <TextFieldsIcon color="secondary" />
+                              <ViewDayIcon color="secondary" />
                             ) : null}
                             {this.props.currentOpenFileName.viewName}
                           </div>

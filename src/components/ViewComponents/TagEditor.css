@@ -4,3 +4,21 @@
   align-items: center;
   text-align: right;
 }
+
+.delete_btn {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+  z-index: 1;
+  height: 20px;
+  width: 20px;
+  background-color: rgb(245, 245, 245) !important;
+  display: none !important;
+}
+
+.delete_btn:hover {
+  background-color: rgb(220, 220, 220) !important;
+}
+
+.separator_container:hover button {
+  display: inline-flex !important;
+}
