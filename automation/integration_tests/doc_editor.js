@@ -6,41 +6,50 @@ const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 puppeteer.use(StealthPlugin());
 
-// puppeteer usage as normal
-//TODO: change headless to TRUE after
-puppeteer.launch({ headless: true }).then(async (browser) => {
-  console.log("Running tests..");
-  const page = await browser.newPage();
+// Add adblocker plugin to block all ads and trackers (saves bandwidth)
+const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
+puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
-  // Load webpage
+// Read credentials
+var json = require("./credentials.json"); //(with path)
+
+// Launch browser
+const headless = false;
+puppeteer.launch({ headless: headless }).then(async (browser) => {
+  console.log("Running tests..");
+
+  // Sign in to Stack Overflow first for google auth to work
+  const page = await browser.newPage();
+  await page.goto(
+    "https://stackoverflow.com/users/login?ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2f"
+  );
+  await page.waitForTimeout(3000);
+
+  sign_in = (await page.$x("//button"))[0];
+  sign_in.click();
+  await page.waitForTimeout(1000);
+
+  await page.type('input[type="email"]', json["username"]);
+  await page.waitForTimeout(1000);
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(3000);
+
+  await page.type('input[type="password"]', json["password"]);
+  await page.waitForTimeout(1000);
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(10000);
+
+  // Sign into Yada
   await page.goto("https://yada.dev");
   await page.waitForTimeout(5000);
-
-  // Load signin popup
-  const newPagePromise = new Promise((x) =>
-    browser.once("targetcreated", (target) => x(target.page()))
-  );
   sign_in = (await page.$x('//span[text()="Sign in with Google"]/../..'))[0];
   sign_in.click();
-  const popup = await newPagePromise;
-  await popup.bringToFront();
+  sign_in.click();
+  sign_in.click();
+  await page.waitForTimeout(15000);
 
-  // Enter credentials
-  await popup.waitForTimeout(5000);
-  //   email = (await popup.$x('//input[@type="email"]'))[0];
-  //   email.type("yada.bugs@gmail.com");
-  await popup.type('input[type="email"]', "yada.bugs@gmail.com");
-  await popup.waitForTimeout(1000);
-
-  //   console.log((await popup.$x['//button']).length);
-  await popup.waitForSelector("#next");
-  await popup.click("#next");
-  //     next = (await popup.$x('//button'))[3];
-  //   next.click();
-  await popup.waitForTimeout(5000);
-
-  // Cleanup
-  await popup.screenshot({ path: "/Users/Akshay/Downloads/example.png" });
+  // Record screenshot of results
+  await page.screenshot({ path: "/Users/Akshay/Downloads/example.png" });
   await browser.close();
   console.log(`All done, check the results. ✨`);
 });
