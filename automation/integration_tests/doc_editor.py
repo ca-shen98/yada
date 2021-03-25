@@ -6,9 +6,10 @@ from selenium.webdriver.common.by import By
 from time import sleep
 
 browser = webdriver.Chrome()
+wait = WebDriverWait(browser, 10)
 def __goto_yada(browser):
     browser.get("http://yada.dev/")
-    sleep(5)
+    sleep(2)
 
 def update_token(browser, token):
     browser.add_cookie({"name": "access_token", "value": token})
@@ -18,13 +19,17 @@ def change_propagation(browser):
     __goto_yada(browser)
     sign_in = browser.find_element_by_xpath('//span[text()="Sign in with Google"]/../..')
     sign_in.click()
-    print(sign_in.text)
-    # browser.find_element_by_xpath('//input[@type="email"]').send_keys(username)
-    # browser.find_element_by_xpath('//*[@id="identifierNext"]').click()
-    # sleep(3)
-    # browser.find_element_by_xpath('//input[@type="password"]').send_keys(password)
-    # browser.find_element_by_xpath('//*[@id="passwordNext"]').click()
-    # sleep(2)
+
+    # wait.until(EC.element_to_be_clickable(save_progress_bar))
+    sleep(4)
+    browser.switch_to.window(browser.window_handles[1])
+    browser.find_element_by_xpath('//input[@type="email"]').send_keys("yada.bugs@gmail.com")
+    browser.find_element_by_xpath('//*[@id="identifierNext"]').click()
+    sleep(3)
+
+    browser.find_element_by_xpath('//input[@type="password"]').send_keys("00")
+    browser.find_element_by_xpath('//*[@id="passwordNext"]').click()
+    sleep(2)
     # browser.get('https://youtube.com'​)
     # sleep(5)
 
