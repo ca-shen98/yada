@@ -7,15 +7,16 @@ const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 puppeteer.use(StealthPlugin());
 
 // puppeteer usage as normal
-puppeteer.launch({ headless: true }).then(async (browser) => {
+//TODO: change headless to TRUE after
+puppeteer.launch({ headless: false }).then(async (browser) => {
   console.log("Running tests..");
   const page = await browser.newPage();
   await page.goto("https://yada.dev");
   await page.waitForTimeout(5000);
-  await page.screenshot({
-    path: "/Users/Akshay/Downloads/testresult.png",
-    fullPage: true,
-  });
+  sign_in = (await page.$x('//span[text()="Sign in with Google"]/../..'))[0];
+  sign_in.click();
+
+  await page.waitForTimeout(5000);
   await browser.close();
-  console.log(`All done, check the screenshot. ✨`);
+  console.log(`All done, check the results. ✨`);
 });
