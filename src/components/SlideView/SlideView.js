@@ -22,8 +22,10 @@ import {
   CLEAR_SAVE_IN_PROGRESS,
   SET_SAVE_IN_PROGRESS,
 } from "../../reducers/CurrentOpenFileState";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import PlayArrowIcon from "@material-ui/icons/PlayArrow";
+import Button from "@material-ui/core/Button";
+import { IconButton } from "@material-ui/core";
 
 class SlideView extends React.Component {
   constructor(props) {
@@ -100,7 +102,7 @@ class SlideView extends React.Component {
     let slideIndex = 0;
     let tagsIndex = 0;
     let separatorIndex = 0;
-    const separators = this.props.metadataInView["separators"];
+    const separators = this.props.metadataInView["separators"] || [];
     while (tagsIndex < this.props.tagsInView.length) {
       const splitIndex =
         separatorIndex < separators.length
@@ -144,24 +146,27 @@ class SlideView extends React.Component {
       const slides = this.generateSlides();
       return (
         <Container>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={this.state.presentationSwitch}
-                onChange={() => {
-                  this.setState({
-                    presentationSwitch: !this.state.presentationSwitch,
-                  });
-                }}
-                name="checkedB"
-                color="primary"
-                className="presentationModeSwitch"
-              />
-            }
-            label="Presentation Mode"
-          />
+          <Button
+            variant="contained"
+            color="primary"
+            endIcon={<PlayArrowIcon />}
+            onClick={() => this.setState({ presentationSwitch: true })}
+          >
+            Play
+          </Button>
           {this.state.presentationSwitch ? (
-            <PresentationView slides={slides} />
+            <div>
+              <IconButton
+                onClick={() => this.setState({ presentationSwitch: false })}
+                className="exit_presentation"
+                color="secondary"
+                aria-label="exit presentation"
+                component="span"
+              >
+                <ExitToAppIcon />
+              </IconButton>
+              <PresentationView slides={slides} />
+            </div>
           ) : (
             <div>
               <TagEditor

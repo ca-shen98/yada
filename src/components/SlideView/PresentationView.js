@@ -8,34 +8,38 @@ class PresentationView extends React.Component {
     slides: this.props.slides,
   };
 
-  render = () => (
-    <div>
-      <Carousel
-        navButtonsAlwaysVisible={true}
-        indicators={false}
-        animation="slide"
-        autoPlay={false}
-        interval={10000}
-        index={this.state.startIndex}
-        next={() => {
-          this.setState({
-            currentNumber:
-              (this.state.currentNumber + 1) % this.state.slides.length,
-          });
-        }}
-        prev={() => {
-          this.setState({
-            currentNumber:
-              (this.state.currentNumber - 1) % this.state.slides.length,
-          });
-        }}
-      >
-        {this.state.slides.map((slide, _) => (
-          <div>{slide}</div>
-        ))}
-      </Carousel>
-    </div>
-  );
+  render = () => {
+    return (
+      <div className="overlay">
+        <div className="presentation">
+          <Carousel
+            navButtonsAlwaysVisible={true}
+            indicators={false}
+            animation="slide"
+            autoPlay={false}
+            interval={10000}
+            index={this.state.startIndex}
+            next={() => {
+              this.setState({
+                currentNumber:
+                  (this.state.currentNumber + 1) % this.state.slides.length,
+              });
+            }}
+            prev={() => {
+              this.setState({
+                currentNumber:
+                  (this.state.currentNumber - 1) % this.state.slides.length,
+              });
+            }}
+          >
+            {this.state.slides.map((slide, _) => (
+              <div>{slide}</div>
+            ))}
+          </Carousel>
+        </div>
+      </div>
+    );
+  };
 }
 
 export default PresentationView;

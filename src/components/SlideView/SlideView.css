@@ -19,3 +19,45 @@
 .Slide div {
   background: transparent;
 }
+
+.overlay {
+  background-color: black;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding-top: 64px;
+}
+
+.presentation {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding-top: 64px;
+  width: 100%;
+}
+
+.presentation .BootstrapSlide {
+  max-width: 85vw;
+  height: 80vh;
+  width: 142vh;
+  margin: 10px auto;
+  overflow-y: scroll;
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+
+.exit_presentation {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  margin-top: 74px !important;
+  margin-right: 10px !important;
+  z-index: 2;
+}
+
+.exit_presentation:hover {
+  opacity: 0.8;
+}
