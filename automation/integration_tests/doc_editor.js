@@ -24,7 +24,6 @@ puppeteer.launch({ headless: true }).then(async (browser) => {
   sign_in.click();
   const popup = await newPagePromise;
   await popup.bringToFront();
-  console.log(popup.url());
 
   // Enter credentials
   await popup.waitForTimeout(5000);
@@ -33,9 +32,10 @@ puppeteer.launch({ headless: true }).then(async (browser) => {
   await popup.type('input[type="email"]', "yada.bugs@gmail.com");
   await popup.waitForTimeout(1000);
 
-  //   await popup.waitForSelector("#identifierNext");
-  //   await popup.click("#identifierNext");
-  //   next = (await popup.$x('//button'))[3];
+  //   console.log((await popup.$x['//button']).length);
+  await popup.waitForSelector("#next");
+  await popup.click("#next");
+  //     next = (await popup.$x('//button'))[3];
   //   next.click();
   await popup.waitForTimeout(5000);
 
