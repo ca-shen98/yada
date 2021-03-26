@@ -52,7 +52,6 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
   sign_in.click();
   await page.waitForTimeout(8000);
 
-  //TODO: test doc flow
   // Create New Document
   (await page.$x('//button[@id="new_document_button"]'))[0].click();
   await page.waitForTimeout(1000);
@@ -80,10 +79,8 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
   await page.keyboard.press("Enter");
   await page.waitForTimeout(500);
 
-  // Save (confirm success)
+  // Save and Confirm Success
   (await page.$('button[name="save_btn"]')).click();
-
-  // Confirm Success
   await page.waitForXPath('//div[contains(@class, "MuiAlert-message")]');
   const successToast = (
     await page.$x('//div[contains(@class, "MuiAlert-message")]')
@@ -99,10 +96,20 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
   );
 
   // TODO: Refresh page (check if tag still there)
+
   // Remove Document
+  const fileListButtons = await page.$x(
+    '//button[contains(@class, "fileList-iconButton")]'
+  );
+  fileListButtons[fileListButtons.length - 1].click();
+  await page.waitForTimeout(250);
+  const listButtons = await page.$x(
+    '//li[contains(@class, "MuiListItem-button")]'
+  );
+  listButtons[listButtons.length - 1 - 4].click(); // delete button for created doc
 
   // Record screenshot of results
-  await page.waitForTimeout(10000);
+  await page.waitForTimeout(2000);
   await page.screenshot({ path: "/Users/Akshay/Downloads/example.png" });
   await page.waitForTimeout(2000);
   await browser.close();
