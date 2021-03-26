@@ -1,6 +1,6 @@
-// puppeteer-extra is a drop-in replacement for puppeteer,
-// it augments the installed puppeteer with plugin functionality
+// Dependencies
 const puppeteer = require("puppeteer-extra");
+const assert = require("assert");
 
 // add stealth plugin and use defaults (all evasion techniques)
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
@@ -73,7 +73,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
   await page.waitForTimeout(500);
 
   // Add Tag
-  (await page.$x('//input[id="add_tag_input"]'))[0].focus();
+  (await page.$x('//input[@id="add_tag_input"]'))[0].focus();
   await page.waitForTimeout(500);
   await page.keyboard.type("Tag_for_line_2");
   await page.waitForTimeout(500);
@@ -81,13 +81,30 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
   await page.waitForTimeout(500);
 
   // Save (confirm success)
-  (await page.$x('button[name="save_btn"]'))[0].click();
-  await page.waitForTimeout(5000);
-  // Refresh page (check if tag still there)
+  (await page.$('button[name="save_btn"]')).click();
+
+  // Confirm Success
+  await page.waitForXPath('//div[contains(@class, "MuiAlert-message")]');
+  const successToast = (
+    await page.$x('//div[contains(@class, "MuiAlert-message")]')
+  )[0];
+  const successMsg = await successToast.evaluate((el) => el.textContent);
+  const expectedMsg = "Saved source file";
+  assert(
+    successMsg == expectedMsg,
+    "Success message differs. Received: " +
+      successMsg +
+      ", but wanted " +
+      expectedMsg
+  );
+
+  // TODO: Refresh page (check if tag still there)
   // Remove Document
 
   // Record screenshot of results
+  await page.waitForTimeout(10000);
   await page.screenshot({ path: "/Users/Akshay/Downloads/example.png" });
+  await page.waitForTimeout(2000);
   await browser.close();
   console.log(`All done, check the results. ✨`);
 });
