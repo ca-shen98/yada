@@ -32,8 +32,7 @@ class PermissionEditor extends React.Component {
     super(props);
 
     this.state = {
-      permissions: [],
-      permissionLevels: {},
+      currentPermissions: [],
       newUserPermissions: [],
     };
   }
@@ -42,11 +41,9 @@ class PermissionEditor extends React.Component {
     var owners = [];
     var readers = [];
     var writers = [];
-    var permissionLevels = {};
     for (var email in filePermissions) {
       var permission = filePermissions[email]["permission"];
       var name = filePermissions[email]["name"];
-      permissionLevels[email] = permission;
       if (permission === PERMISSION_TYPE.OWN) {
         owners.push({ email: email, name: name, permission: permission });
       } else if (permission === PERMISSION_TYPE.WRITE) {
@@ -56,8 +53,7 @@ class PermissionEditor extends React.Component {
       }
     }
     this.setState({
-      permissions: owners.concat(writers).concat(readers),
-      permissionLevels: permissionLevels,
+      currentPermissions: owners.concat(writers).concat(readers),
       newUserPermissions: [],
     });
   };
@@ -66,15 +62,14 @@ class PermissionEditor extends React.Component {
     this.updateFilePermissions(this.props.filePermissions);
   };
   componentDidUpdate = (prevProps) => {
-    console.log(this.state.permissionLevels);
-    if (prevProps.filePermissions != this.props.filePermissions) {
+    if (prevProps.filePermissions !== this.props.filePermissions) {
       this.updateFilePermissions(this.props.filePermissions);
     }
   };
-  handlePermissionChange = (email, event) => {
-    var currentPermissionLevels = this.state.permissionLevels;
-    currentPermissionLevels[email] = event.target.value;
-    this.setState({ permissionLevels: currentPermissionLevels });
+  handlePermissionChange = (index, event) => {
+    var currentPermissions = this.state.currentPermissions;
+    currentPermissions[index]["permission"] = event.target.value;
+    this.setState({ currentPermissions: currentPermissions });
   };
 
   handleNewUserPermissionChange = (index, event) => {
@@ -95,20 +90,11 @@ class PermissionEditor extends React.Component {
     this.setState({ newUserPermissions: currentNewUsers });
   };
 
-  removeExistingUser = (email) => {
-    var currentPermissions = this.state.permissions;
-    for (let i = 0; i < currentPermissions.length; i++) {
-      if (currentPermissions[i]["email"] == email) {
-        currentPermissions.splice(i, 1);
-        break;
-      }
-    }
-    var currentPermissionLevels = this.state.permissionLevels;
-    delete currentPermissionLevels[email];
-
+  removeExistingUser = (index) => {
+    var currentPermissions = this.state.currentPermissions;
+    currentPermissions.splice(index, 1);
     this.setState({
-      permissions: currentPermissions,
-      permissionLevels: currentPermissionLevels,
+      currentPermissions: currentPermissions,
     });
   };
 
@@ -121,10 +107,22 @@ class PermissionEditor extends React.Component {
   };
   savePermissions = () => {
     var ownerPresent = false;
-    for (var email in this.state.permissionLevels) {
-      if (this.state.permissionLevels[email] === PERMISSION_TYPE.OWN) {
+    for (let i = 0; i < this.state.currentPermissions.length; i++) {
+      if (
+        this.state.currentPermissions[i]["permission"] === PERMISSION_TYPE.OWN
+      ) {
         ownerPresent = true;
         break;
+      }
+    }
+    if (!ownerPresent) {
+      for (let i = 0; i < this.state.newUserPermissions.length; i++) {
+        if (
+          this.state.newUserPermissions[i]["permission"] === PERMISSION_TYPE.OWN
+        ) {
+          ownerPresent = true;
+          break;
+        }
       }
     }
     if (!ownerPresent) {
@@ -135,10 +133,11 @@ class PermissionEditor extends React.Component {
       });
       return;
     }
-    console.log(this.state.permissionLevels);
     var currentPermissionLevels = {};
-    for (let email in this.state.permissionLevels) {
-      currentPermissionLevels[email] = this.state.permissionLevels[email];
+    for (let i = 0; i < this.state.currentPermissions.length; i++) {
+      currentPermissionLevels[
+        this.state.currentPermissions[i]["email"]
+      ] = this.state.currentPermissions[i]["permission"];
     }
     for (let i = 0; i < this.state.newUserPermissions.length; i++) {
       if (this.state.newUserPermissions[i]["email"] === "") {
@@ -175,7 +174,7 @@ class PermissionEditor extends React.Component {
       },
       (failure) => {
         var errorMessage = "";
-        if (failure.message == 404) {
+        if (failure.message === 404) {
           errorMessage =
             "Email Not Found. Please ensure the user has an account with Yada";
         } else {
@@ -194,8 +193,9 @@ class PermissionEditor extends React.Component {
     return (
       <div className="permissions_popover">
         <List>
-          {this.state.permissions != null && this.state.permissions.length > 0
-            ? this.state.permissions.map((permission, index) => (
+          {this.state.currentPermissions != null &&
+          this.state.currentPermissions.length > 0
+            ? this.state.currentPermissions.map((permission, index) => (
                 <div>
                   <ListItem alignItem="flex-start">
                     <ListItemAvatar>
@@ -222,13 +222,12 @@ class PermissionEditor extends React.Component {
                             <InputLabel>Role</InputLabel>
                             <Select
                               value={
-                                this.state.permissionLevels[permission["email"]]
+                                this.state.currentPermissions[index][
+                                  "permission"
+                                ]
                               }
                               onChange={(event) =>
-                                this.handlePermissionChange(
-                                  permission["email"],
-                                  event
-                                )
+                                this.handlePermissionChange(index, event)
                               }
                               label="Permission"
                             >
@@ -249,9 +248,7 @@ class PermissionEditor extends React.Component {
                           <IconButton
                             color="default"
                             className="close_button"
-                            onClick={() =>
-                              this.removeExistingUser(permission["email"])
-                            }
+                            onClick={() => this.removeExistingUser(index)}
                           >
                             <CancelIcon />
                           </IconButton>
@@ -321,7 +318,7 @@ class PermissionEditor extends React.Component {
         </List>
         <Grid container className="button_group">
           <Grid item xs={1} />
-          <Grid item xs={3}>
+          <Grid item xs={3} style={{ textAlign: "center" }}>
             <Button
               variant="outlined"
               color="primary"
@@ -332,7 +329,7 @@ class PermissionEditor extends React.Component {
             </Button>
           </Grid>
           <Grid item xs={4} />
-          <Grid item xs={3}>
+          <Grid item xs={3} style={{ textAlign: "center" }}>
             <Button
               variant="outlined"
               color="primary"
@@ -375,9 +372,11 @@ class Permissions extends React.Component {
                   <Tooltip title={this.props.filePermissions[email]["name"]}>
                     <Avatar
                       style={
-                        index % 2 === 0
+                        index % 3 === 0
                           ? { backgroundColor: "#FF6E40" }
-                          : { backgroundColor: "#FF9A8D" }
+                          : index % 3 === 1
+                          ? { backgroundColor: "#FF9A8D" }
+                          : { backgroundColor: "#FFC13B" }
                       }
                     >
                       {this.props.filePermissions[email]["name"]
