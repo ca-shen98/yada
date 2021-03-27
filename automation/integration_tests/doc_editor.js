@@ -35,17 +35,14 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
 
   const loginEmail = await page.waitForSelector('input[type="email"]');
   await loginEmail.type(json["username"], { delay: 50 });
-  //   await page.type('input[type="email"]', json["username"]);
-  //   await page.waitForTimeout(500);
   await page.keyboard.press("Enter");
 
   await page.waitForTimeout(1000);
 
   const loginPass = await page.waitForSelector('input[type="password"]');
   await loginPass.type(json["password"], { delay: 50 });
-  //   await page.type('input[type="password"]', json["password"]);
-  //   await page.waitForTimeout(500);
   await page.keyboard.press("Enter");
+
   await page.waitForTimeout(10000); //TODO replace with a waitFor on url change?
 
   //TODO: sometimes stackoverflow gives us a captcha then asks us to log in
