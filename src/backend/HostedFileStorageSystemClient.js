@@ -258,15 +258,20 @@ export default {
         SERVER_BASE_URL + `document_permissions`,
         {
           method: "POST",
-          body: JSON.stringify({ docID: sourceId, permissions: permissions }),
-          headers: new Headers({ "Set-Cookie": `token=${token}` }),
+          body: JSON.stringify({
+            body: { docID: sourceId, permissions: permissions },
+          }),
+          headers: new Headers({
+            "Content-Type": "application/json",
+            "Set-Cookie": `token=${token}`,
+          }),
         }
       );
+      console.log(response.status);
       if (response.ok) {
-        return true;
+        return await response.json();
       } else {
-        console.log(response.json());
-        return false;
+        return Promise.reject(new Error(response.status));
       }
     } catch (e) {
       console.log(e);
