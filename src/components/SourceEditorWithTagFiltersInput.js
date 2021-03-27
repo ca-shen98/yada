@@ -106,7 +106,6 @@ class SourceEditorWithTagFiltersInput extends React.Component {
           handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
         } else {
           this.props.dispatchSetFileOpenedAction(true);
-          console.log(value);
           this.props.setFilePermissions(value["permissions"]);
           this.setState({
             fileIdKeyStr,
