@@ -48,7 +48,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
   //TODO: sometimes stackoverflow gives us a captcha then asks us to log in
   //      again - i think there's a puppeteer plugin for captchas.
 
-  // Sign into Yada
+  // Sign into Yada (very finnicky lol)
   await page.goto(yada_url);
   sign_in = await page.waitForXPath(
     '//span[text()="Sign in with Google"]/../..'
@@ -64,7 +64,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
   await page.waitForTimeout(1500);
 
   // Rename Document
-  const fileNameSuffix = "++";
+  const fileNameSuffix = "++++";
   const fileName = "Untitled" + fileNameSuffix;
   console.log("Renaming doc to: " + fileName);
   await page.keyboard.type(fileNameSuffix, { delay: 200 });
@@ -152,22 +152,19 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
   );
 
   // Remove Document
-  //TODO: need to find exact document. Maybe we should make a third test account for this.
-  //   console.log("Delete test doc");
-  //   const fileListButtons = await page.$x(
-  //     '//button[contains(@class, "fileList-iconButton")]'
-  //   );
-  //   fileListButtons[fileListButtons.length - 1].click();
-  //   await page.waitForTimeout(250);
-  //   const listButtons = await page.$x(
-  //     '//li[contains(@class, "MuiListItem-button")]'
-  //   );
-  //   listButtons[listButtons.length - 1 - 4].click(); // delete button for created doc
+  console.log("Delete test doc");
+  const fileListButtons = await page.$x(
+    '//button[contains(@class, "fileList-iconButton")]'
+  );
+  fileListButtons[fileListButtons.length - 1].click();
+  await page.waitForTimeout(250);
+  const listButtons = await page.$x(
+    '//li[contains(@class, "MuiListItem-button")]'
+  );
+  await listButtons[listButtons.length - 1 - 4].click(); // delete button for created doc
 
   // Record screenshot of results
-  await page.waitForTimeout(2000);
   await page.screenshot({ path: "/Users/Akshay/Downloads/example.png" });
-  await page.waitForTimeout(2000);
   await browser.close();
   console.log(`All done, check the results. ✨`);
 });
