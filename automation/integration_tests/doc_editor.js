@@ -14,7 +14,11 @@ puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 var json = require("./credentials.json"); //(with path)
 
 // Launch browser
+const dev = true;
+const yada_url = dev ? "http://localhost:3000" : "https://yada.dev";
 const headless = false;
+
+//TODO: add timeout on total thing
 puppeteer.launch({ headless: headless }).then(async (browser) => {
   console.log("Running tests..");
 
@@ -25,66 +29,79 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
   );
   await page.waitForTimeout(3000);
 
-  sign_in = (await page.$x("//button"))[0];
-  sign_in.click();
-  await page.waitForTimeout(1000);
-
-  await page.type('input[type="email"]', json["username"]);
-  await page.waitForTimeout(1000);
-  await page.keyboard.press("Enter");
+  sign_in = await page.waitForXPath("//button");
+  await sign_in.click();
   await page.waitForTimeout(3000);
 
-  await page.type('input[type="password"]', json["password"]);
-  await page.waitForTimeout(1000);
+  const loginEmail = await page.waitForSelector('input[type="email"]');
+  await loginEmail.type(json["username"], { delay: 50 });
+  //   await page.type('input[type="email"]', json["username"]);
+  //   await page.waitForTimeout(500);
   await page.keyboard.press("Enter");
-  await page.waitForTimeout(10000);
+
+  await page.waitForTimeout(1000);
+
+  const loginPass = await page.waitForSelector('input[type="password"]');
+  await loginPass.type(json["password"], { delay: 50 });
+  //   await page.type('input[type="password"]', json["password"]);
+  //   await page.waitForTimeout(500);
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(10000); //TODO replace with a waitFor on url change?
 
   //TODO: sometimes stackoverflow gives us a captcha then asks us to log in
   //      again - i think there's a puppeteer plugin for captchas.
 
   // Sign into Yada
-  await page.goto("https://yada.dev");
-  await page.waitForTimeout(5000);
-  sign_in = (await page.$x('//span[text()="Sign in with Google"]/../..'))[0];
+  await page.goto(yada_url);
+  sign_in = await page.waitForXPath(
+    '//span[text()="Sign in with Google"]/../..'
+  );
   sign_in.click();
   sign_in.click();
   await page.waitForTimeout(2000);
   sign_in.click();
-  await page.waitForTimeout(8000);
 
   // Create New Document
-  (await page.$x('//button[@id="new_document_button"]'))[0].click();
-  await page.waitForTimeout(1000);
+  console.log("Creating test doc");
+  (await page.waitForXPath('//button[@id="new_document_button"]')).click();
+  await page.waitForTimeout(1500);
 
   // Rename Document
-  await page.keyboard.type("_new_name");
+  const fileNameSuffix = "++";
+  const fileName = "Untitled" + fileNameSuffix;
+  console.log("Renaming doc to: " + fileName);
+  await page.keyboard.type(fileNameSuffix, { delay: 200 });
+  await page.waitForTimeout(1000);
   await page.keyboard.press("Enter");
-  await page.waitForTimeout(2000);
 
   // Add Text
-  (await page.$x('//div[contains(@class, "ProseMirror")]'))[0].focus();
+  console.log("Inserting some text into the doc body");
+  (await page.waitForXPath('//div[contains(@class, "ProseMirror")]')).focus();
   await page.waitForTimeout(500);
-  await page.keyboard.type("Type line 1");
+  await page.keyboard.type("Type line 1", { delay: 100 });
   await page.waitForTimeout(500);
   await page.keyboard.press("Enter");
   await page.waitForTimeout(250);
-  await page.keyboard.type("Type line 2");
+  const line2Text = "Type line 2";
+  await page.keyboard.type(line2Text, { delay: 100 });
   await page.waitForTimeout(500);
 
   // Add Tag
-  (await page.$x('//input[@id="add_tag_input"]'))[0].focus();
-  await page.waitForTimeout(500);
-  await page.keyboard.type("Tag_for_line_2");
+  const tag = "Tag_for_line_2";
+  console.log("Add a tag for line 2: " + tag);
+  (await page.waitForXPath('//input[@id="add_tag_input"]')).focus();
+  await page.waitForTimeout(2500);
+  await page.keyboard.type(tag);
   await page.waitForTimeout(500);
   await page.keyboard.press("Enter");
   await page.waitForTimeout(500);
 
   // Save and Confirm Success
+  console.log("Save doc and confirm success snackbar appears");
   (await page.$('button[name="save_btn"]')).click();
-  await page.waitForXPath('//div[contains(@class, "MuiAlert-message")]');
-  const successToast = (
-    await page.$x('//div[contains(@class, "MuiAlert-message")]')
-  )[0];
+  const successToast = await page.waitForXPath(
+    '//div[contains(@class, "MuiAlert-message")]'
+  );
   const successMsg = await successToast.evaluate((el) => el.textContent);
   const expectedMsg = "Saved source file";
   assert(
@@ -95,18 +112,60 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
       expectedMsg
   );
 
-  // TODO: Refresh page (check if tag still there)
+  // Refresh page and verify content still there
+  console.log("Refresh page to verify persistence of content");
+  await page.goto(yada_url);
+  await page.waitForXPath('//div[contains(@class, "ProseMirror")]');
+
+  //TODO: check file name
+  console.log("Verify file name is: " + fileName);
+  const fileNameEl = await page.waitForXPath('//div[@id="navbar-file-name"]');
+  const pulledFileName = await fileNameEl.evaluate((el) => el.textContent);
+  //TODO: uncomment below once the UI bug (where the file name isn't correct) is fixed!
+  //   assert(
+  //     pulledFileName == fileName,
+  //     "File name differs. Got: " +
+  //     pulledFileName +
+  //       ", but expected " +
+  //       fileName
+  //   );
+
+  // Check line 2 content
+  console.log("Verify line 2 has content: " + line2Text);
+  const line2 = (await page.$x('//div[contains(@class, "ProseMirror")]//p'))[1];
+  const pulledLine2Text = await line2.evaluate((el) => el.textContent);
+  assert(
+    pulledLine2Text == line2Text,
+    "Doc content differs. Line 2 reads: " +
+      pulledLine2Text +
+      ", but expected " +
+      line2Text
+  );
+
+  // Check tag for line 2
+  console.log("Verify line 2 is tagged with: " + tag);
+  await line2.click();
+  const tagEl = await page.waitForXPath(
+    '//span[contains(@class, "MuiChip-label")]'
+  );
+  const tagName = await tagEl.evaluate((el) => el.textContent);
+  assert(
+    tagName == tag,
+    "Tag differs. See: " + tagName + ", but expected " + tag
+  );
 
   // Remove Document
-  const fileListButtons = await page.$x(
-    '//button[contains(@class, "fileList-iconButton")]'
-  );
-  fileListButtons[fileListButtons.length - 1].click();
-  await page.waitForTimeout(250);
-  const listButtons = await page.$x(
-    '//li[contains(@class, "MuiListItem-button")]'
-  );
-  listButtons[listButtons.length - 1 - 4].click(); // delete button for created doc
+  //TODO: need to find exact document. Maybe we should make a third test account for this.
+  //   console.log("Delete test doc");
+  //   const fileListButtons = await page.$x(
+  //     '//button[contains(@class, "fileList-iconButton")]'
+  //   );
+  //   fileListButtons[fileListButtons.length - 1].click();
+  //   await page.waitForTimeout(250);
+  //   const listButtons = await page.$x(
+  //     '//li[contains(@class, "MuiListItem-button")]'
+  //   );
+  //   listButtons[listButtons.length - 1 - 4].click(); // delete button for created doc
 
   // Record screenshot of results
   await page.waitForTimeout(2000);
