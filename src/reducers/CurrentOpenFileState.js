@@ -122,3 +122,15 @@ export const selectNodeReducer = (state = null, action) =>
     : action.type === SET_SELECT_NODE_ACTION_TYPE
     ? null
     : state;
+
+const SET_FILE_PERMISSIONS_TYPE = "setFilePermissions/set";
+export const setFilePermissionsAction = (filePermissions) => ({
+  type: SET_FILE_PERMISSIONS_TYPE,
+  filePermissions,
+});
+
+export const setFilePermissionsReducer = (state = null, action) =>
+  action.type !== SET_FILE_PERMISSIONS_TYPE ||
+  !action.hasOwnProperty("filePermissions")
+    ? state
+    : action.filePermissions;

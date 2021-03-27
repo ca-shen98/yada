@@ -46,6 +46,9 @@ const clientInterface = {
   doRenameSource: () => {
     throw new Error("not implemented");
   },
+  doSavePermissions: () => {
+    throw new Error("not implemented");
+  },
 };
 
 export default Object.keys(clientInterface).reduce((partial, key) => {
