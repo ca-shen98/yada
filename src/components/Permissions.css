@@ -1,9 +1,9 @@
 .permissions_popover {
-  width: 400px;
+  width: 500px;
 }
 
 .secondary_action {
-  width: 100px;
+  width: 200px;
 }
 
 .custom_form_control {
@@ -13,4 +13,8 @@
 .button_group {
   padding-top: 20px;
   padding-bottom: 20px;
+}
+
+.close_button {
+  opacity: 0.8;
 }
