@@ -25,6 +25,7 @@ import Popover from "@material-ui/core/Popover";
 import CheckIcon from "@material-ui/icons/Check";
 import Input from "@material-ui/core/Input";
 import Chip from "@material-ui/core/Chip";
+import Permissions from "./Permissions";
 
 const RENAME_TAG_FIELD = "rename_field";
 
@@ -218,6 +219,7 @@ class TagMenu extends React.Component {
 
   render = () => (
     <div className="MarginPane">
+      <Permissions />
       <div id="tag_menu_wrapper">
         <div className="InputRow" id="add_tag_input_row">
           <OutlinedInput
@@ -375,6 +377,7 @@ export default connect(
     selectNode: state.selectNode,
     saveDirtyFlag: state.saveDirtyFlag,
     currentOpenFileId: state.currentOpenFileId,
+    filePermissions: state.filePermissions,
   }),
   (dispatch) => ({
     dispatchSetSaveDirtyFlagAction: () =>
