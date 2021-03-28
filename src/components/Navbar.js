@@ -17,6 +17,7 @@ import {
   checkSourceFileId,
   checkViewFileId,
   NO_OPEN_FILE_ID,
+  PERMISSION_TYPE,
 } from "../util/FileIdAndTypeUtils";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
@@ -584,47 +585,49 @@ class Navbar extends React.Component {
                         }
                       }}
                     />
-                    <div style={{ float: "right" }}>
-                      {this.state.modifyingTagFilters ? null : this.state
-                          .currentTagFiltersStr ===
-                        "" ? null : currentTagFiltersSaved ? (
-                        <IconButton
-                          title="Unpersist Filter"
-                          style={{
-                            padding: "0px",
-                            paddingRight: "10px",
-                            paddingTop: "5px",
-                          }}
-                        >
-                          <RemoveCircleIcon
-                            color="primary"
-                            onClick={() => {
-                              document.getElementById(
-                                TAG_FILTERS_INPUT_ID
-                              ).value = "";
-                              this.handleUnpersistCurrentTagFilters();
-                              this.handleApplyTagFilters();
+                    {this.props.userPermission !== PERMISSION_TYPE.READ ? (
+                      <div style={{ float: "right" }}>
+                        {this.state.modifyingTagFilters ? null : this.state
+                            .currentTagFiltersStr ===
+                          "" ? null : currentTagFiltersSaved ? (
+                          <IconButton
+                            title="Unpersist Filter"
+                            style={{
+                              padding: "0px",
+                              paddingRight: "10px",
+                              paddingTop: "5px",
                             }}
-                          />
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          title="Persist Filter"
-                          style={{
-                            padding: "0px",
-                            paddingRight: "10px",
-                            paddingTop: "5px",
-                          }}
-                        >
-                          <SaveIcon
-                            color="primary"
-                            onClick={() => {
-                              this.handlePersistNewSavedTagFilters();
+                          >
+                            <RemoveCircleIcon
+                              color="primary"
+                              onClick={() => {
+                                document.getElementById(
+                                  TAG_FILTERS_INPUT_ID
+                                ).value = "";
+                                this.handleUnpersistCurrentTagFilters();
+                                this.handleApplyTagFilters();
+                              }}
+                            />
+                          </IconButton>
+                        ) : (
+                          <IconButton
+                            title="Persist Filter"
+                            style={{
+                              padding: "0px",
+                              paddingRight: "10px",
+                              paddingTop: "5px",
                             }}
-                          />
-                        </IconButton>
-                      )}
-                    </div>
+                          >
+                            <SaveIcon
+                              color="primary"
+                              onClick={() => {
+                                this.handlePersistNewSavedTagFilters();
+                              }}
+                            />
+                          </IconButton>
+                        )}
+                      </div>
+                    ) : null}
                   </div>
                 </Grid>
               ) : null}
@@ -712,6 +715,7 @@ export default connect(
     tagsInView: state.tagsInView,
     saveDirtyFlag: state.saveDirtyFlag,
     saveInProgress: state.saveInProgress,
+    userPermission: state.userPermission,
   }),
   (dispatch) => ({
     dispatchSetBackendModeSignedInStatusAction: (mode) =>

@@ -11,6 +11,14 @@ class StudyView extends React.Component {
     cards: this.props.cards,
   };
 
+  componentDidUpdate = (prevProps) => {
+    if (this.props.cards != prevProps.cards) {
+      this.setState({
+        cards: this.props.cards,
+      });
+    }
+  };
+
   shuffleCards = () => {
     let shuffledCards = this.state.cards;
     let i = shuffledCards.length - 1;
@@ -24,56 +32,59 @@ class StudyView extends React.Component {
     this.setState({ cards: shuffledCards, startIndex: 3 });
   };
 
-  render = () => (
-    <div>
-      <Carousel
-        navButtonsAlwaysVisible={true}
-        indicators={false}
-        animation="slide"
-        autoPlay={false}
-        interval={10000}
-        index={this.state.startIndex}
-        next={() => {
-          this.setState({
-            currentNumber:
-              (this.state.currentNumber + 1) % this.state.cards.length,
-          });
-        }}
-        prev={() => {
-          this.setState({
-            currentNumber:
-              (this.state.currentNumber - 1) % this.state.cards.length,
-          });
-        }}
-      >
-        {this.state.cards.map((card, i) => (
-          <div>{card}</div>
-        ))}
-      </Carousel>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          flexWrap: "nowrap",
-          justifyContent: "space-between",
-        }}
-      >
-        <div />
-        <Typography variant="h6" style={{ color: "#1E3D59" }}>
-          {this.state.currentNumber + 1}/{this.state.cards.length}
-        </Typography>
-        <Chip
-          label="Shuffle"
-          clickable
-          color="primary"
-          onDelete={this.shuffleCards}
-          onClick={this.shuffleCards}
-          deleteIcon={<ShuffleIcon />}
-          variant="outlined"
-        />
+  render = () => {
+    console.log(this.state.cards);
+    return (
+      <div>
+        <Carousel
+          navButtonsAlwaysVisible={true}
+          indicators={false}
+          animation="slide"
+          autoPlay={false}
+          interval={10000}
+          index={this.state.startIndex}
+          next={() => {
+            this.setState({
+              currentNumber:
+                (this.state.currentNumber + 1) % this.state.cards.length,
+            });
+          }}
+          prev={() => {
+            this.setState({
+              currentNumber:
+                (this.state.currentNumber - 1) % this.state.cards.length,
+            });
+          }}
+        >
+          {this.state.cards.map((card, i) => (
+            <div>{card}</div>
+          ))}
+        </Carousel>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "nowrap",
+            justifyContent: "space-between",
+          }}
+        >
+          <div />
+          <Typography variant="h6" style={{ color: "#1E3D59" }}>
+            {this.state.currentNumber + 1}/{this.state.cards.length}
+          </Typography>
+          <Chip
+            label="Shuffle"
+            clickable
+            color="primary"
+            onDelete={this.shuffleCards}
+            onClick={this.shuffleCards}
+            deleteIcon={<ShuffleIcon />}
+            variant="outlined"
+          />
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 }
 
 export default StudyView;

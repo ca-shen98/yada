@@ -25,6 +25,7 @@ import {
   SET_SAVE_IN_PROGRESS,
   CLEAR_SAVE_IN_PROGRESS,
   setFilePermissionsAction,
+  setUserPermissionAction,
 } from "../reducers/CurrentOpenFileState";
 import { setFileOpenedAction } from "../reducers/Steps";
 
@@ -107,6 +108,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
         } else {
           this.props.dispatchSetFileOpenedAction(true);
           this.props.setFilePermissions(value["permissions"]);
+          this.props.setUserPermission(value["current_permission"]);
           this.setState({
             fileIdKeyStr,
             fileContent: JSON.stringify(value["doc"]) ?? "",
@@ -177,5 +179,7 @@ export default connect(
       dispatch(setFileOpenedAction(fileOpened)),
     setFilePermissions: (filePermissions) =>
       dispatch(setFilePermissionsAction(filePermissions)),
+    setUserPermission: (userPermission) =>
+      dispatch(setUserPermissionAction(userPermission)),
   })
 )(SourceEditorWithTagFiltersInput);

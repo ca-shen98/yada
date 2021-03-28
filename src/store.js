@@ -9,6 +9,7 @@ import {
   currentOpenFileNameReducer,
   SIGNOUT,
   setFilePermissionsReducer,
+  setUserPermissionReducer,
 } from "./reducers/CurrentOpenFileState";
 import { backendModeSignedInStatusReducer } from "./reducers/BackendModeSignedInStatus";
 import { setTagsInViewReducer } from "./reducers/SetTagsInView";
@@ -33,6 +34,7 @@ const reducers = combineReducers({
   newUser: setNewUserReducer,
   tagEditorOpened: setTagEditorOpenedReducer,
   filePermissions: setFilePermissionsReducer,
+  userPermission: setUserPermissionReducer,
 });
 
 const rootReducer = (state, action) => {
