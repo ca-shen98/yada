@@ -1,3 +1,19 @@
+/**
+ * INTEGRATION TEST
+ *
+ * Tests:
+ *  - Creation, renaming, and deletion of a document
+ *  - Insertion of content and tagging of a part of it
+ *
+ *  * Requires:
+ *  - Yada running @ localhost:3000
+ *  - credentials.json with Test Account's Google Info
+ *
+ * Outputs:
+ *  - Success or Failure message, along with logs for each action taken
+ *
+ */
+
 // Dependencies
 const puppeteer = require("puppeteer-extra");
 const assert = require("assert");
@@ -11,7 +27,7 @@ const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 // Read credentials
-var json = require("./credentials.json"); //(with path)
+var json = require("./credentials.json");
 
 // Launch browser
 const DEFAULT_ELEMENT_TIMEOUT = 10000;
@@ -49,17 +65,18 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     await loginPass.type(json["password"], { delay: 50 });
     await page.keyboard.press("Enter");
 
-    await page.waitForTimeout(10000); //TODO replace with a waitFor on url change?
+    // Wait for StackOverflow to authenticate our Google User TODO: replace with a waitFor?
+    await page.waitForTimeout(10000);
 
-    //TODO: sometimes stackoverflow gives us a captcha then asks us to log in
-    //      again - i think there's a puppeteer plugin for captchas.
+    //TODO: sometimes stackoverflow gives a captcha - use puppeteer plugin for this
 
-    // Sign into Yada (very finnicky lol)
+    // Sign into Yada
     await page.goto(yada_url);
     sign_in = await page.waitForXPath(
       '//span[text()="Sign in with Google"]/../..',
       { timeout: DEFAULT_ELEMENT_TIMEOUT }
     );
+    // Anecdotally, the Google Sign In button often requires multiple clicks.
     await page.waitForTimeout(2000);
     await sign_in.click();
     await page.waitForTimeout(2000);
@@ -134,14 +151,14 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
       timeout: DEFAULT_ELEMENT_TIMEOUT,
     });
 
-    //TODO: check file name
+    // Check file name was updated correctly by comparing against Navbar
     console.log("Verify file name is: " + fileName);
     const fileNameEl = await page.waitForXPath(
       '//div[@id="navbar-file-name"]',
       { timeout: DEFAULT_ELEMENT_TIMEOUT }
     );
     const pulledFileName = await fileNameEl.evaluate((el) => el.textContent);
-    //TODO: uncomment below once the UI bug (where the file name isn't correct) is fixed!
+    //TODO: uncomment once issue #174 is fixed
     //   assert(
     //     pulledFileName == fileName,
     //     "File name differs. Got: " +
@@ -191,6 +208,15 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     console.log("Delete test doc");
     await listButtons[listButtons.length - 1 - 4].click(); // delete button for created doc
     await page.waitForTimeout(2000);
+
+    // Verify deletion worked
+    const remainingFiles = await page.$x(
+      '//button[contains(@class, "fileList-iconButton")]'
+    );
+    assert(
+      remainingFiles == [],
+      "Deletion failed - files still exist for user"
+    );
 
     console.log(`[SUCCESS] ✨`);
   } catch (err) {
