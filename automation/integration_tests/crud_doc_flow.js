@@ -34,7 +34,7 @@ var json = require("./credentials.json");
 const DEFAULT_ELEMENT_TIMEOUT = 10000;
 const dev = true;
 const yada_url = dev ? "http://localhost:3000" : "https://yada.dev";
-const headless = false;
+const headless = true;
 
 puppeteer.launch({ headless: headless }).then(async (browser) => {
   console.log("Running tests..");
