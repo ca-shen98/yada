@@ -19,7 +19,6 @@ const dev = true;
 const yada_url = dev ? "http://localhost:3000" : "https://yada.dev";
 const headless = false;
 
-//TODO: add timeout on total thing
 puppeteer.launch({ headless: headless }).then(async (browser) => {
   console.log("Running tests..");
   try {
