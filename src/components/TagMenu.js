@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import React from "react";
 import { connect } from "react-redux";
 import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../reducers/CurrentOpenFileState";
-
+import { PERMISSION_TYPE } from "../util/FileIdAndTypeUtils";
 import BlockTaggingEditorExtension from "../editor_extension/BlockTagging";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
@@ -173,7 +173,9 @@ class TagMenu extends React.Component {
         this.props.selectNode &&
         prevProps.selectNode.pos !== this.props.selectNode.pos)
     ) {
-      document.getElementById(ADD_TAG_INPUT_ID).value = "";
+      if (document.getElementById(ADD_TAG_INPUT_ID) !== null) {
+        document.getElementById(ADD_TAG_INPUT_ID).value = "";
+      }
       defer(() => {
         if (this.props.selectNode) {
           const node = BlockTaggingEditorExtension.editor.view.state.doc.nodeAt(
@@ -222,41 +224,43 @@ class TagMenu extends React.Component {
       <Permissions />
       <div id="tag_menu_wrapper">
         <div className="InputRow" id="add_tag_input_row">
-          <OutlinedInput
-            id={ADD_TAG_INPUT_ID}
-            title="New Tag"
-            placeholder="New Tag"
-            color="primary"
-            disabled={!this.props.selectNode}
-            onKeyPress={(event) => {
-              if (event.key === "Enter" && this.handleAddTag()) {
-                event.target.value = "";
+          {this.props.userPermission !== PERMISSION_TYPE.READ ? (
+            <OutlinedInput
+              id={ADD_TAG_INPUT_ID}
+              title="New Tag"
+              placeholder="New Tag"
+              color="primary"
+              disabled={!this.props.selectNode}
+              onKeyPress={(event) => {
+                if (event.key === "Enter" && this.handleAddTag()) {
+                  event.target.value = "";
+                }
+                if (!TAG_VALUE_REGEX.test(event.key)) {
+                  event.preventDefault();
+                }
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.target.value = "";
+                  BlockTaggingEditorExtension.editor.view.focus();
+                }
+              }}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="Add"
+                    title="add"
+                    disabled={!this.props.selectNode}
+                    onClick={this.handleAddTag}
+                    edge="end"
+                  >
+                    <AddCircleIcon color="primary" />
+                  </IconButton>
+                </InputAdornment>
               }
-              if (!TAG_VALUE_REGEX.test(event.key)) {
-                event.preventDefault();
-              }
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                event.target.value = "";
-                BlockTaggingEditorExtension.editor.view.focus();
-              }
-            }}
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="Add"
-                  title="add"
-                  disabled={!this.props.selectNode}
-                  onClick={this.handleAddTag}
-                  edge="end"
-                >
-                  <AddCircleIcon color="primary" />
-                </IconButton>
-              </InputAdornment>
-            }
-            margin="dense"
-          />
+              margin="dense"
+            />
+          ) : null}
         </div>
         <div id="tag_menu_list_container">
           {this.props.selectNode &&
@@ -378,6 +382,7 @@ export default connect(
     saveDirtyFlag: state.saveDirtyFlag,
     currentOpenFileId: state.currentOpenFileId,
     filePermissions: state.filePermissions,
+    userPermission: state.userPermission,
   }),
   (dispatch) => ({
     dispatchSetSaveDirtyFlagAction: () =>

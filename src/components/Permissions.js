@@ -361,71 +361,80 @@ class Permissions extends React.Component {
     this.setState({ anchorEl: null });
   };
 
-  render = () => (
-    <div>
-      <Grid container spacing={0}>
-        <Grid item xs={7}>
-          <AvatarGroup max={3}>
-            {(this.props.filePermissions != null &&
-              Object.keys(this.props.filePermissions).length) > 0
-              ? Object.keys(this.props.filePermissions).map((email, index) => (
-                  <Tooltip title={this.props.filePermissions[email]["name"]}>
-                    <Avatar
-                      style={
-                        index % 3 === 0
-                          ? { backgroundColor: "#FF6E40" }
-                          : index % 3 === 1
-                          ? { backgroundColor: "#FF9A8D" }
-                          : { backgroundColor: "#FFC13B" }
-                      }
-                    >
-                      {this.props.filePermissions[email]["name"]
-                        .substring(0, 1)
-                        .toUpperCase()}
-                    </Avatar>
-                  </Tooltip>
-                ))
-              : null}
-          </AvatarGroup>
+  render = () => {
+    return (
+      <div>
+        <Grid container spacing={0}>
+          <Grid item xs={7}>
+            <AvatarGroup max={3}>
+              {(this.props.filePermissions != null &&
+                Object.keys(this.props.filePermissions).length) > 0
+                ? Object.keys(this.props.filePermissions).map(
+                    (email, index) => (
+                      <Tooltip
+                        title={this.props.filePermissions[email]["name"]}
+                      >
+                        <Avatar
+                          style={
+                            index % 3 === 0
+                              ? { backgroundColor: "#FF6E40" }
+                              : index % 3 === 1
+                              ? { backgroundColor: "#FF9A8D" }
+                              : { backgroundColor: "#FFC13B" }
+                          }
+                        >
+                          {this.props.filePermissions[email]["name"]
+                            .substring(0, 1)
+                            .toUpperCase()}
+                        </Avatar>
+                      </Tooltip>
+                    )
+                  )
+                : null}
+            </AvatarGroup>
+          </Grid>
+          <Grid item xs={5}>
+            {this.props.userPermission === PERMISSION_TYPE.OWN ? (
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={(event) => this.openPermissionsPopover(event)}
+              >
+                Share
+              </Button>
+            ) : null}
+          </Grid>
         </Grid>
-        <Grid item xs={5}>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={(event) => this.openPermissionsPopover(event)}
-          >
-            Share
-          </Button>
-        </Grid>
-      </Grid>
-      <Popover
-        open={this.state.anchorEl !== null}
-        anchorEl={this.state.anchorEl}
-        onClose={this.closePermissionsPopover}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-      >
-        <PermissionEditor
-          filePermissions={this.props.filePermissions}
-          dispatchSetToastAction={this.props.dispatchSetToastAction}
-          currentOpenFileId={this.props.currentOpenFileId}
-          setFilePermissions={this.props.setFilePermissions}
-        />
-      </Popover>
-    </div>
-  );
+        <Popover
+          open={this.state.anchorEl !== null}
+          anchorEl={this.state.anchorEl}
+          onClose={this.closePermissionsPopover}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "left",
+          }}
+        >
+          <PermissionEditor
+            filePermissions={this.props.filePermissions}
+            dispatchSetToastAction={this.props.dispatchSetToastAction}
+            currentOpenFileId={this.props.currentOpenFileId}
+            setFilePermissions={this.props.setFilePermissions}
+          />
+        </Popover>
+      </div>
+    );
+  };
 }
 
 export default connect(
   (state) => ({
     currentOpenFileId: state.currentOpenFileId,
     filePermissions: state.filePermissions,
+    userPermission: state.userPermission,
   }),
   (dispatch) => ({
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),

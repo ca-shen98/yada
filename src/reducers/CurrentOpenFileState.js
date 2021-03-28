@@ -134,3 +134,15 @@ export const setFilePermissionsReducer = (state = null, action) =>
   !action.hasOwnProperty("filePermissions")
     ? state
     : action.filePermissions;
+
+const SET_USER_PERMISSION_TYPE = "setUserPermission/set";
+export const setUserPermissionAction = (userPermission) => ({
+  type: SET_USER_PERMISSION_TYPE,
+  userPermission,
+});
+
+export const setUserPermissionReducer = (state = null, action) =>
+  action.type !== SET_USER_PERMISSION_TYPE ||
+  !action.hasOwnProperty("userPermission")
+    ? state
+    : action.userPermission;
