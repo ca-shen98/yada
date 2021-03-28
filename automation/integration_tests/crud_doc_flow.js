@@ -11,6 +11,7 @@
  *
  * Outputs:
  *  - Success or Failure message, along with logs for each action taken
+ *  - Timeouts included as a way to fail test if things change
  *
  */
 
@@ -54,6 +55,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     const loginEmail = await page.waitForSelector('input[type="email"]', {
       timeout: DEFAULT_ELEMENT_TIMEOUT,
     });
+    await page.waitForTimeout(500);
     await loginEmail.type(json["username"], { delay: 50 });
     await page.keyboard.press("Enter");
 
@@ -62,6 +64,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     const loginPass = await page.waitForSelector('input[type="password"]', {
       timeout: DEFAULT_ELEMENT_TIMEOUT,
     });
+    await page.waitForTimeout(500);
     await loginPass.type(json["password"], { delay: 50 });
     await page.keyboard.press("Enter");
 
@@ -214,7 +217,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
       '//button[contains(@class, "fileList-iconButton")]'
     );
     assert(
-      remainingFiles == [],
+      remainingFiles.length == 0,
       "Deletion failed - files still exist for user"
     );
 
