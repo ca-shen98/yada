@@ -10,6 +10,7 @@ import {
   checkSourceFileId,
   checkViewFileId,
   getFileIdKeyStr,
+  PERMISSION_TYPE,
 } from "../util/FileIdAndTypeUtils";
 import { INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY } from "./SourceEditorWithTagFiltersInput";
 import {
@@ -200,6 +201,12 @@ class FileListItem extends React.Component {
           <IconButton
             className={"fileList-iconButton"}
             onClick={this.props.handleEditMenuClick}
+            disabled={this.props.current_permission === PERMISSION_TYPE.READ}
+            style={
+              this.props.current_permission === PERMISSION_TYPE.READ
+                ? { opacity: "0.2" }
+                : {}
+            }
           >
             <MoreVertIcon fontSize="small" color="primary" />
           </IconButton>
@@ -250,6 +257,12 @@ class FileListItem extends React.Component {
           <IconButton
             className={"fileList-iconButton"}
             onClick={this.props.handleEditMenuClick}
+            disabled={this.props.current_permission === PERMISSION_TYPE.READ}
+            style={
+              this.props.current_permission === PERMISSION_TYPE.READ
+                ? { opacity: "0.2" }
+                : {}
+            }
           >
             <MoreVertIcon fontSize="small" color="primary" />
           </IconButton>
@@ -285,6 +298,12 @@ class Navigator extends React.Component {
     checkViewFileId(fileId)
       ? this.getViewName(fileId)
       : this.getSourceName(fileId);
+
+  getFilePermission = (fileId) =>
+    validateFileIdObj(fileId) &&
+    this.state.filesList.hasOwnProperty(fileId.sourceId)
+      ? this.state.filesList[fileId.sourceId].current_permission
+      : "";
 
   getRenameInputValueFunctions = {
     [RENAME_INPUT_TYPES.CURRENT_SOURCE]: this.getSourceName,
@@ -909,6 +928,10 @@ class Navigator extends React.Component {
                         handleEditMenuClick={this.handleEditMenuClick}
                         childViewsExist={Object.keys(views).length > 0}
                         fileName={this.getFileName({ sourceId, viewId: 0 })}
+                        current_permission={this.getFilePermission({
+                          sourceId,
+                          viewId: 0,
+                        })}
                       />
                     </ListItem>
                     {Object.keys(views).length > 0 ? (
@@ -975,6 +998,10 @@ class Navigator extends React.Component {
                                   selected={
                                     viewId === this.state.selectedViewId
                                   }
+                                  current_permission={this.getFilePermission({
+                                    sourceId,
+                                    viewId: 0,
+                                  })}
                                 />
                               </ListItem>
                             );

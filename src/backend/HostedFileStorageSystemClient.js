@@ -80,7 +80,12 @@ export default {
       }
       const view_json = await viewResponse.json();
       const tags_json = await tagResponse.json();
-      return { view: view_json, tags: tags_json, type: fileId.viewType };
+      return {
+        view: view_json["view"],
+        tags: tags_json,
+        type: fileId.viewType,
+        current_permission: view_json["current_permission"],
+      };
     } catch (e) {
       console.log(e);
     }
