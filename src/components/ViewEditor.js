@@ -85,11 +85,8 @@ class ViewEditor extends React.Component {
             }
           });
           this.props.setTagsInView([]); // clear any tagsInView currently stored
-<<<<<<< HEAD
           this.props.setMetadataInView({}); // clear any metadataInView currently stored
-=======
           this.props.setUserPermission(value["current_permission"]);
->>>>>>> Updated Permissions for Docs list
           this.setState({
             sourceId: this.props.currentOpenFileId.sourceId,
             viewId: this.props.currentOpenFileId.viewId,
