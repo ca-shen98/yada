@@ -12,7 +12,7 @@ class StudyView extends React.Component {
   };
 
   componentDidUpdate = (prevProps) => {
-    if (this.props.cards != prevProps.cards) {
+    if (this.props.cards !== prevProps.cards) {
       this.setState({
         cards: this.props.cards,
       });
@@ -33,7 +33,6 @@ class StudyView extends React.Component {
   };
 
   render = () => {
-    console.log(this.state.cards);
     return (
       <div>
         <Carousel

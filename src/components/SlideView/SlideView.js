@@ -26,6 +26,7 @@ import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import Button from "@material-ui/core/Button";
 import { IconButton } from "@material-ui/core";
+import { PERMISSION_TYPE } from "../../util/FileIdAndTypeUtils";
 
 class SlideView extends React.Component {
   constructor(props) {
@@ -169,11 +170,13 @@ class SlideView extends React.Component {
             </div>
           ) : (
             <div>
-              <TagEditor
-                viewType={FILE_TYPE.SLIDE_VIEW}
-                allTagsData={this.state.allTagsData}
-                tagsInView={this.props.tagsInView}
-              />
+              {this.props.userPermission !== PERMISSION_TYPE.READ ? (
+                <TagEditor
+                  viewType={FILE_TYPE.SLIDE_VIEW}
+                  allTagsData={this.state.allTagsData}
+                  tagsInView={this.props.tagsInView}
+                />
+              ) : null}
               <div className="viewContent">{slides}</div>
             </div>
           )}
@@ -189,6 +192,7 @@ export default connect(
     metadataInView: state.metadataInView,
     currentOpenFileId: state.currentOpenFileId,
     saveDirtyFlag: state.saveDirtyFlag,
+    userPermission: state.userPermission,
   }),
   (dispatch) => ({
     setTagsInView: (tagsInView) => dispatch(setTagsInViewAction(tagsInView)),

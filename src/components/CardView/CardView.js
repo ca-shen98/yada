@@ -115,7 +115,6 @@ class CardView extends React.Component {
         this.state.displaySwitch ||
         this.props.userPermission === PERMISSION_TYPE.READ
       ) {
-        console.log("Constructing Cards");
         for (let i = 0; i < this.props.tagsInView.length; i += 2) {
           cards.push(this.constructCard(i));
         }
@@ -134,7 +133,6 @@ class CardView extends React.Component {
           );
         }
       }
-      console.log(cards);
       return (
         <Container>
           <FormControlLabel

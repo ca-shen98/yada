@@ -106,28 +106,28 @@ class PermissionEditor extends React.Component {
     });
   };
   savePermissions = () => {
-    var ownerPresent = false;
+    var ownerPresent = 0;
     for (let i = 0; i < this.state.currentPermissions.length; i++) {
       if (
         this.state.currentPermissions[i]["permission"] === PERMISSION_TYPE.OWN
       ) {
-        ownerPresent = true;
-        break;
+        ownerPresent += 1;
+        if (ownerPresent > 1) break;
       }
     }
-    if (!ownerPresent) {
+    if (ownerPresent !== 1) {
       for (let i = 0; i < this.state.newUserPermissions.length; i++) {
         if (
           this.state.newUserPermissions[i]["permission"] === PERMISSION_TYPE.OWN
         ) {
-          ownerPresent = true;
-          break;
+          ownerPresent += 1;
+          if (ownerPresent > 1) break;
         }
       }
     }
-    if (!ownerPresent) {
+    if (ownerPresent !== 1) {
       this.props.dispatchSetToastAction({
-        message: "Please ensure there is at least one owner for the file",
+        message: "Please ensure there is only one owner for the file",
         severity: TOAST_SEVERITY.ERROR,
         open: true,
       });
@@ -234,11 +234,11 @@ class PermissionEditor extends React.Component {
                               <MenuItem value={PERMISSION_TYPE.OWN}>
                                 Owner
                               </MenuItem>
-                              <MenuItem value={PERMISSION_TYPE.WRITE}>
-                                Editor
-                              </MenuItem>
                               <MenuItem value={PERMISSION_TYPE.READ}>
                                 Reader
+                              </MenuItem>
+                              <MenuItem value={PERMISSION_TYPE.WRITE} disabled>
+                                Editor - Coming Soon
                               </MenuItem>
                             </Select>
                           </FormControl>
@@ -289,11 +289,11 @@ class PermissionEditor extends React.Component {
                               <MenuItem value={PERMISSION_TYPE.OWN}>
                                 Owner
                               </MenuItem>
-                              <MenuItem value={PERMISSION_TYPE.WRITE}>
-                                Editor
-                              </MenuItem>
                               <MenuItem value={PERMISSION_TYPE.READ}>
                                 Reader
+                              </MenuItem>
+                              <MenuItem value={PERMISSION_TYPE.WRITE} disabled>
+                                Editor - Coming Soon
                               </MenuItem>
                             </Select>
                           </FormControl>
