@@ -322,7 +322,7 @@ class TagEditor extends React.Component {
           const start = this.state.columns[source.droppableId];
           const finish = this.state.columns[destination.droppableId];
           const newStart = removeTagId(start, source.index);
-          const newFinish = insertTagId(finish, destination.index);
+          const newFinish = insertTagId(finish, destination.index, draggableId);
           newState = createNewState(this.state, newStart, newFinish);
           this.props.dispatchSetSaveDirtyFlagAction();
         }
