@@ -37,16 +37,25 @@ const INVALID_TAG_VALUE_REGEX = /[{}]/;
 class TagListItem extends React.Component {
   render = () => (
     <div style={{ width: "100%", display: "flex", alignItems: "center" }}>
-      <Chip
-        label={this.props.tagValue}
-        color="primary"
-        onDelete={(event) =>
-          this.props.handleEditMenuClick(event, this.props.tagValue)
-        }
-        deleteIcon={<MoreVertIcon color="secondary" />}
-        style={{ width: "100%", justifyContent: "space-between" }}
-        variant="outlined"
-      />
+      {this.props.userPermission === PERMISSION_TYPE.READ ? (
+        <Chip
+          label={this.props.tagValue}
+          color="primary"
+          style={{ width: "100%", justifyContent: "space-between" }}
+          variant="outlined"
+        />
+      ) : (
+        <Chip
+          label={this.props.tagValue}
+          color="primary"
+          onDelete={(event) =>
+            this.props.handleEditMenuClick(event, this.props.tagValue)
+          }
+          deleteIcon={<MoreVertIcon color="secondary" />}
+          style={{ width: "100%", justifyContent: "space-between" }}
+          variant="outlined"
+        />
+      )}
     </div>
   );
 }
@@ -281,6 +290,7 @@ class TagMenu extends React.Component {
                   <TagListItem
                     tagValue={tag}
                     handleEditMenuClick={this.handleEditMenuClick}
+                    userPermission={this.props.userPermission}
                   />
                 </ListItem>
               ))}
