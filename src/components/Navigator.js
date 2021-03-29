@@ -572,11 +572,14 @@ class Navigator extends React.Component {
       });
       return;
     }
-    store.dispatch(
-      setCurrentOpenFileNameAction({
-        sourceName: sourceFileIdCheck ? newName : this.getSourceName(fileId),
-        viewName: sourceFileIdCheck ? "" : newName,
-      })
+    let fileName = {
+      sourceName: sourceFileIdCheck ? newName : this.getSourceName(fileId),
+      viewName: sourceFileIdCheck ? "" : newName,
+    };
+    store.dispatch(setCurrentOpenFileNameAction(fileName));
+    localStorage.setItem(
+      INITIAL_FILE_NAME_LOCAL_STORAGE_KEY,
+      JSON.stringify(fileName)
     );
     const newFilesList = { ...this.state.filesList };
     if (sourceFileIdCheck) {
