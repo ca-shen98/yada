@@ -141,7 +141,7 @@ puppeteer.launch({ headless: false }).then(async (browser) => {
     await page.waitForTimeout(250);
     listButtons = await page.$x('//li[contains(@class, "MuiListItem-button")]');
     console.log("Delete test doc");
-    await listButtons[listButtons.length - 1 - 4].click(); // delete button for created doc
+    await listButtons[3].click(); // delete button for created doc
     await page.waitForTimeout(2000);
 
     // Verify deletion worked
