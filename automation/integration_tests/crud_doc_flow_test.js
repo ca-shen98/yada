@@ -27,16 +27,14 @@ puppeteer.use(StealthPlugin());
 const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
-// Read credentials
-var credentials = require("./credentials.json");
-
 // Launch browser
 puppeteer.launch({ headless: true }).then(async (browser) => {
   const loginUtils = require("./login_utils.js");
-  console.log("Running tests..");
+  console.log("[[ TEST: DOC FLOWS ]]");
+  var page = null;
   try {
-    const page = await browser.newPage();
-    await loginUtils.loginToYada(page, credentials);
+    page = await browser.newPage();
+    await loginUtils.loginToYada(page);
 
     // Create New Document
     console.log("Creating test doc");
@@ -176,6 +174,7 @@ puppeteer.launch({ headless: true }).then(async (browser) => {
 
     console.log(`[SUCCESS] ✨`);
   } catch (err) {
+    await page.screenshot({ path: "./error.png" });
     console.log("[FAILURE] Reason for failure: " + err.message);
   }
   await browser.close();

@@ -1,6 +1,9 @@
 // const puppeteer = require("puppeteer-extra");
 
-const DEFAULT_ELEMENT_TIMEOUT = 10000;
+// Read credentials
+var credentials = require("./credentials.json");
+
+const DEFAULT_ELEMENT_TIMEOUT = 20000;
 const dev = true;
 const yada_url = dev ? "http://localhost:3000" : "https://yada.dev";
 
@@ -8,7 +11,7 @@ exports.DEFAULT_ELEMENT_TIMEOUT = DEFAULT_ELEMENT_TIMEOUT;
 exports.dev = dev;
 exports.yada_url = yada_url;
 
-exports.loginToYada = async (page, credentials) => {
+exports.loginToYada = async (page) => {
   // Sign in to Stack Overflow first for google auth to work
   console.log("Authenticating Google account via third-party");
   await page.goto(
@@ -50,9 +53,6 @@ exports.loginToYada = async (page, credentials) => {
     '//span[text()="Sign in with Google"]/../..',
     { timeout: DEFAULT_ELEMENT_TIMEOUT }
   );
-  // Anecdotally, the Google Sign In button often requires multiple clicks.
-  await page.waitForTimeout(2000);
-  await sign_in.click();
   await page.waitForTimeout(2000);
   await sign_in.click();
 
