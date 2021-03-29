@@ -112,14 +112,10 @@ puppeteer.launch({ headless: true }).then(async (browser) => {
       { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
     );
     const pulledFileName = await fileNameEl.evaluate((el) => el.textContent);
-    //TODO: uncomment once issue #174 is fixed
-    //   assert(
-    //     pulledFileName == fileName,
-    //     "File name differs. Got: " +
-    //     pulledFileName +
-    //       ", but expected " +
-    //       fileName
-    //   );
+    assert(
+      pulledFileName == fileName,
+      "File name differs. Got: " + pulledFileName + ", but expected " + fileName
+    );
 
     // Check line 2 content
     console.log("Verify line 2 has content: " + line2Text);
@@ -160,7 +156,7 @@ puppeteer.launch({ headless: true }).then(async (browser) => {
       '//li[contains(@class, "MuiListItem-button")]'
     );
     console.log("Delete test doc");
-    await listButtons[listButtons.length - 1 - 4].click(); // delete button for created doc
+    await listButtons[3].click(); // delete button for created doc
     await page.waitForTimeout(2000);
 
     // Verify deletion worked
