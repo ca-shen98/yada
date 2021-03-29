@@ -28,62 +28,15 @@ const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 // Read credentials
-var json = require("./credentials.json");
+var credentials = require("./credentials.json");
 
 // Launch browser
-const DEFAULT_ELEMENT_TIMEOUT = 10000;
-const dev = true;
-const yada_url = dev ? "http://localhost:3000" : "https://yada.dev";
-const headless = true;
-
-puppeteer.launch({ headless: headless }).then(async (browser) => {
+puppeteer.launch({ headless: true }).then(async (browser) => {
+  const loginUtils = require("./login_utils.js");
   console.log("Running tests..");
   try {
-    // Sign in to Stack Overflow first for google auth to work
     const page = await browser.newPage();
-    await page.goto(
-      "https://stackoverflow.com/users/login?ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2f"
-    );
-    await page.waitForTimeout(3000);
-
-    sign_in = await page.waitForXPath("//button", {
-      timeout: DEFAULT_ELEMENT_TIMEOUT,
-    });
-    await sign_in.click();
-    await page.waitForTimeout(3000);
-
-    const loginEmail = await page.waitForSelector('input[type="email"]', {
-      timeout: DEFAULT_ELEMENT_TIMEOUT,
-    });
-    await page.waitForTimeout(500);
-    await loginEmail.type(json["username"], { delay: 50 });
-    await page.keyboard.press("Enter");
-
-    await page.waitForTimeout(1000);
-
-    const loginPass = await page.waitForSelector('input[type="password"]', {
-      timeout: DEFAULT_ELEMENT_TIMEOUT,
-    });
-    await page.waitForTimeout(500);
-    await loginPass.type(json["password"], { delay: 50 });
-    await page.keyboard.press("Enter");
-
-    // Wait for StackOverflow to authenticate our Google User TODO: replace with a waitFor?
-    await page.waitForTimeout(10000);
-
-    //TODO: sometimes stackoverflow gives a captcha - use puppeteer plugin for this
-
-    // Sign into Yada
-    await page.goto(yada_url);
-    sign_in = await page.waitForXPath(
-      '//span[text()="Sign in with Google"]/../..',
-      { timeout: DEFAULT_ELEMENT_TIMEOUT }
-    );
-    // Anecdotally, the Google Sign In button often requires multiple clicks.
-    await page.waitForTimeout(2000);
-    await sign_in.click();
-    await page.waitForTimeout(2000);
-    await sign_in.click();
+    await loginUtils.loginToYada(page, credentials);
 
     // Create New Document
     console.log("Creating test doc");
@@ -104,7 +57,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     console.log("Inserting some text into the doc body");
     await (
       await page.waitForXPath('//div[contains(@class, "ProseMirror")]', {
-        timeout: DEFAULT_ELEMENT_TIMEOUT,
+        timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT,
       })
     ).focus();
     await page.waitForTimeout(500);
@@ -121,7 +74,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     console.log("Add a tag for line 2: " + tag);
     await (
       await page.waitForXPath('//input[@id="add_tag_input"]', {
-        timeout: DEFAULT_ELEMENT_TIMEOUT,
+        timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT,
       })
     ).focus();
     await page.waitForTimeout(2500);
@@ -135,7 +88,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     await (await page.$('button[name="save_btn"]')).click();
     const successToast = await page.waitForXPath(
       '//div[contains(@class, "MuiAlert-message")]',
-      { timeout: DEFAULT_ELEMENT_TIMEOUT }
+      { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
     );
     const successMsg = await successToast.evaluate((el) => el.textContent);
     const expectedMsg = "Saved source file";
@@ -149,16 +102,16 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
 
     // Refresh page and verify content still there
     console.log("Refresh page to verify persistence of content");
-    await page.goto(yada_url);
+    await page.goto(loginUtils.yada_url);
     await page.waitForXPath('//div[contains(@class, "ProseMirror")]', {
-      timeout: DEFAULT_ELEMENT_TIMEOUT,
+      timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT,
     });
 
     // Check file name was updated correctly by comparing against Navbar
     console.log("Verify file name is: " + fileName);
     const fileNameEl = await page.waitForXPath(
       '//div[@id="navbar-file-name"]',
-      { timeout: DEFAULT_ELEMENT_TIMEOUT }
+      { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
     );
     const pulledFileName = await fileNameEl.evaluate((el) => el.textContent);
     //TODO: uncomment once issue #174 is fixed
@@ -189,7 +142,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     await line2.click();
     const tagEl = await page.waitForXPath(
       '//span[contains(@class, "MuiChip-label")]',
-      { timeout: DEFAULT_ELEMENT_TIMEOUT }
+      { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
     );
     const tagName = await tagEl.evaluate((el) => el.textContent);
     assert(
