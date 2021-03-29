@@ -16,6 +16,7 @@ import { setNewUserAction } from "../reducers/Steps";
 import {
   SET_FILE_LOADING,
   CLEAR_FILE_LOADING,
+  setUserPermissionAction,
 } from "../reducers/CurrentOpenFileState";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import SlideView from "./SlideView/SlideView";
@@ -85,6 +86,7 @@ class ViewEditor extends React.Component {
           });
           this.props.setTagsInView([]); // clear any tagsInView currently stored
           this.props.setMetadataInView({}); // clear any metadataInView currently stored
+          this.props.setUserPermission(value["current_permission"]);
           this.setState({
             sourceId: this.props.currentOpenFileId.sourceId,
             viewId: this.props.currentOpenFileId.viewId,
@@ -174,5 +176,7 @@ export default connect(
     dispatchNewUserAction: (newUser) => dispatch(setNewUserAction(newUser)),
     dispatchSetFileLoading: () => dispatch({ type: SET_FILE_LOADING }),
     dispatchClearFileLoading: () => dispatch({ type: CLEAR_FILE_LOADING }),
+    setUserPermission: (userPermission) =>
+      dispatch(setUserPermissionAction(userPermission)),
   })
 )(ViewEditor);

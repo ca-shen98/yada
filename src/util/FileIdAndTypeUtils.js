@@ -6,6 +6,12 @@ export const FILE_TYPE = {
   EMPTY: "NON_EXISTENT",
 };
 
+export const PERMISSION_TYPE = {
+  OWN: "0",
+  WRITE: "1",
+  READ: "2",
+};
+
 export const NO_OPEN_FILE_ID = {
   sourceId: 0,
   viewId: 0,
