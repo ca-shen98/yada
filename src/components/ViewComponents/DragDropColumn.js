@@ -1,4 +1,3 @@
-import styled from "styled-components";
 import React from "react";
 import { Tag } from "./Tag";
 import Separator from "./Separator";
@@ -139,41 +138,25 @@ class DragDropColumn extends React.Component {
   }
 
   render = () => {
-    const Container = styled.div`
-      border: 1px solid lightgrey;
-      border-radius: 10px;
-      padding: 8px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      transition: background-color 0.2s ease;
-      background-color: ${(props) =>
-        props.isDraggingOver
-          ? THEME.palette.grey[300]
-          : THEME.palette.grey[100]};
-    `;
-    const Title = styled.h3`
-      padding: 8px;
-    `;
-    const DroppableRegion = styled.div`
-      padding: 8px;
-    `;
-    const TagList = styled.div`
-      overflow-x: hidden;
-      overflow-y: auto;
-      height: 400px;
-      padding-bottom: 30px;
-    `;
-
     return (
       <Droppable droppableId={this.props.column.id}>
         {(provided, snapshot) => {
           return (
-            <Container isDraggingOver={snapshot.isDraggingOver}>
+            <div
+              className={`drag_drop_container ${
+                snapshot.isDraggingOver
+                  ? "drag_drop_container_drag_over"
+                  : "drag_drop_container_no_drag_over"
+              }`}
+              isDraggingOver={snapshot.isDraggingOver}
+            >
               {this.props.viewType === FILE_TYPE.SLIDE_VIEW &&
               this.props.column.id === TAG_HOLDERS.IN_VIEW ? (
                 <Row className="justify-content-md-center">
                   <Col xs="6">
-                    <Title>{this.props.column.title}</Title>
+                    <h3 className="drag_drop_title">
+                      {this.props.column.title}
+                    </h3>
                   </Col>
                   <Col xs="6" className="tag-editor-button-container">
                     <Button onClick={() => this.addSlideSeparator()}>
@@ -183,13 +166,14 @@ class DragDropColumn extends React.Component {
                   </Col>
                 </Row>
               ) : (
-                <Title>{this.props.column.title}</Title>
+                <h3 className="drag_drop_title">{this.props.column.title}</h3>
               )}
-              <DroppableRegion
+              <div
+                className="droppable_region"
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
-                <TagList ref={this.tagListRef}>
+                <div className="tag_list" ref={this.tagListRef}>
                   <InnerTagList
                     viewType={this.props.viewType}
                     columnId={this.props.column.id}
@@ -197,9 +181,9 @@ class DragDropColumn extends React.Component {
                     metadataInView={this.props.metadataInView}
                   />
                   {provided.placeholder}
-                </TagList>
-              </DroppableRegion>
-            </Container>
+                </div>
+              </div>
+            </div>
           );
         }}
       </Droppable>

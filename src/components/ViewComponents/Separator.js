@@ -5,7 +5,6 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { connect } from "react-redux";
 import { setMetadataInViewAction } from "../../reducers/SetTagsInView";
-import styled from "styled-components";
 import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../../reducers/CurrentOpenFileState";
 
 class Separator extends React.Component {
@@ -26,23 +25,14 @@ class Separator extends React.Component {
   }
 
   render = () => {
-    const Container = styled.div`
-      height: 30px;
-      padding: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    `;
     return (
       <Draggable draggableId={this.props.separatorId} index={this.props.index}>
         {(provided, snapshot) => (
-          <Container
+          <div
             className="separator_container"
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
-            isDragging={snapshot.isDragging}
           >
             <hr
               style={{
@@ -75,7 +65,7 @@ class Separator extends React.Component {
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
-          </Container>
+          </div>
         )}
       </Draggable>
     );

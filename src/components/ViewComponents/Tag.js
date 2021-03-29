@@ -1,34 +1,18 @@
 import React from "react";
-import { THEME } from "../../App";
 import { Draggable } from "react-beautiful-dnd";
 import Grid from "@material-ui/core/Grid";
-import styled from "styled-components";
 
 export class Tag extends React.Component {
   render = () => {
-    const Container = styled.div`
-      border: 1px solid lightgrey;
-      border-radius: 10px;
-      padding: 8px;
-      margin-top: 4px;
-      margin-bottom: 4px;
-      background-color: ${(props) =>
-        props.isDragging
-          ? THEME.palette.secondary.dark
-          : THEME.palette.secondary.light};
-    `;
-    const TagId = styled.h6`
-      word-break: break-word;
-    `;
-    const Content = styled.div`
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    `;
     return (
       <Draggable draggableId={this.props.tagId} index={this.props.index}>
         {(provided, snapshot) => (
-          <Container
+          <div
+            className={`tag_container ${
+              snapshot.isDragging
+                ? "tag_container_dragging"
+                : "tag_container_stationary"
+            }`}
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
@@ -36,13 +20,13 @@ export class Tag extends React.Component {
           >
             <Grid container spacing={1}>
               <Grid item xs={4}>
-                <TagId>{this.props.tagInfo["tag_name"]}</TagId>
+                <h6 className="tag_name">{this.props.tagInfo["tag_name"]}</h6>
               </Grid>
               <Grid item xs={8}>
-                <Content>{this.props.tagInfo.preview}</Content>
+                <div className="tag_content">{this.props.tagInfo.preview}</div>
               </Grid>
             </Grid>
-          </Container>
+          </div>
         )}
       </Draggable>
     );
