@@ -56,10 +56,12 @@ import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import CheckIcon from "@material-ui/icons/Check";
 import AddIcon from "@material-ui/icons/Add";
 import TextFieldsIcon from "@material-ui/icons/TextFields";
+import ViewDayIcon from "@material-ui/icons/ViewDay";
 import AmpStoriesIcon from "@material-ui/icons/AmpStories";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import ConfirmDialog from "./ConfirmDialog";
 import CreateIcon from "@material-ui/icons/Create";
+import { getDefaultMetadata } from "./ViewEditor";
 
 export const handleSetCurrentOpenFileId = (
   fileId,
@@ -179,6 +181,8 @@ class FileListItem extends React.Component {
               <AmpStoriesIcon color="primary" />
             ) : viewType === FILE_TYPE.TEXT_VIEW ? (
               <TextFieldsIcon color="primary" />
+            ) : viewType === FILE_TYPE.SLIDE_VIEW ? (
+              <ViewDayIcon color="primary" />
             ) : null}
           </IconButton>
           <div
@@ -381,7 +385,8 @@ class Navigator extends React.Component {
           this.props.currentOpenFileId.sourceId,
           localStorageNextNewFileId,
           fileType,
-          true
+          true,
+          getDefaultMetadata(fileType)
         );
     try {
       const newFile = await newFilePromise;
@@ -1071,6 +1076,26 @@ class Navigator extends React.Component {
                 <AmpStoriesIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText primary="Card View" />
+            </MenuItem>
+
+            <MenuItem
+              onClick={() => {
+                this.handleViewMenuClose();
+                if (this.props.saveDirtyFlag) {
+                  this.setState({
+                    confirmDialogOpen: true,
+                    confirmDialogCallback: () =>
+                      this.handleCreateNewFile(FILE_TYPE.SLIDE_VIEW),
+                  });
+                } else {
+                  this.handleCreateNewFile(FILE_TYPE.SLIDE_VIEW);
+                }
+              }}
+            >
+              <ListItemIcon>
+                <ViewDayIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Slide View" />
             </MenuItem>
           </Menu>
           <Popover

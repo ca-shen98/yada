@@ -9,6 +9,7 @@ import {
 } from "../reducers/BackendModeSignedInStatus";
 import DescriptionIcon from "@material-ui/icons/Description";
 import TextFieldsIcon from "@material-ui/icons/TextFields";
+import ViewDayIcon from "@material-ui/icons/ViewDay";
 import AmpStoriesIcon from "@material-ui/icons/AmpStories";
 import { BACKEND_MODE_SIGNED_IN_STATUS } from "../reducers/BackendModeSignedInStatus";
 import {
@@ -128,7 +129,8 @@ class Navbar extends React.Component {
         this.props.currentOpenFileId.sourceId,
         this.props.currentOpenFileId.viewId,
         this.props.currentOpenFileId.viewType,
-        false
+        false,
+        this.props.metadataInView
       )
         .then(() => {
           this.props.dispatchSetToastAction({
@@ -443,6 +445,9 @@ class Navbar extends React.Component {
                             ) : this.props.currentOpenFileId.viewType ===
                               FILE_TYPE.TEXT_VIEW ? (
                               <TextFieldsIcon color="secondary" />
+                            ) : this.props.currentOpenFileId.viewType ===
+                              FILE_TYPE.SLIDE_VIEW ? (
+                              <ViewDayIcon color="secondary" />
                             ) : null}
                             {this.props.currentOpenFileName.viewName}
                           </div>
@@ -710,6 +715,7 @@ export default connect(
     currentOpenFileName: state.currentOpenFileName,
     backendModeSignedInStatus: state.backendModeSignedInStatus,
     tagsInView: state.tagsInView,
+    metadataInView: state.metadataInView,
     saveDirtyFlag: state.saveDirtyFlag,
     saveInProgress: state.saveInProgress,
   }),

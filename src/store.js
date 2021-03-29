@@ -10,7 +10,10 @@ import {
   SIGNOUT,
 } from "./reducers/CurrentOpenFileState";
 import { backendModeSignedInStatusReducer } from "./reducers/BackendModeSignedInStatus";
-import { setTagsInViewReducer } from "./reducers/SetTagsInView";
+import {
+  setMetadataInViewReducer,
+  setTagsInViewReducer,
+} from "./reducers/SetTagsInView";
 import { setToastReducer } from "./reducers/Toast";
 import {
   setNewUserReducer,
@@ -27,6 +30,7 @@ const reducers = combineReducers({
   selectNode: selectNodeReducer,
   backendModeSignedInStatus: backendModeSignedInStatusReducer,
   tagsInView: setTagsInViewReducer,
+  metadataInView: setMetadataInViewReducer,
   toast: setToastReducer,
   fileOpened: setFileOpenedReducer,
   newUser: setNewUserReducer,

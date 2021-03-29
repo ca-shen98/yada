@@ -1,0 +1,97 @@
+/*Tag Editor CSS*/
+
+.tag-editor-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: right;
+}
+
+.delete_btn {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+  z-index: 1;
+  height: 20px;
+  width: 20px;
+  background-color: rgb(245, 245, 245) !important;
+  display: none !important;
+}
+
+.delete_btn:hover {
+  background-color: rgb(220, 220, 220) !important;
+}
+
+/*Drag Drop Column CSS*/
+.drag_drop_container {
+  border: 1px solid lightgrey;
+  border-radius: 10px;
+  padding: 8px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.drag_drop_container_drag_over {
+  background-color: #e0e0e0;
+}
+
+.drag_drop_container_no_drag_over {
+  background-color: #f5f5f5;
+}
+
+.drag_drop_title {
+  padding: 8px;
+}
+
+.droppable_region {
+  padding: 8px;
+}
+
+.tag_list {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 400px;
+  padding-bottom: 30px;
+}
+
+/*Tag CSS*/
+
+.tag_container {
+  border: 1px solid lightgrey;
+  border-radius: 10px;
+  padding: 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.tag_container_stationary {
+  background-color: rgb(247, 243, 231);
+}
+
+.tag_container_dragging {
+  background-color: rgb(171, 168, 157);
+}
+
+.tag_name {
+  word-break: break-word;
+}
+
+.tag_content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*Separator CSS*/
+.separator_container {
+  height: 30px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.separator_container:hover button {
+  display: inline-flex !important;
+}
