@@ -2,6 +2,7 @@
 
 // Read credentials
 var credentials = require("./credentials.json");
+const assert = require("assert");
 
 const DEFAULT_ELEMENT_TIMEOUT = 20000;
 const dev = true;
@@ -37,7 +38,7 @@ exports.loginToYada = async (page, headless) => {
   const loginPass = await page.waitForSelector('input[type="password"]', {
     timeout: DEFAULT_ELEMENT_TIMEOUT,
   });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000);
   await loginPass.type(credentials["password"], { delay: 50 });
   await page.keyboard.press("Enter");
 
@@ -107,4 +108,21 @@ exports.waitAndGetAddTagInput = async (page) => {
 
 exports.waitAndGetNewDocumentButton = async (page) => {
   return page.waitForXPath('//button[@id="new_document_button"]');
+};
+
+exports.deleteAllFiles = async (page) => {
+  while (true) {
+    const files = await exports.getFileOptions(page);
+    if (files.length == 0) {
+      break;
+    }
+
+    // Open menuitem for document in left bar
+    await files[0].click();
+    await page.waitForTimeout(250);
+    listButtons = await exports.getOpenMenuItems(page);
+    console.log("Deleting doc...");
+    await listButtons[3].click(); // delete button for created doc
+    await page.waitForTimeout(2000);
+  }
 };

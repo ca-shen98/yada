@@ -37,10 +37,17 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     page = await browser.newPage();
     await utils.loginToYada(page, headless);
 
+    // Wait for files to load then clear files beforehand
+    await page.waitForTimeout(1500);
+    await utils.deleteAllFiles(page);
+
     // Create New Document
     console.log("Creating test doc");
     await (await utils.waitAndGetNewDocumentButton(page)).click();
-    await page.waitForTimeout(1500);
+
+    // Sometimes a delay + key press is necessary before typing
+    await page.waitForTimeout(2000);
+    await page.keyboard.press("ArrowRight");
 
     // Rename Document
     const fileNameSuffix = "++++";
@@ -133,21 +140,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
 
     // Cleanup
     console.log("Begin cleanup");
-    // Open menuitem for document in left bar
-    const fileListButtons = await utils.getFileOptions(page);
-    await fileListButtons[fileListButtons.length - 1].click();
-    await page.waitForTimeout(250);
-    const listButtons = await utils.getOpenMenuItems(page);
-    console.log("Delete test doc");
-    await listButtons[3].click(); // delete button for created doc
-    await page.waitForTimeout(2000);
-
-    // Verify deletion worked
-    const remainingFiles = await utils.getFileOptions(page);
-    assert(
-      remainingFiles.length == 0,
-      "Deletion failed - files still exist for user"
-    );
+    await utils.deleteAllFiles(page);
 
     console.log(`[SUCCESS] ✨`);
   } catch (err) {

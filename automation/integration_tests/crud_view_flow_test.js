@@ -42,6 +42,9 @@ puppeteer
       page = await browser.newPage();
       await utils.loginToYada(page, headless);
 
+      // Clear beforehand
+      await utils.deleteAllFiles(page);
+
       // Create New Document
       console.log("Creating test doc");
       await (await utils.waitAndGetNewDocumentButton(page)).click();
@@ -99,7 +102,10 @@ puppeteer
 
       const viewTypeButtons = await utils.getOpenMenuItems(page);
       await viewTypeButtons[4].click(); // create text view
+
+      // Sometimes a delay + key press is necessary before typing
       await page.waitForTimeout(2000);
+      await page.keyboard.press("ArrowRight");
 
       // Rename view
       const fileNameSuffix = "----";
@@ -128,7 +134,7 @@ puppeteer
       await page.waitForTimeout(250);
 
       x -= (bounding_box.width * 5) / 4;
-      await page.mouse.move(x, y, { steps: 600 });
+      await page.mouse.move(x, y, { steps: 300 });
       await page.waitForTimeout(600);
 
       await page.mouse.up();
@@ -180,20 +186,7 @@ puppeteer
 
       // Cleanup
       console.log("Begin cleanup");
-      // Open menuitem for document in left bar
-      await (await utils.getFileOptions(page))[0].click();
-      await page.waitForTimeout(250);
-      listButtons = await utils.getOpenMenuItems(page);
-      console.log("Delete test doc");
-      await listButtons[3].click(); // delete button for created doc
-      await page.waitForTimeout(2000);
-
-      // Verify deletion worked
-      const remainingFiles = await utils.getFileOptions(page);
-      assert(
-        remainingFiles.length == 0,
-        "Deletion failed - files still exist for user"
-      );
+      await utils.deleteAllFiles(page);
 
       console.log(`[SUCCESS] ✨`);
     } catch (err) {
