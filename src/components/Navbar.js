@@ -413,6 +413,7 @@ class Navbar extends React.Component {
                       >
                         {this.props.currentOpenFileName.viewName === "" ? (
                           <div
+                            id="navbar-file-name"
                             color="inherit"
                             style={{
                               color: "#F5F0E1",
@@ -429,6 +430,7 @@ class Navbar extends React.Component {
                           </div>
                         ) : (
                           <div
+                            id="navbar-file-name"
                             color="inherit"
                             style={{
                               color: "#F5F0E1",
