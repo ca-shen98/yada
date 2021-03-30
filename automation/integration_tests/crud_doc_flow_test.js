@@ -171,8 +171,8 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
 
     console.log(`[SUCCESS] ✨`);
   } catch (err) {
-    await page.screenshot({ path: "./error.png" });
-    console.log("[FAILURE] Reason for failure: " + err.message);
+    await page.screenshot({ path: "./doc_flow_error.png" });
+    console.error("[FAILURE] Reason for failure: " + err.message);
   }
   await browser.close();
 });

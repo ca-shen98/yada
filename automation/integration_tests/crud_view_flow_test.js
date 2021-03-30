@@ -27,15 +27,22 @@ const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 // Launch browser
-const headless = false;
+const headless = true;
 puppeteer
-  .launch({ headless: headless, ignoreDefaultArgs: ["--enable-automation"] })
+  .launch({
+    headless: headless,
+    ignoreDefaultArgs: ["--enable-automation"],
+    args: ["--window-size=1920,1080"],
+  })
   .then(async (browser) => {
     const loginUtils = require("./login_utils.js");
     console.log("[[ TEST: VIEW FLOWS ]]");
     var page = null;
     try {
       page = await browser.newPage();
+      // if (headless) {
+      //   await page.setViewport()
+      // }
       await loginUtils.loginToYada(page, headless);
 
       // Create New Document
@@ -121,7 +128,7 @@ puppeteer
       await page.keyboard.press("Enter");
 
       // Drag tag over
-      console.log("Dragging tav over");
+      console.log("Dragging tag over");
       const tagLine = await page.waitForXPath(
         // '//div[contains(@class, "tag_container")]',
         '//div[contains(@class, "MuiGrid-spacing-xs-1")]',
@@ -225,8 +232,8 @@ puppeteer
 
       console.log(`[SUCCESS] ✨`);
     } catch (err) {
-      await page.screenshot({ path: "./error.png" });
-      console.log("[FAILURE] Reason for failure: " + err.message);
+      await page.screenshot({ path: "./view_flow_error.png" });
+      console.error("[FAILURE] Reason for failure: " + err.message);
     }
     await browser.close();
   });
