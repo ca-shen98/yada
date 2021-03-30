@@ -71,3 +71,40 @@ exports.loginToYada = async (page, headless) => {
   });
   console.log("Logged into Yada");
 };
+
+exports.getSaveButton = async (page) => {
+  return page.$('button[name="save_btn"]');
+};
+
+exports.waitAndGetSuccessToastMessage = async (page) => {
+  const successToast = await page.waitForXPath(
+    '//div[contains(@class, "MuiAlert-message")]',
+    { timeout: DEFAULT_ELEMENT_TIMEOUT }
+  );
+  return successToast.evaluate((el) => el.textContent);
+};
+
+exports.getOpenMenuItems = async (page) => {
+  return page.$x('//li[contains(@class, "MuiListItem-button")]');
+};
+
+exports.getOpenFileName = async (page) => {
+  const fileNameEl = await page.waitForXPath('//div[@id="navbar-file-name"]', {
+    timeout: DEFAULT_ELEMENT_TIMEOUT,
+  });
+  return fileNameEl.evaluate((el) => el.textContent);
+};
+
+exports.getFileOptions = async (page) => {
+  return page.$x('//button[contains(@class, "fileList-iconButton")]');
+};
+
+exports.waitAndGetAddTagInput = async (page) => {
+  return page.waitForXPath('//input[@id="add_tag_input"]', {
+    timeout: DEFAULT_ELEMENT_TIMEOUT,
+  });
+};
+
+exports.waitAndGetNewDocumentButton = async (page) => {
+  return page.waitForXPath('//button[@id="new_document_button"]');
+};

@@ -5,7 +5,7 @@
  *  - Creation, renaming, and deletion of a document
  *  - Insertion of content and tagging of a part of it
  *
- *  * Requires:
+ *  Requires:
  *  - Yada running @ localhost:3000
  *  - credentials.json with Test Account's Google Info
  *
@@ -30,18 +30,16 @@ puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 // Launch browser
 const headless = true;
 puppeteer.launch({ headless: headless }).then(async (browser) => {
-  const loginUtils = require("./login_utils.js");
+  const utils = require("./test_utils.js");
   console.log("[[ TEST: DOC FLOWS ]]");
   var page = null;
   try {
     page = await browser.newPage();
-    await loginUtils.loginToYada(page, headless);
+    await utils.loginToYada(page, headless);
 
     // Create New Document
     console.log("Creating test doc");
-    await (
-      await page.waitForXPath('//button[@id="new_document_button"]')
-    ).click();
+    await (await utils.waitAndGetNewDocumentButton(page)).click();
     await page.waitForTimeout(1500);
 
     // Rename Document
@@ -56,7 +54,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     console.log("Inserting some text into the doc body");
     await (
       await page.waitForXPath('//div[contains(@class, "ProseMirror")]', {
-        timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT,
+        timeout: utils.DEFAULT_ELEMENT_TIMEOUT,
       })
     ).focus();
     await page.waitForTimeout(500);
@@ -71,11 +69,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     // Add Tag
     const tag = "Tag_for_line_2";
     console.log("Add a tag for line 2: " + tag);
-    await (
-      await page.waitForXPath('//input[@id="add_tag_input"]', {
-        timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT,
-      })
-    ).focus();
+    await (await utils.waitAndGetAddTagInput(page)).focus();
     await page.waitForTimeout(2500);
     await page.keyboard.type(tag);
     await page.waitForTimeout(500);
@@ -84,12 +78,8 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
 
     // Save and Confirm Success
     console.log("Save doc and confirm success snackbar appears");
-    await (await page.$('button[name="save_btn"]')).click();
-    const successToast = await page.waitForXPath(
-      '//div[contains(@class, "MuiAlert-message")]',
-      { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
-    );
-    const successMsg = await successToast.evaluate((el) => el.textContent);
+    await (await utils.getSaveButton(page)).click();
+    const successMsg = await utils.waitAndGetSuccessToastMessage(page);
     const expectedMsg = "Saved source file";
     assert(
       successMsg == expectedMsg,
@@ -101,18 +91,14 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
 
     // Refresh page and verify content still there
     console.log("Refresh page to verify persistence of content");
-    await page.goto(loginUtils.yada_url);
+    await page.goto(utils.yada_url);
     await page.waitForXPath('//div[contains(@class, "ProseMirror")]', {
-      timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT,
+      timeout: utils.DEFAULT_ELEMENT_TIMEOUT,
     });
 
     // Check file name was updated correctly by comparing against Navbar
     console.log("Verify file name is: " + fileName);
-    const fileNameEl = await page.waitForXPath(
-      '//div[@id="navbar-file-name"]',
-      { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
-    );
-    const pulledFileName = await fileNameEl.evaluate((el) => el.textContent);
+    const pulledFileName = await utils.getOpenFileName(page);
     assert(
       pulledFileName == fileName,
       "File name differs. Got: " + pulledFileName + ", but expected " + fileName
@@ -137,7 +123,7 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     await line2.click();
     const tagEl = await page.waitForXPath(
       '//span[contains(@class, "MuiChip-label")]',
-      { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
+      { timeout: utils.DEFAULT_ELEMENT_TIMEOUT }
     );
     const tagName = await tagEl.evaluate((el) => el.textContent);
     assert(
@@ -148,22 +134,16 @@ puppeteer.launch({ headless: headless }).then(async (browser) => {
     // Cleanup
     console.log("Begin cleanup");
     // Open menuitem for document in left bar
-    const fileListButtons = await page.$x(
-      '//button[contains(@class, "fileList-iconButton")]'
-    );
+    const fileListButtons = await utils.getFileOptions(page);
     await fileListButtons[fileListButtons.length - 1].click();
     await page.waitForTimeout(250);
-    const listButtons = await page.$x(
-      '//li[contains(@class, "MuiListItem-button")]'
-    );
+    const listButtons = await utils.getOpenMenuItems(page);
     console.log("Delete test doc");
     await listButtons[3].click(); // delete button for created doc
     await page.waitForTimeout(2000);
 
     // Verify deletion worked
-    const remainingFiles = await page.$x(
-      '//button[contains(@class, "fileList-iconButton")]'
-    );
+    const remainingFiles = await utils.getFileOptions(page);
     assert(
       remainingFiles.length == 0,
       "Deletion failed - files still exist for user"

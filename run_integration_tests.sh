@@ -5,6 +5,7 @@ cd ./automation/integration_tests/
 
 for filename in ./*test.js; do
     node $filename
+    sleep 10 # Needed due to authentication being blocked when run back to back
 done
 
 # Return

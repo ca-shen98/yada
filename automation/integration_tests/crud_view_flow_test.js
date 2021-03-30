@@ -5,7 +5,7 @@
  *  - Creation, renaming, and deletion of a view
  *  - Dragging of content over
  *
- *  * Requires:
+ *  Requires:
  *  - Yada running @ localhost:3000
  *  - credentials.json with Test Account's Google Info
  *
@@ -35,21 +35,16 @@ puppeteer
     args: ["--window-size=1920,1080"],
   })
   .then(async (browser) => {
-    const loginUtils = require("./login_utils.js");
+    const utils = require("./test_utils.js");
     console.log("[[ TEST: VIEW FLOWS ]]");
     var page = null;
     try {
       page = await browser.newPage();
-      // if (headless) {
-      //   await page.setViewport()
-      // }
-      await loginUtils.loginToYada(page, headless);
+      await utils.loginToYada(page, headless);
 
       // Create New Document
       console.log("Creating test doc");
-      await (
-        await page.waitForXPath('//button[@id="new_document_button"]')
-      ).click();
+      await (await utils.waitAndGetNewDocumentButton(page)).click();
       await page.waitForTimeout(1500);
       await page.keyboard.press("Enter");
 
@@ -57,7 +52,7 @@ puppeteer
       console.log("Inserting some text into the doc body");
       await (
         await page.waitForXPath('//div[contains(@class, "ProseMirror")]', {
-          timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT,
+          timeout: utils.DEFAULT_ELEMENT_TIMEOUT,
         })
       ).focus();
       await page.waitForTimeout(500);
@@ -72,11 +67,7 @@ puppeteer
       // Add Tag
       const tag = "Tag_for_line_2";
       console.log("Add a tag for line 2: " + tag);
-      await (
-        await page.waitForXPath('//input[@id="add_tag_input"]', {
-          timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT,
-        })
-      ).focus();
+      await (await utils.waitAndGetAddTagInput(page)).focus();
       await page.waitForTimeout(2500);
       await page.keyboard.type(tag);
       await page.waitForTimeout(500);
@@ -85,13 +76,9 @@ puppeteer
 
       // Save and Confirm Success
       console.log("Save doc and confirm success snackbar appears");
-      const saveBtn = await page.$('button[name="save_btn"]');
+      const saveBtn = await utils.getSaveButton(page);
       await saveBtn.click();
-      const successToast = await page.waitForXPath(
-        '//div[contains(@class, "MuiAlert-message")]',
-        { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
-      );
-      const successMsg = await successToast.evaluate((el) => el.textContent);
+      const successMsg = await utils.waitAndGetSuccessToastMessage(page);
       const expectedMsg = "Saved source file";
       assert(
         successMsg == expectedMsg,
@@ -103,19 +90,14 @@ puppeteer
 
       // Create a view
       console.log("Create text view");
-      const fileListButtons = await page.$x(
-        '//button[contains(@class, "fileList-iconButton")]'
-      );
+      const fileListButtons = await utils.getFileOptions(page);
       await fileListButtons[fileListButtons.length - 1].click();
       await page.waitForTimeout(250);
-      var listButtons = await page.$x(
-        '//li[contains(@class, "MuiListItem-button")]'
-      );
+      var listButtons = await utils.getOpenMenuItems(page);
       await listButtons[1].click(); // create view
       await page.waitForTimeout(250);
-      const viewTypeButtons = await page.$x(
-        '//li[contains(@class, "MuiListItem-button")]'
-      );
+
+      const viewTypeButtons = await utils.getOpenMenuItems(page);
       await viewTypeButtons[4].click(); // create text view
       await page.waitForTimeout(2000);
 
@@ -130,9 +112,8 @@ puppeteer
       // Drag tag over
       console.log("Dragging tag over");
       const tagLine = await page.waitForXPath(
-        // '//div[contains(@class, "tag_container")]',
         '//div[contains(@class, "MuiGrid-spacing-xs-1")]',
-        { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
+        { timeout: utils.DEFAULT_ELEMENT_TIMEOUT }
       );
       const bounding_box = await tagLine.boundingBox();
       var x = bounding_box.x + (bounding_box.width * 3) / 4;
@@ -155,15 +136,9 @@ puppeteer
 
       // Save view
       console.log("Saving view and confirming success snackbar appears");
-      const viewSaveBtn = await page.$('button[name="save_btn"]');
+      const viewSaveBtn = await utils.getSaveButton(page);
       await viewSaveBtn.click();
-      const viewSuccessToast = await page.waitForXPath(
-        '//div[contains(@class, "MuiAlert-message")]',
-        { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
-      );
-      const viewSuccessMsg = await viewSuccessToast.evaluate(
-        (el) => el.textContent
-      );
+      const viewSuccessMsg = await utils.waitAndGetSuccessToastMessage(page);
       const viewExpectedMsg = "View saved";
       assert(
         viewSuccessMsg == viewExpectedMsg,
@@ -175,13 +150,13 @@ puppeteer
 
       // Refresh
       console.log("Confirmed... Now refresh page");
-      await page.goto(loginUtils.yada_url);
+      await page.goto(utils.yada_url);
 
       // Verify content is there
       console.log("Verify View has the tag content: " + line2Text);
       const line2 = await page.waitForXPath(
         '//div[contains(@class, "ProseMirror")]//p',
-        { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
+        { timeout: utils.DEFAULT_ELEMENT_TIMEOUT }
       );
       const viewText = await line2.evaluate((el) => el.textContent);
       assert(
@@ -194,11 +169,7 @@ puppeteer
 
       // Check file name was updated correctly by comparing against Navbar
       console.log("Verify file name is: " + fileName);
-      const fileNameEl = await page.waitForXPath(
-        '//div[@id="navbar-file-name"]',
-        { timeout: loginUtils.DEFAULT_ELEMENT_TIMEOUT }
-      );
-      const pulledFileName = await fileNameEl.evaluate((el) => el.textContent);
+      const pulledFileName = await utils.getOpenFileName(page);
       assert(
         pulledFileName == fileName,
         "File name differs. Got: " +
@@ -210,21 +181,15 @@ puppeteer
       // Cleanup
       console.log("Begin cleanup");
       // Open menuitem for document in left bar
-      await (
-        await page.$x('//button[contains(@class, "fileList-iconButton")]')
-      )[0].click();
+      await (await utils.getFileOptions(page))[0].click();
       await page.waitForTimeout(250);
-      listButtons = await page.$x(
-        '//li[contains(@class, "MuiListItem-button")]'
-      );
+      listButtons = await utils.getOpenMenuItems(page);
       console.log("Delete test doc");
       await listButtons[3].click(); // delete button for created doc
       await page.waitForTimeout(2000);
 
       // Verify deletion worked
-      const remainingFiles = await page.$x(
-        '//button[contains(@class, "fileList-iconButton")]'
-      );
+      const remainingFiles = await utils.getFileOptions(page);
       assert(
         remainingFiles.length == 0,
         "Deletion failed - files still exist for user"
