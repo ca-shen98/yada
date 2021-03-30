@@ -11,7 +11,7 @@ exports.DEFAULT_ELEMENT_TIMEOUT = DEFAULT_ELEMENT_TIMEOUT;
 exports.dev = dev;
 exports.yada_url = yada_url;
 
-exports.loginToYada = async (page) => {
+exports.loginToYada = async (page, headless) => {
   // Sign in to Stack Overflow first for google auth to work
   console.log("Authenticating Google account via third-party");
   await page.goto(
@@ -55,6 +55,15 @@ exports.loginToYada = async (page) => {
   );
   await page.waitForTimeout(2000);
   await sign_in.click();
+
+  // For some reason, headless needs a second click sometimes
+  if (
+    headless == false &&
+    page.$x('//span[text()="Sign in with Google"]/../..')
+  ) {
+    await page.waitForTimeout(2000);
+    await sign_in.click();
+  }
 
   // Use "Create Document" button as a test to confirm we've logged in
   await page.waitForXPath('//button[@id="new_document_button"]', {

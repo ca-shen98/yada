@@ -28,13 +28,14 @@ const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 // Launch browser
-puppeteer.launch({ headless: true }).then(async (browser) => {
+const headless = true;
+puppeteer.launch({ headless: headless }).then(async (browser) => {
   const loginUtils = require("./login_utils.js");
   console.log("[[ TEST: DOC FLOWS ]]");
   var page = null;
   try {
     page = await browser.newPage();
-    await loginUtils.loginToYada(page);
+    await loginUtils.loginToYada(page, headless);
 
     // Create New Document
     console.log("Creating test doc");
