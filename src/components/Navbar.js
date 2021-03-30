@@ -430,6 +430,7 @@ class Navbar extends React.Component {
                           </div>
                         ) : (
                           <div
+                            id="navbar-file-name"
                             color="inherit"
                             style={{
                               color: "#F5F0E1",

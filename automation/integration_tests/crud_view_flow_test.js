@@ -203,7 +203,9 @@ puppeteer
       // Cleanup
       console.log("Begin cleanup");
       // Open menuitem for document in left bar
-      await fileListButtons[fileListButtons.length - 1].click();
+      await (
+        await page.$x('//button[contains(@class, "fileList-iconButton")]')
+      )[0].click();
       await page.waitForTimeout(250);
       listButtons = await page.$x(
         '//li[contains(@class, "MuiListItem-button")]'
