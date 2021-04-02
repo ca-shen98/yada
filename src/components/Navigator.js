@@ -783,9 +783,9 @@ class Navigator extends React.Component {
     });
   };
 
-  handleViewMenuOpen = (event) => {
+  handleViewMenuOpen = (anchorElement) => {
     this.setState({
-      newViewAnchorElement: this.state.editMenuAnchorElement,
+      newViewAnchorElement: anchorElement,
     });
   };
 
@@ -821,6 +821,9 @@ class Navigator extends React.Component {
       ? this.handleDoFileNamesSearch()
       : this.state.filesList;
     const numFilteredFiles = countNumFiles(filteredFilesList);
+    const current_open_file_permission = this.getFilePermission(
+      this.props.currentOpenFileId
+    );
     return (
       <div className="SidePane">
         <ConfirmDialog
@@ -851,6 +854,19 @@ class Navigator extends React.Component {
           >
             New Document
           </Button>
+          {current_open_file_permission !== PERMISSION_TYPE.READ ? (
+            <Button
+              variant="outlined"
+              color="primary"
+              endIcon={<AddCircleIcon />}
+              disableElevation
+              id="new_view_button"
+              onClick={(event) => this.handleViewMenuOpen(event.target)}
+              style={{ marginBottom: "10px" }}
+            >
+              New View
+            </Button>
+          ) : null}
           <div className="InputRow" id="search_file_names_input_row">
             <Input
               variant="outlined"
@@ -1034,7 +1050,11 @@ class Navigator extends React.Component {
             }}
           >
             {this.state.selectedViewId === null ? (
-              <MenuItem onClick={() => this.handleViewMenuOpen()}>
+              <MenuItem
+                onClick={() =>
+                  this.handleViewMenuOpen(this.state.editMenuAnchorElement)
+                }
+              >
                 <ListItemIcon>
                   <AddIcon fontSize="small" color="primary" />
                 </ListItemIcon>
@@ -1084,7 +1104,7 @@ class Navigator extends React.Component {
               }}
             >
               <ListItemIcon>
-                <TextFieldsIcon fontSize="small" />
+                <TextFieldsIcon fontSize="small" color="primary" />
               </ListItemIcon>
               <ListItemText primary="Text View" />
             </MenuItem>
@@ -1103,12 +1123,13 @@ class Navigator extends React.Component {
               }}
             >
               <ListItemIcon>
-                <AmpStoriesIcon fontSize="small" />
+                <AmpStoriesIcon fontSize="small" color="primary" />
               </ListItemIcon>
               <ListItemText primary="Card View" />
             </MenuItem>
 
             <MenuItem
+              color="primary"
               onClick={() => {
                 this.handleViewMenuClose();
                 if (this.props.saveDirtyFlag) {
@@ -1123,7 +1144,7 @@ class Navigator extends React.Component {
               }}
             >
               <ListItemIcon>
-                <ViewDayIcon fontSize="small" />
+                <ViewDayIcon fontSize="small" color="primary" />
               </ListItemIcon>
               <ListItemText primary="Slide View" />
             </MenuItem>
