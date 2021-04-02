@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import React from "react";
 import { connect } from "react-redux";
 import { SET_SAVE_DIRTY_FLAG_ACTION_TYPE } from "../reducers/CurrentOpenFileState";
-
+import { PERMISSION_TYPE } from "../util/FileIdAndTypeUtils";
 import BlockTaggingEditorExtension from "../editor_extension/BlockTagging";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import OutlinedInput from "@material-ui/core/OutlinedInput";
@@ -25,6 +25,7 @@ import Popover from "@material-ui/core/Popover";
 import CheckIcon from "@material-ui/icons/Check";
 import Input from "@material-ui/core/Input";
 import Chip from "@material-ui/core/Chip";
+import Permissions from "./Permissions";
 
 const RENAME_TAG_FIELD = "rename_field";
 
@@ -36,16 +37,25 @@ const INVALID_TAG_VALUE_REGEX = /[{}]/;
 class TagListItem extends React.Component {
   render = () => (
     <div style={{ width: "100%", display: "flex", alignItems: "center" }}>
-      <Chip
-        label={this.props.tagValue}
-        color="primary"
-        onDelete={(event) =>
-          this.props.handleEditMenuClick(event, this.props.tagValue)
-        }
-        deleteIcon={<MoreVertIcon color="secondary" />}
-        style={{ width: "100%", justifyContent: "space-between" }}
-        variant="outlined"
-      />
+      {this.props.userPermission === PERMISSION_TYPE.READ ? (
+        <Chip
+          label={this.props.tagValue}
+          color="primary"
+          style={{ width: "100%", justifyContent: "space-between" }}
+          variant="outlined"
+        />
+      ) : (
+        <Chip
+          label={this.props.tagValue}
+          color="primary"
+          onDelete={(event) =>
+            this.props.handleEditMenuClick(event, this.props.tagValue)
+          }
+          deleteIcon={<MoreVertIcon color="secondary" />}
+          style={{ width: "100%", justifyContent: "space-between" }}
+          variant="outlined"
+        />
+      )}
     </div>
   );
 }
@@ -172,7 +182,9 @@ class TagMenu extends React.Component {
         this.props.selectNode &&
         prevProps.selectNode.pos !== this.props.selectNode.pos)
     ) {
-      document.getElementById(ADD_TAG_INPUT_ID).value = "";
+      if (document.getElementById(ADD_TAG_INPUT_ID) !== null) {
+        document.getElementById(ADD_TAG_INPUT_ID).value = "";
+      }
       defer(() => {
         if (this.props.selectNode) {
           const node = BlockTaggingEditorExtension.editor.view.state.doc.nodeAt(
@@ -218,43 +230,46 @@ class TagMenu extends React.Component {
 
   render = () => (
     <div className="MarginPane">
+      <Permissions />
       <div id="tag_menu_wrapper">
         <div className="InputRow" id="add_tag_input_row">
-          <OutlinedInput
-            id={ADD_TAG_INPUT_ID}
-            title="New Tag"
-            placeholder="New Tag"
-            color="primary"
-            disabled={!this.props.selectNode}
-            onKeyPress={(event) => {
-              if (event.key === "Enter" && this.handleAddTag()) {
-                event.target.value = "";
+          {this.props.userPermission !== PERMISSION_TYPE.READ ? (
+            <OutlinedInput
+              id={ADD_TAG_INPUT_ID}
+              title="New Tag"
+              placeholder="New Tag"
+              color="primary"
+              disabled={!this.props.selectNode}
+              onKeyPress={(event) => {
+                if (event.key === "Enter" && this.handleAddTag()) {
+                  event.target.value = "";
+                }
+                if (!TAG_VALUE_REGEX.test(event.key)) {
+                  event.preventDefault();
+                }
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.target.value = "";
+                  BlockTaggingEditorExtension.editor.view.focus();
+                }
+              }}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="Add"
+                    title="add"
+                    disabled={!this.props.selectNode}
+                    onClick={this.handleAddTag}
+                    edge="end"
+                  >
+                    <AddCircleIcon color="primary" />
+                  </IconButton>
+                </InputAdornment>
               }
-              if (!TAG_VALUE_REGEX.test(event.key)) {
-                event.preventDefault();
-              }
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                event.target.value = "";
-                BlockTaggingEditorExtension.editor.view.focus();
-              }
-            }}
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="Add"
-                  title="add"
-                  disabled={!this.props.selectNode}
-                  onClick={this.handleAddTag}
-                  edge="end"
-                >
-                  <AddCircleIcon color="primary" />
-                </IconButton>
-              </InputAdornment>
-            }
-            margin="dense"
-          />
+              margin="dense"
+            />
+          ) : null}
         </div>
         <div id="tag_menu_list_container">
           {this.props.selectNode &&
@@ -275,6 +290,7 @@ class TagMenu extends React.Component {
                   <TagListItem
                     tagValue={tag}
                     handleEditMenuClick={this.handleEditMenuClick}
+                    userPermission={this.props.userPermission}
                   />
                 </ListItem>
               ))}
@@ -375,6 +391,8 @@ export default connect(
     selectNode: state.selectNode,
     saveDirtyFlag: state.saveDirtyFlag,
     currentOpenFileId: state.currentOpenFileId,
+    filePermissions: state.filePermissions,
+    userPermission: state.userPermission,
   }),
   (dispatch) => ({
     dispatchSetSaveDirtyFlagAction: () =>

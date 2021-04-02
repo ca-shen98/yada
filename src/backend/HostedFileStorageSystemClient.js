@@ -25,7 +25,14 @@ export default {
     }
     return null;
   },
-  doSaveViewSpec: async (tagsList, sourceId, viewId, type, createNew) => {
+  doSaveViewSpec: async (
+    tagsList,
+    sourceId,
+    viewId,
+    type,
+    createNew,
+    metadata = {}
+  ) => {
     const token = getAccessToken();
     const response = await fetchWithTimeout(
       SERVER_BASE_URL +
@@ -33,7 +40,7 @@ export default {
         (!createNew ? `&viewID=${viewId}` : ""),
       {
         method: "PUT",
-        body: JSON.stringify({ tags: tagsList }),
+        body: JSON.stringify({ tags: tagsList, metadata: metadata }),
         headers: new Headers({
           "Content-Type": "application/json",
           "Set-Cookie": `token=${token}`,
@@ -73,7 +80,12 @@ export default {
       }
       const view_json = await viewResponse.json();
       const tags_json = await tagResponse.json();
-      return { view: view_json, tags: tags_json, type: fileId.viewType };
+      return {
+        view: view_json["view"],
+        tags: tags_json,
+        type: fileId.viewType,
+        current_permission: view_json["current_permission"],
+      };
     } catch (e) {
       console.log(e);
     }
@@ -140,7 +152,7 @@ export default {
         { headers: new Headers({ "Set-Cookie": `token=${token}` }) }
       );
       if (response.ok) {
-        return await response.text();
+        return await response.json();
       }
     } catch (e) {
       console.log(e);
@@ -246,6 +258,33 @@ export default {
         }
       );
       return ok;
+    } catch (e) {
+      console.log(e);
+    }
+    return false;
+  },
+  doSavePermissions: async (sourceId, permissions) => {
+    const token = getAccessToken();
+    try {
+      const response = await fetchWithTimeout(
+        SERVER_BASE_URL + `document_permissions`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            body: { docID: sourceId, permissions: permissions },
+          }),
+          headers: new Headers({
+            "Content-Type": "application/json",
+            "Set-Cookie": `token=${token}`,
+          }),
+        }
+      );
+      console.log(response.status);
+      if (response.ok) {
+        return await response.json();
+      } else {
+        return Promise.reject(new Error(response.status));
+      }
     } catch (e) {
       console.log(e);
     }

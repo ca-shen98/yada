@@ -10,6 +10,7 @@ import {
   checkSourceFileId,
   checkViewFileId,
   getFileIdKeyStr,
+  PERMISSION_TYPE,
 } from "../util/FileIdAndTypeUtils";
 import { INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY } from "./SourceEditorWithTagFiltersInput";
 import {
@@ -56,10 +57,12 @@ import FileStorageSystemClient from "../backend/FileStorageSystemClient";
 import CheckIcon from "@material-ui/icons/Check";
 import AddIcon from "@material-ui/icons/Add";
 import TextFieldsIcon from "@material-ui/icons/TextFields";
+import ViewDayIcon from "@material-ui/icons/ViewDay";
 import AmpStoriesIcon from "@material-ui/icons/AmpStories";
 import { setToastAction, TOAST_SEVERITY } from "../reducers/Toast";
 import ConfirmDialog from "./ConfirmDialog";
 import CreateIcon from "@material-ui/icons/Create";
+import { getDefaultMetadata } from "./ViewEditor";
 
 export const handleSetCurrentOpenFileId = (
   fileId,
@@ -179,6 +182,8 @@ class FileListItem extends React.Component {
               <AmpStoriesIcon color="primary" />
             ) : viewType === FILE_TYPE.TEXT_VIEW ? (
               <TextFieldsIcon color="primary" />
+            ) : viewType === FILE_TYPE.SLIDE_VIEW ? (
+              <ViewDayIcon color="primary" />
             ) : null}
           </IconButton>
           <div
@@ -196,6 +201,12 @@ class FileListItem extends React.Component {
           <IconButton
             className={"fileList-iconButton"}
             onClick={this.props.handleEditMenuClick}
+            disabled={this.props.current_permission === PERMISSION_TYPE.READ}
+            style={
+              this.props.current_permission === PERMISSION_TYPE.READ
+                ? { opacity: "0.2" }
+                : {}
+            }
           >
             <MoreVertIcon fontSize="small" color="primary" />
           </IconButton>
@@ -246,6 +257,12 @@ class FileListItem extends React.Component {
           <IconButton
             className={"fileList-iconButton"}
             onClick={this.props.handleEditMenuClick}
+            disabled={this.props.current_permission === PERMISSION_TYPE.READ}
+            style={
+              this.props.current_permission === PERMISSION_TYPE.READ
+                ? { opacity: "0.2" }
+                : {}
+            }
           >
             <MoreVertIcon fontSize="small" color="primary" />
           </IconButton>
@@ -281,6 +298,12 @@ class Navigator extends React.Component {
     checkViewFileId(fileId)
       ? this.getViewName(fileId)
       : this.getSourceName(fileId);
+
+  getFilePermission = (fileId) =>
+    validateFileIdObj(fileId) &&
+    this.state.filesList.hasOwnProperty(fileId.sourceId)
+      ? this.state.filesList[fileId.sourceId].current_permission
+      : "";
 
   getRenameInputValueFunctions = {
     [RENAME_INPUT_TYPES.CURRENT_SOURCE]: this.getSourceName,
@@ -381,7 +404,8 @@ class Navigator extends React.Component {
           this.props.currentOpenFileId.sourceId,
           localStorageNextNewFileId,
           fileType,
-          true
+          true,
+          getDefaultMetadata(fileType)
         );
     try {
       const newFile = await newFilePromise;
@@ -572,11 +596,14 @@ class Navigator extends React.Component {
       });
       return;
     }
-    store.dispatch(
-      setCurrentOpenFileNameAction({
-        sourceName: sourceFileIdCheck ? newName : this.getSourceName(fileId),
-        viewName: sourceFileIdCheck ? "" : newName,
-      })
+    let fileName = {
+      sourceName: sourceFileIdCheck ? newName : this.getSourceName(fileId),
+      viewName: sourceFileIdCheck ? "" : newName,
+    };
+    store.dispatch(setCurrentOpenFileNameAction(fileName));
+    localStorage.setItem(
+      INITIAL_FILE_NAME_LOCAL_STORAGE_KEY,
+      JSON.stringify(fileName)
     );
     const newFilesList = { ...this.state.filesList };
     if (sourceFileIdCheck) {
@@ -756,9 +783,9 @@ class Navigator extends React.Component {
     });
   };
 
-  handleViewMenuOpen = (event) => {
+  handleViewMenuOpen = (anchorElement) => {
     this.setState({
-      newViewAnchorElement: this.state.editMenuAnchorElement,
+      newViewAnchorElement: anchorElement,
     });
   };
 
@@ -794,6 +821,9 @@ class Navigator extends React.Component {
       ? this.handleDoFileNamesSearch()
       : this.state.filesList;
     const numFilteredFiles = countNumFiles(filteredFilesList);
+    const current_open_file_permission = this.getFilePermission(
+      this.props.currentOpenFileId
+    );
     return (
       <div className="SidePane">
         <ConfirmDialog
@@ -824,6 +854,19 @@ class Navigator extends React.Component {
           >
             New Document
           </Button>
+          {current_open_file_permission !== PERMISSION_TYPE.READ ? (
+            <Button
+              variant="outlined"
+              color="primary"
+              endIcon={<AddCircleIcon />}
+              disableElevation
+              id="new_view_button"
+              onClick={(event) => this.handleViewMenuOpen(event.target)}
+              style={{ marginBottom: "10px" }}
+            >
+              New View
+            </Button>
+          ) : null}
           <div className="InputRow" id="search_file_names_input_row">
             <Input
               variant="outlined"
@@ -901,6 +944,10 @@ class Navigator extends React.Component {
                         handleEditMenuClick={this.handleEditMenuClick}
                         childViewsExist={Object.keys(views).length > 0}
                         fileName={this.getFileName({ sourceId, viewId: 0 })}
+                        current_permission={this.getFilePermission({
+                          sourceId,
+                          viewId: 0,
+                        })}
                       />
                     </ListItem>
                     {Object.keys(views).length > 0 ? (
@@ -967,6 +1014,10 @@ class Navigator extends React.Component {
                                   selected={
                                     viewId === this.state.selectedViewId
                                   }
+                                  current_permission={this.getFilePermission({
+                                    sourceId,
+                                    viewId: 0,
+                                  })}
                                 />
                               </ListItem>
                             );
@@ -999,7 +1050,11 @@ class Navigator extends React.Component {
             }}
           >
             {this.state.selectedViewId === null ? (
-              <MenuItem onClick={() => this.handleViewMenuOpen()}>
+              <MenuItem
+                onClick={() =>
+                  this.handleViewMenuOpen(this.state.editMenuAnchorElement)
+                }
+              >
                 <ListItemIcon>
                   <AddIcon fontSize="small" color="primary" />
                 </ListItemIcon>
@@ -1049,7 +1104,7 @@ class Navigator extends React.Component {
               }}
             >
               <ListItemIcon>
-                <TextFieldsIcon fontSize="small" />
+                <TextFieldsIcon fontSize="small" color="primary" />
               </ListItemIcon>
               <ListItemText primary="Text View" />
             </MenuItem>
@@ -1068,9 +1123,30 @@ class Navigator extends React.Component {
               }}
             >
               <ListItemIcon>
-                <AmpStoriesIcon fontSize="small" />
+                <AmpStoriesIcon fontSize="small" color="primary" />
               </ListItemIcon>
               <ListItemText primary="Card View" />
+            </MenuItem>
+
+            <MenuItem
+              color="primary"
+              onClick={() => {
+                this.handleViewMenuClose();
+                if (this.props.saveDirtyFlag) {
+                  this.setState({
+                    confirmDialogOpen: true,
+                    confirmDialogCallback: () =>
+                      this.handleCreateNewFile(FILE_TYPE.SLIDE_VIEW),
+                  });
+                } else {
+                  this.handleCreateNewFile(FILE_TYPE.SLIDE_VIEW);
+                }
+              }}
+            >
+              <ListItemIcon>
+                <ViewDayIcon fontSize="small" color="primary" />
+              </ListItemIcon>
+              <ListItemText primary="Slide View" />
             </MenuItem>
           </Menu>
           <Popover

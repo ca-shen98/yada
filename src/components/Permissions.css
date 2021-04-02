@@ -1,0 +1,20 @@
+.permissions_popover {
+  width: 500px;
+}
+
+.secondary_action {
+  width: 200px;
+}
+
+.custom_form_control {
+  width: 100%;
+}
+
+.button_group {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.close_button {
+  opacity: 0.8;
+}

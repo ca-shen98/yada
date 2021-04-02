@@ -7,6 +7,7 @@ import {
   checkNoOpenFileId,
   checkSourceFileId,
   getFileIdKeyStr,
+  PERMISSION_TYPE,
 } from "../util/FileIdAndTypeUtils";
 import Editor from "./Editor";
 import { handleSetCurrentOpenFileId } from "./Navigator";
@@ -23,6 +24,8 @@ import {
   CLEAR_FILE_LOADING,
   SET_SAVE_IN_PROGRESS,
   CLEAR_SAVE_IN_PROGRESS,
+  setFilePermissionsAction,
+  setUserPermissionAction,
 } from "../reducers/CurrentOpenFileState";
 import { setFileOpenedAction } from "../reducers/Steps";
 
@@ -31,6 +34,7 @@ export const INITIAL_TAG_FILTERS_LOCAL_STORAGE_KEY = "initialTagFilters";
 const DEFAULT_STATE = {
   fileIdKeyStr: getFileIdKeyStr(NO_OPEN_FILE_ID),
   fileContent: "",
+  permission: "",
 };
 
 class SourceEditorWithTagFiltersInput extends React.Component {
@@ -103,7 +107,13 @@ class SourceEditorWithTagFiltersInput extends React.Component {
           handleSetCurrentOpenFileId(NO_OPEN_FILE_ID);
         } else {
           this.props.dispatchSetFileOpenedAction(true);
-          this.setState({ fileIdKeyStr, fileContent: value ?? "" });
+          this.props.setFilePermissions(value["permissions"]);
+          this.props.setUserPermission(value["current_permission"]);
+          this.setState({
+            fileIdKeyStr,
+            fileContent: JSON.stringify(value["doc"]) ?? "",
+            permission: value["current_permission"],
+          });
         }
       });
     } else {
@@ -147,6 +157,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
       <Editor
         fileIdKeyStr={this.state.fileIdKeyStr}
         fileContent={this.state.fileContent}
+        readOnly={this.state.permission === PERMISSION_TYPE.READ}
       />
     );
   };
@@ -158,6 +169,7 @@ export default connect(
     currentOpenFileName: state.currentOpenFileName,
     fileLoading: state.fileLoading,
     saveDirtyFlag: state.saveDirtyFlag,
+    email: state.email,
   }),
   (dispatch) => ({
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
@@ -165,5 +177,9 @@ export default connect(
     dispatchClearFileLoading: () => dispatch({ type: CLEAR_FILE_LOADING }),
     dispatchSetFileOpenedAction: (fileOpened) =>
       dispatch(setFileOpenedAction(fileOpened)),
+    setFilePermissions: (filePermissions) =>
+      dispatch(setFilePermissionsAction(filePermissions)),
+    setUserPermission: (userPermission) =>
+      dispatch(setUserPermissionAction(userPermission)),
   })
 )(SourceEditorWithTagFiltersInput);

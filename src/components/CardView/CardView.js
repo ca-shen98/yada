@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./CardDeck.css";
+import "./CardView.css";
 import React from "react";
 import { connect } from "react-redux";
 import Container from "react-bootstrap/Container";
@@ -21,8 +21,9 @@ import {
 } from "../../reducers/CurrentOpenFileState";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
+import { PERMISSION_TYPE } from "../../util/FileIdAndTypeUtils";
 
-class CardDeck extends React.Component {
+class CardView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -110,7 +111,10 @@ class CardDeck extends React.Component {
       );
     } else {
       const cards = [];
-      if (this.state.displaySwitch) {
+      if (
+        this.state.displaySwitch ||
+        this.props.userPermission === PERMISSION_TYPE.READ
+      ) {
         for (let i = 0; i < this.props.tagsInView.length; i += 2) {
           cards.push(this.constructCard(i));
         }
@@ -134,18 +138,23 @@ class CardDeck extends React.Component {
           <FormControlLabel
             control={
               <Switch
-                checked={this.state.displaySwitch}
+                checked={
+                  this.state.displaySwitch ||
+                  this.props.userPermission === PERMISSION_TYPE.READ
+                }
                 onChange={() => {
                   this.setState({ displaySwitch: !this.state.displaySwitch });
                 }}
-                name="checkedB"
+                name="checked"
                 color="primary"
                 className="displayModeSwitch"
+                disabled={this.props.userPermission === PERMISSION_TYPE.READ}
               />
             }
             label="Display Mode"
           />
-          {this.state.displaySwitch ? (
+          {this.state.displaySwitch ||
+          this.props.userPermission === PERMISSION_TYPE.READ ? (
             <StudyView cards={cards} />
           ) : (
             <div>
@@ -168,9 +177,10 @@ export default connect(
     tagsInView: state.tagsInView,
     currentOpenFileId: state.currentOpenFileId,
     saveDirtyFlag: state.saveDirtyFlag,
+    userPermission: state.userPermission,
   }),
   (dispatch) => ({
     setTagsInView: (tagsInView) => dispatch(setTagsInViewAction(tagsInView)),
     dispatchSetToastAction: (toast) => dispatch(setToastAction(toast)),
   })
-)(CardDeck);
+)(CardView);

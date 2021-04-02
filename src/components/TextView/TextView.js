@@ -18,6 +18,7 @@ import {
 } from "../../reducers/CurrentOpenFileState";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
+import { PERMISSION_TYPE } from "../../util/FileIdAndTypeUtils";
 
 class TextView extends React.Component {
   constructor(props) {
@@ -102,24 +103,29 @@ class TextView extends React.Component {
           <FormControlLabel
             control={
               <Switch
-                checked={this.state.displaySwitch}
+                checked={
+                  this.state.displaySwitch ||
+                  this.props.userPermission === PERMISSION_TYPE.READ
+                }
                 onChange={() => {
                   this.setState({ displaySwitch: !this.state.displaySwitch });
                 }}
                 name="checkedB"
                 color="primary"
                 className="displayModeSwitch"
+                disabled={this.props.userPermission === PERMISSION_TYPE.READ}
               />
             }
             label="Display Mode"
           />
-          {!this.state.displaySwitch && (
-            <TagEditor
-              viewType={FILE_TYPE.TEXT_VIEW}
-              allTagsData={this.state.allTagsData}
-              tagsInView={this.props.tagsInView}
-            />
-          )}
+          {!this.state.displaySwitch &&
+            this.props.userPermission !== PERMISSION_TYPE.READ && (
+              <TagEditor
+                viewType={FILE_TYPE.TEXT_VIEW}
+                allTagsData={this.state.allTagsData}
+                tagsInView={this.props.tagsInView}
+              />
+            )}
           {this.props.tagsInView.length > 0 && (
             <RichMarkdownEditor
               className="TextViewEditor viewContent"
@@ -140,6 +146,7 @@ export default connect(
     tagsInView: state.tagsInView,
     currentOpenFileId: state.currentOpenFileId,
     saveDirtyFlag: state.saveDirtyFlag,
+    userPermission: state.userPermission,
   }),
   (dispatch) => ({
     setTagsInView: (tagsInView) => dispatch(setTagsInViewAction(tagsInView)),

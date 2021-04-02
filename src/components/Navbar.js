@@ -9,6 +9,7 @@ import {
 } from "../reducers/BackendModeSignedInStatus";
 import DescriptionIcon from "@material-ui/icons/Description";
 import TextFieldsIcon from "@material-ui/icons/TextFields";
+import ViewDayIcon from "@material-ui/icons/ViewDay";
 import AmpStoriesIcon from "@material-ui/icons/AmpStories";
 import { BACKEND_MODE_SIGNED_IN_STATUS } from "../reducers/BackendModeSignedInStatus";
 import {
@@ -17,6 +18,7 @@ import {
   checkSourceFileId,
   checkViewFileId,
   NO_OPEN_FILE_ID,
+  PERMISSION_TYPE,
 } from "../util/FileIdAndTypeUtils";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/Save";
@@ -128,7 +130,8 @@ class Navbar extends React.Component {
         this.props.currentOpenFileId.sourceId,
         this.props.currentOpenFileId.viewId,
         this.props.currentOpenFileId.viewType,
-        false
+        false,
+        this.props.metadataInView
       )
         .then(() => {
           this.props.dispatchSetToastAction({
@@ -410,6 +413,7 @@ class Navbar extends React.Component {
                       >
                         {this.props.currentOpenFileName.viewName === "" ? (
                           <div
+                            id="navbar-file-name"
                             color="inherit"
                             style={{
                               color: "#F5F0E1",
@@ -426,6 +430,7 @@ class Navbar extends React.Component {
                           </div>
                         ) : (
                           <div
+                            id="navbar-file-name"
                             color="inherit"
                             style={{
                               color: "#F5F0E1",
@@ -443,6 +448,9 @@ class Navbar extends React.Component {
                             ) : this.props.currentOpenFileId.viewType ===
                               FILE_TYPE.TEXT_VIEW ? (
                               <TextFieldsIcon color="secondary" />
+                            ) : this.props.currentOpenFileId.viewType ===
+                              FILE_TYPE.SLIDE_VIEW ? (
+                              <ViewDayIcon color="secondary" />
                             ) : null}
                             {this.props.currentOpenFileName.viewName}
                           </div>
@@ -584,47 +592,49 @@ class Navbar extends React.Component {
                         }
                       }}
                     />
-                    <div style={{ float: "right" }}>
-                      {this.state.modifyingTagFilters ? null : this.state
-                          .currentTagFiltersStr ===
-                        "" ? null : currentTagFiltersSaved ? (
-                        <IconButton
-                          title="Unpersist Filter"
-                          style={{
-                            padding: "0px",
-                            paddingRight: "10px",
-                            paddingTop: "5px",
-                          }}
-                        >
-                          <RemoveCircleIcon
-                            color="primary"
-                            onClick={() => {
-                              document.getElementById(
-                                TAG_FILTERS_INPUT_ID
-                              ).value = "";
-                              this.handleUnpersistCurrentTagFilters();
-                              this.handleApplyTagFilters();
+                    {this.props.userPermission !== PERMISSION_TYPE.READ ? (
+                      <div style={{ float: "right" }}>
+                        {this.state.modifyingTagFilters ? null : this.state
+                            .currentTagFiltersStr ===
+                          "" ? null : currentTagFiltersSaved ? (
+                          <IconButton
+                            title="Unpersist Filter"
+                            style={{
+                              padding: "0px",
+                              paddingRight: "10px",
+                              paddingTop: "5px",
                             }}
-                          />
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          title="Persist Filter"
-                          style={{
-                            padding: "0px",
-                            paddingRight: "10px",
-                            paddingTop: "5px",
-                          }}
-                        >
-                          <SaveIcon
-                            color="primary"
-                            onClick={() => {
-                              this.handlePersistNewSavedTagFilters();
+                          >
+                            <RemoveCircleIcon
+                              color="primary"
+                              onClick={() => {
+                                document.getElementById(
+                                  TAG_FILTERS_INPUT_ID
+                                ).value = "";
+                                this.handleUnpersistCurrentTagFilters();
+                                this.handleApplyTagFilters();
+                              }}
+                            />
+                          </IconButton>
+                        ) : (
+                          <IconButton
+                            title="Persist Filter"
+                            style={{
+                              padding: "0px",
+                              paddingRight: "10px",
+                              paddingTop: "5px",
                             }}
-                          />
-                        </IconButton>
-                      )}
-                    </div>
+                          >
+                            <SaveIcon
+                              color="primary"
+                              onClick={() => {
+                                this.handlePersistNewSavedTagFilters();
+                              }}
+                            />
+                          </IconButton>
+                        )}
+                      </div>
+                    ) : null}
                   </div>
                 </Grid>
               ) : null}
@@ -710,8 +720,10 @@ export default connect(
     currentOpenFileName: state.currentOpenFileName,
     backendModeSignedInStatus: state.backendModeSignedInStatus,
     tagsInView: state.tagsInView,
+    metadataInView: state.metadataInView,
     saveDirtyFlag: state.saveDirtyFlag,
     saveInProgress: state.saveInProgress,
+    userPermission: state.userPermission,
   }),
   (dispatch) => ({
     dispatchSetBackendModeSignedInStatusAction: (mode) =>

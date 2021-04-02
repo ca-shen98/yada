@@ -2,7 +2,14 @@ export const FILE_TYPE = {
   SOURCE: "SOURCE",
   TEXT_VIEW: "TEXT_VIEW",
   CARD_VIEW: "CARD_VIEW",
+  SLIDE_VIEW: "SLIDE_VIEW",
   EMPTY: "NON_EXISTENT",
+};
+
+export const PERMISSION_TYPE = {
+  OWN: "0",
+  WRITE: "1",
+  READ: "2",
 };
 
 export const NO_OPEN_FILE_ID = {
