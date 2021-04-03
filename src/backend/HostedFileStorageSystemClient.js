@@ -12,6 +12,7 @@ const EMPTY_SOURCE_CONTENT = {
 
 function getErrorMessage(response, defaultMsg) {
   if (response.status === 401) {
+    // Only triggered by token authentication errors
     return "Session expired. Please refresh and sign in again.";
   } else {
     return defaultMsg;
