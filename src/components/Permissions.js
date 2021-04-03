@@ -174,9 +174,11 @@ class PermissionEditor extends React.Component {
       },
       (failure) => {
         var errorMessage = "";
-        if (failure.message === 404) {
+        if (failure.message === "404") {
           errorMessage =
             "Email Not Found. Please ensure the user has an account with Yada";
+        } else if (failure.message === "401") {
+          errorMessage = "Session expired. Please refresh and sign in again.";
         } else {
           errorMessage = "Unable to Update Permissions";
         }

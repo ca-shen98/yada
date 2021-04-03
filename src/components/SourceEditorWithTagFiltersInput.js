@@ -70,6 +70,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
                 open: true,
               });
             } else {
+              //TODO: catch auth error
               store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
               this.props.dispatchSetToastAction({
                 message: "Failed to save source file",
@@ -99,6 +100,7 @@ class SourceEditorWithTagFiltersInput extends React.Component {
       ).then((value) => {
         this.props.dispatchClearFileLoading();
         if (value === null) {
+          //TODO: catch auth error
           this.props.dispatchSetToastAction({
             message: "Failed to retrieve source content",
             severity: TOAST_SEVERITY.ERROR,

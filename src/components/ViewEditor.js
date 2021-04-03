@@ -67,6 +67,7 @@ class ViewEditor extends React.Component {
       (value) => {
         this.props.dispatchClearFileLoading();
         if (value === null) {
+          //TODO: catch auth error
           this.props.dispatchSetToastAction({
             message: "Failed to retrieve view",
             severity: TOAST_SEVERITY.ERROR,

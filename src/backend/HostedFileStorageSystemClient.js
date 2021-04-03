@@ -10,6 +10,14 @@ const EMPTY_SOURCE_CONTENT = {
   content: [{ type: "paragraph", attrs: { tags: {} } }],
 };
 
+function getErrorMessage(response, defaultMsg) {
+  if (response.status === 401) {
+    return "Session expired. Please refresh and sign in again.";
+  } else {
+    return defaultMsg;
+  }
+}
+
 export default {
   doGetFilesList: async () => {
     const token = getAccessToken();
@@ -55,7 +63,7 @@ export default {
         ...(createNew ? { name: "Untitled", type } : null),
       };
     }
-    throw new Error("Failed to save view");
+    throw new Error(getErrorMessage(response, "Failed to save view"));
   },
   doGetView: async (fileId) => {
     const token = getAccessToken();
@@ -283,7 +291,7 @@ export default {
       if (response.ok) {
         return await response.json();
       } else {
-        return Promise.reject(new Error(response.status));
+        return Promise.reject(new Error(response.status)); //TODO: update
       }
     } catch (e) {
       console.log(e);

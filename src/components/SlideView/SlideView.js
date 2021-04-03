@@ -66,11 +66,11 @@ class SlideView extends React.Component {
               open: true,
             });
           })
-          .catch(() => {
+          .catch((failure) => {
             store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
             store.dispatch({ type: SET_SAVE_DIRTY_FLAG_ACTION_TYPE });
             this.props.dispatchSetToastAction({
-              message: "Failed to save view",
+              message: failure.message,
               severity: TOAST_SEVERITY.ERROR,
               open: true,
             });

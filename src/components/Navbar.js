@@ -113,6 +113,7 @@ class Navbar extends React.Component {
             open: true,
           });
         } else {
+          //TODO: catch auth error?
           this.props.dispatchSetToastAction({
             message: "Failed to save source file",
             severity: TOAST_SEVERITY.ERROR,
@@ -142,9 +143,9 @@ class Navbar extends React.Component {
           store.dispatch({ type: CLEAR_SAVE_IN_PROGRESS });
           store.dispatch({ type: CLEAR_SAVE_DIRTY_FLAG_ACTION_TYPE });
         })
-        .catch(() => {
+        .catch((failure) => {
           this.props.dispatchSetToastAction({
-            message: "Failed to save view",
+            message: failure.message,
             severity: TOAST_SEVERITY.ERROR,
             open: true,
           });
@@ -192,6 +193,7 @@ class Navbar extends React.Component {
       newSourceSavedTagFilters
     ).then((success) => {
       if (!success) {
+        //TODO: catch auth error
         this.props.dispatchSetToastAction({
           message: "Failed to set source saved tag filters",
           severity: TOAST_SEVERITY.ERROR,
@@ -221,6 +223,7 @@ class Navbar extends React.Component {
       newSourceSavedTagFilters
     ).then((success) => {
       if (!success) {
+        //TODO: catch auth error
         this.props.dispatchSetToastAction({
           message: "Failed to set source saved tag filters",
           severity: TOAST_SEVERITY.ERROR,
@@ -241,6 +244,7 @@ class Navbar extends React.Component {
       if (tagFiltersStr) {
         tagFilters = parseTagFilters(tagFiltersStr);
         if (!tagFilters) {
+          //TODO: catch auth error
           this.props.dispatchSetToastAction({
             message: "Invalid tag filters",
             severity: TOAST_SEVERITY.ERROR,
@@ -295,6 +299,7 @@ class Navbar extends React.Component {
         this.props.currentOpenFileId.sourceId
       ).then((sourceSavedTagFilters) => {
         if (!sourceSavedTagFilters) {
+          //TODO: catch auth error
           this.props.dispatchSetToastAction({
             message: "Failed to retrieve source saved tag filters",
             severity: TOAST_SEVERITY.ERROR,

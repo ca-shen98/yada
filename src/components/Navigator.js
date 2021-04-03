@@ -493,6 +493,7 @@ class Navigator extends React.Component {
         });
       }
     } catch (e) {
+      //TODO: catch auth error
       this.props.dispatchSetToastAction({
         message: "Failed to create new file",
         severity: TOAST_SEVERITY.ERROR,
@@ -521,6 +522,7 @@ class Navigator extends React.Component {
       : FileStorageSystemClient.doDeleteView(fileId.sourceId, fileId.viewId);
     const success = await deleteFilePromise;
     if (!success) {
+      //TODO: catch auth error
       this.props.dispatchSetToastAction({
         message: "Failed to delete file",
         severity: TOAST_SEVERITY.ERROR,
@@ -589,6 +591,7 @@ class Navigator extends React.Component {
         );
     const success = await renameFilePromise;
     if (!success) {
+      //TODO: catch auth error
       this.props.dispatchSetToastAction({
         message: "Failed to rename file",
         severity: TOAST_SEVERITY.ERROR,
@@ -650,6 +653,7 @@ class Navigator extends React.Component {
     });
     FileStorageSystemClient.doGetFilesList().then((filesList) => {
       if (!filesList) {
+        //TODO: catch auth error
         this.props.dispatchSetToastAction({
           message: "Failed to retrieve file list",
           severity: TOAST_SEVERITY.ERROR,
